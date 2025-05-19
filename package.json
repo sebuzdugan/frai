@@ -1,0 +1,38 @@
+{
+  "name": "framework-rai",
+  "version": "1.0.0",
+  "description": "Responsible AI framework for quick compliance documentation with AI-powered tips",
+  "main": "ai-responsible.mjs",
+  "bin": {
+    "ai-responsible": "./ai-responsible.mjs",
+    "framework-rai": "./ai-responsible.mjs"
+  },
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "inquirer": "^8.2.6",
+    "node-fetch": "^3.3.2"
+  },
+  "keywords": [
+    "ai",
+    "responsible-ai",
+    "ethics",
+    "compliance",
+    "documentation",
+    "ai-governance",
+    "model-cards"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/username/framework-rai.git"
+  },
+  "scripts": {
+    "start": "node ai-responsible.mjs",
+    "setup": "node ai-responsible.mjs --setup"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
