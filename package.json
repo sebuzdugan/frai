@@ -4,8 +4,8 @@
   "description": "Responsible AI framework for quick compliance documentation with AI-powered tips",
   "main": "ai-responsible.mjs",
   "bin": {
-    "ai-responsible": "./ai-responsible.mjs",
-    "framework-rai": "./ai-responsible.mjs"
+    "ai-responsible": "ai-responsible.mjs",
+    "framework-rai": "ai-responsible.mjs"
   },
   "type": "module",
   "dependencies": {
@@ -22,11 +22,11 @@
     "ai-governance",
     "model-cards"
   ],
-  "author": "",
+  "author": "Sebastian Buzdugan",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/username/framework-rai.git"
+    "url": "git+https://github.com/sebastianbuzdugan/framework-rai.git"
   },
   "scripts": {
     "start": "node ai-responsible.mjs",

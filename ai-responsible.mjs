@@ -315,12 +315,14 @@ async function main() {
   let aiTips = '';
   if (apiKey) {
     aiTips = await getAITips(allAnswers, apiKey);
+  } else {
+    aiTips = "\n*No tips available. Add an OpenAI API key to receive AI-powered recommendations.*";
   }
 
   // Save files (overwrite)
-  fs.writeFileSync('checklist.md', `# Responsible AI Feature Checklist\n\n${checklistSummary}\n\n## Tips\n${aiTips.match(/Checklist Tips:[\s\S]*?(?=Model Card Tips:|Risk File Tips:|$)/)?.[0] || ''}\n`);
-  fs.writeFileSync('model_card.md', `# Model Card\n\n${modelCardSummary}\n\n## Tips\n${aiTips.match(/Model Card Tips:[\s\S]*?(?=Checklist Tips:|Risk File Tips:|$)/)?.[0] || ''}\n`);
-  fs.writeFileSync('risk_file.md', `# AI Model Risk & Compliance\n\n${riskSummary}\n\n## Tips\n${aiTips.match(/Risk File Tips:[\s\S]*?(?=Checklist Tips:|Model Card Tips:|$)/)?.[0] || ''}\n`);
+  fs.writeFileSync('checklist.md', `# Responsible AI Feature Checklist\n\n${checklistSummary}\n\n## Tips\n${aiTips.match(/Checklist Tips:[\s\S]*?(?=Model Card Tips:|Risk File Tips:|$)/)?.[0] || aiTips}\n`);
+  fs.writeFileSync('model_card.md', `# Model Card\n\n${modelCardSummary}\n\n## Tips\n${aiTips.match(/Model Card Tips:[\s\S]*?(?=Checklist Tips:|Risk File Tips:|$)/)?.[0] || aiTips}\n`);
+  fs.writeFileSync('risk_file.md', `# AI Model Risk & Compliance\n\n${riskSummary}\n\n## Tips\n${aiTips.match(/Risk File Tips:[\s\S]*?(?=Checklist Tips:|Model Card Tips:|$)/)?.[0] || aiTips}\n`);
 
   console.log('Responsible AI documentation updated! Proceeding with commit.');
   process.exit(0);
