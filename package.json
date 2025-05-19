@@ -1,6 +1,6 @@
 {
   "name": "framework-rai",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Responsible AI framework for quick compliance documentation with AI-powered tips",
   "main": "ai-responsible.mjs",
   "bin": {
