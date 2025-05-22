@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Sample AI model for testing the Framework-RAI scanner
-
+# TEST 2
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
