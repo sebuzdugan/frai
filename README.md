@@ -11,6 +11,8 @@ A lightweight, developer-friendly framework that ensures responsible AI practice
 - **AI-Powered Tips**: Receive 2-3 practical, actionable tips per category
 - **Minimal Questions**: Answer only the most impactful questions
 - **Pre-commit Integration**: Automate checks before code is committed
+- **Automatic Code Scanning**: Detect AI libraries and functions in your codebase
+- **GitHub Actions Integration**: Run framework-rai checks in your CI pipeline
 - **Comprehensive Documentation**: Generate three essential documents:
   - `checklist.md`: Essential questions for every AI feature
   - `model_card.md`: Simple model documentation
@@ -91,6 +93,12 @@ npx framework-rai --global
 # Specify an API key directly (won't be saved)
 npx framework-rai --key=your-api-key-here
 
+# Scan codebase for AI-related code
+npx framework-rai --scan
+
+# Run in CI mode (non-interactive)
+npx framework-rai --scan --ci
+
 # Combine options
 npx framework-rai --global --setup
 ```
@@ -108,13 +116,75 @@ npx husky init
 npx husky add .husky/pre-commit "npx framework-rai"
 ```
 
+### GitHub Actions Integration
+
+You can automatically run Framework-RAI checks in your CI pipeline:
+
+1. Create a GitHub Secret called `OPENAI_API_KEY` with your OpenAI API key
+2. Add the workflow file to your repository:
+
+```yaml
+# .github/workflows/rai-check.yml
+name: Responsible AI Framework Check
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  rai-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run Framework-RAI
+      run: |
+        node ./ai-responsible.mjs --scan --ci
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    
+    - name: Upload RAI Documentation
+      uses: actions/upload-artifact@v3
+      with:
+        name: rai-documentation
+        path: |
+          checklist.md
+          model_card.md
+          risk_file.md
+```
+
 ## 🔍 How It Works
 
 1. **Detection**: Identifies if a commit introduces or modifies an AI feature
-2. **Documentation**: Guides you through minimal, high-impact questions
-3. **Generation**: Creates three essential markdown files
-4. **AI Tips**: Provides 2-3 practical tips per category using OpenAI's API
-5. **Integration**: Works with your existing workflow via pre-commit hooks or manual runs
+2. **Code Scanning**: Automatically detects AI libraries and functions
+3. **Documentation**: Guides you through minimal, high-impact questions
+4. **Generation**: Creates three essential markdown files
+5. **AI Tips**: Provides 2-3 practical tips per category using OpenAI's API
+6. **Integration**: Works with your existing workflow via pre-commit hooks, CI pipelines, or manual runs
+
+### Automatic Code Scanning
+
+The code scanning feature can detect:
+
+- **AI Libraries**: TensorFlow, PyTorch, scikit-learn, Hugging Face, etc.
+- **AI Functions**: fit, predict, transform, evaluate, etc.
+- **Risk Patterns**: Common patterns that may require additional documentation
+
+When running with the `--scan` option, the tool will:
+1. Recursively scan your codebase for AI-related patterns
+2. Generate documentation templates based on the detected patterns
+3. Provide the option to refine the templates with interactive mode
 
 ## 🧠 Example Output
 

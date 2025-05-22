@@ -1,0 +1,41 @@
+name: Responsible AI Framework Check
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  rai-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run Framework-RAI
+      run: |
+        echo "Running framework-rai autodetection..."
+        # Run with the AI code scanning mode
+        node ./ai-responsible.mjs --scan --ci
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    
+    - name: Upload RAI Documentation
+      uses: actions/upload-artifact@v3
+      with:
+        name: rai-documentation
+        path: |
+          checklist.md
+          model_card.md
+          risk_file.md
+        retention-days: 14 

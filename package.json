@@ -30,7 +30,8 @@
   },
   "scripts": {
     "start": "node ai-responsible.mjs",
-    "setup": "node ai-responsible.mjs --setup"
+    "setup": "node ai-responsible.mjs --setup",
+    "scan": "node ai-responsible.mjs --scan"
   },
   "engines": {
     "node": ">=16.0.0"
