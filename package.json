@@ -37,7 +37,8 @@
     "start": "node ai-responsible.mjs",
     "setup": "node ai-responsible.mjs --setup",
     "scan": "node ai-responsible.mjs --scan",
-    "dev": "npx tailwindcss -i ./src/input.css -o ./public/styles.css --watch"
+    "dev": "npx tailwindcss -i ./src/input.css -o ./public/styles.css --watch",
+    "build": "npx tailwindcss -i ./src/input.css -o ./public/styles.css --minify"
   },
   "engines": {
     "node": ">=16.0.0"
