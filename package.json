@@ -13,6 +13,11 @@
     "inquirer": "^8.2.6",
     "node-fetch": "^3.3.2"
   },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35"
+  },
   "keywords": [
     "ai",
     "responsible-ai",
@@ -31,7 +36,9 @@
   "scripts": {
     "start": "node ai-responsible.mjs",
     "setup": "node ai-responsible.mjs --setup",
-    "scan": "node ai-responsible.mjs --scan"
+    "scan": "node ai-responsible.mjs --scan",
+    "dev": "npx tailwindcss -i ./src/input.css -o ./public/styles.css --watch",
+    "build": "npx tailwindcss -i ./src/input.css -o ./public/styles.css --minify"
   },
   "engines": {
     "node": ">=16.0.0"
