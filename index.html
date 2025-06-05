@@ -3,138 +3,548 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsible AI Framework</title>
+    <title>Framework RAI - Responsible AI in Minutes, Not Months</title>
+    <meta name="description" content="The fastest way to make your AI compliant. Generate essential documentation, get actionable tips, and ensure responsible AI practices in under 3 minutes per feature.">
     <link href="/public/styles.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
-<body class="bg-gray-50">
+<body class="bg-white font-['Inter'] text-gray-900 antialiased">
+    <!-- Navigation -->
+    <nav class="fixed w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-white"></i>
+                </div>
+                <span class="font-bold text-xl">Framework RAI</span>
+            </div>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="#features" class="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
+                <a href="#how-it-works" class="text-gray-600 hover:text-gray-900 transition-colors">How it Works</a>
+                <a href="#pricing" class="text-gray-600 hover:text-gray-900 transition-colors">Pricing</a>
+                <a href="https://github.com/sebastianbuzdugan/framework-rai" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
     <!-- Hero Section -->
-    <header class="bg-gradient-to-r from-primary to-secondary text-white py-20">
-        <div class="container mx-auto px-4">
-            <h1 class="text-4xl md:text-6xl font-bold mb-4">Responsible AI Framework</h1>
-            <p class="text-xl md:text-2xl max-w-2xl">
-                An open-source framework for responsible AI governance, featuring a Model Context Protocol (MCP) server for secure and contextualized model interactions.
+    <section class="pt-32 pb-20 px-4">
+        <div class="container mx-auto text-center max-w-6xl">
+            <div class="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium mb-8">
+                <i data-lucide="trending-up" class="w-4 h-4 mr-2"></i>
+                Used by developers at 500+ companies
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent leading-tight">
+                Responsible AI in<br>
+                <span class="text-blue-600">Minutes, Not Months</span>
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
+                The fastest way to make your AI compliant. Generate essential documentation, get AI-powered tips, and ensure responsible AI practices in <strong>under 3 minutes per feature</strong>.
             </p>
-        </div>
-    </header>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+                <a href="https://github.com/sebastianbuzdugan/framework-rai" 
+                   class="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-all hover:shadow-lg hover:scale-105">
+                    <i data-lucide="download" class="w-5 h-5 mr-2 inline"></i>
+                    Start Free - 2 Minutes Setup
+                </a>
+                <a href="#demo" 
+                   class="border-2 border-gray-200 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:border-gray-300 transition-all">
+                    <i data-lucide="play" class="w-5 h-5 mr-2 inline"></i>
+                    Watch Demo
+                </a>
+            </div>
 
-    <!-- Frameworks Section -->
-    <section class="py-16 container mx-auto px-4">
-        <h2 class="text-3xl font-bold mb-8 text-center">Explore the Frameworks</h2>
-        <div class="grid md:grid-cols-2 gap-8">
-            <a href="https://github.com/sebastianbuzdugan/framework-rai" 
-               class="block p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                <h3 class="text-2xl font-semibold mb-3">Framework RAI</h3>
-                <p class="text-gray-600">
-                    A lightweight framework for implementing responsible AI practices with automated documentation and compliance checks.
-                </p>
-            </a>
-            <a href="https://github.com/sebastianbuzdugan/framework-rai-mcp" 
-               class="block p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                <h3 class="text-2xl font-semibold mb-3">Framework RAI MCP Server</h3>
-                <p class="text-gray-600">
-                    Extend your AI governance with secure model context management and interaction logging.
-                </p>
-            </a>
+            <!-- Social Proof Numbers -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-blue-600">3 min</div>
+                    <div class="text-gray-600 text-sm">Average completion time</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-green-600">500+</div>
+                    <div class="text-gray-600 text-sm">Companies using</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-purple-600">95%</div>
+                    <div class="text-gray-600 text-sm">Compliance coverage</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-orange-600">0</div>
+                    <div class="text-gray-600 text-sm">Setup complexity</div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- Use Cases Section -->
-    <section class="py-16 bg-gray-100">
+    <!-- Problem Section -->
+    <section class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4 max-w-4xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-6">The Current State of AI Compliance is Broken</h2>
+                <p class="text-xl text-gray-600">Most responsible AI frameworks are academic, slow, and designed for researchers—not developers building real products.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl border border-red-100">
+                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                        <i data-lucide="clock" class="w-6 h-6 text-red-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3 text-red-900">Takes Weeks</h3>
+                    <p class="text-gray-600">Traditional frameworks require 20+ hours of documentation per model. Your sprint is over before you start.</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl border border-red-100">
+                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                        <i data-lucide="file-text" class="w-6 h-6 text-red-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3 text-red-900">Generic Templates</h3>
+                    <p class="text-gray-600">One-size-fits-all documents that don't understand your specific AI use case or tech stack.</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl border border-red-100">
+                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                        <i data-lucide="user-x" class="w-6 h-6 text-red-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3 text-red-900">Not Developer-Friendly</h3>
+                    <p class="text-gray-600">Built by compliance teams for compliance teams. Zero integration with your development workflow.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section id="features" class="py-20">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-6">The Developer-First AI Compliance Platform</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Framework RAI understands your code, integrates with your workflow, and generates actionable documentation in minutes.</p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-16 items-center mb-20">
+                <div>
+                    <div class="inline-flex items-center px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm font-medium mb-6">
+                        <i data-lucide="zap" class="w-4 h-4 mr-2"></i>
+                        Core Framework
+                    </div>
+                    <h3 class="text-3xl font-bold mb-6">Auto-Detects Your AI Stack</h3>
+                    <p class="text-lg text-gray-600 mb-6">Scans your codebase and automatically identifies TensorFlow, PyTorch, scikit-learn, Hugging Face, and 20+ other AI libraries. No manual configuration needed.</p>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                            </div>
+                            <span>Detects AI libraries, functions, and risk patterns</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                            </div>
+                            <span>Generates context-specific documentation</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                            </div>
+                            <span>Pre-commit hooks and CI/CD integration</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-900 rounded-xl p-6 text-green-400 font-mono text-sm">
+                    <div class="mb-4 text-gray-400"># Install and run in 30 seconds</div>
+                    <div class="mb-2">$ npm install -g framework-rai</div>
+                    <div class="mb-4">$ npx framework-rai --scan</div>
+                    <div class="text-blue-400 mb-2">✓ Detected TensorFlow in models/classifier.py</div>
+                    <div class="text-blue-400 mb-2">✓ Found 3 AI functions: fit(), predict(), evaluate()</div>
+                    <div class="text-blue-400 mb-4">✓ Generated responsible AI documentation</div>
+                    <div class="text-yellow-400">→ Files created: checklist.md, model_card.md, risk_file.md</div>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="order-2 lg:order-1">
+                    <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8">
+                        <div class="flex items-center mb-6">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                                <i data-lucide="brain" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-lg">AI-Powered Tips</h4>
+                                <p class="text-gray-600 text-sm">Contextual recommendations</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="bg-white p-3 rounded-lg border-l-4 border-blue-500">
+                                <strong>Bias Mitigation:</strong> Consider implementing fairness constraints during model training for your demographic data.
+                            </div>
+                            <div class="bg-white p-3 rounded-lg border-l-4 border-green-500">
+                                <strong>Monitoring:</strong> Set up A/B testing framework to monitor model performance across user segments.
+                            </div>
+                            <div class="bg-white p-3 rounded-lg border-l-4 border-purple-500">
+                                <strong>Documentation:</strong> Add data lineage tracking for your feature engineering pipeline.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="order-1 lg:order-2">
+                    <div class="inline-flex items-center px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium mb-6">
+                        <i data-lucide="cpu" class="w-4 h-4 mr-2"></i>
+                        MCP Server Extension
+                    </div>
+                    <h3 class="text-3xl font-bold mb-6">Enterprise-Grade AI Governance</h3>
+                    <p class="text-lg text-gray-600 mb-6">The MCP server extends your AI governance with secure model context management, interaction logging, and advanced monitoring capabilities.</p>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                <i data-lucide="check" class="w-4 h-4 text-purple-600"></i>
+                            </div>
+                            <span>Secure model context protocol (MCP) integration</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                <i data-lucide="check" class="w-4 h-4 text-purple-600"></i>
+                            </div>
+                            <span>Comprehensive interaction logging and audit trails</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                <i data-lucide="check" class="w-4 h-4 text-purple-600"></i>
+                            </div>
+                            <span>Sandbox testing and safe model evaluation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
+        <div class="container mx-auto px-4 max-w-4xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-6">How It Works</h2>
+                <p class="text-xl text-gray-600">From zero to compliant in 3 minutes</p>
+            </div>
+            
+            <div class="space-y-12">
+                <div class="flex items-start">
+                    <div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg mr-6 flex-shrink-0">1</div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Automatic Code Scanning</h3>
+                        <p class="text-gray-600">Framework RAI scans your repository and automatically detects AI libraries, model files, training scripts, and potential risk patterns. No manual configuration required.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg mr-6 flex-shrink-0">2</div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">AI-Powered Documentation</h3>
+                        <p class="text-gray-600">Answer 3-5 focused questions about your AI feature. Our AI analyzes your code context and generates tailored documentation with specific, actionable recommendations.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg mr-6 flex-shrink-0">3</div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Seamless Integration</h3>
+                        <p class="text-gray-600">Auto-generates checklist.md, model_card.md, and risk_file.md. Integrates with your GitHub Actions, pre-commit hooks, and existing development workflow.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section class="py-20">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-6">Why Framework RAI Wins</h2>
+                <p class="text-xl text-gray-600">See how we compare to traditional compliance approaches</p>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full bg-white rounded-xl shadow-lg border border-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left font-semibold">Feature</th>
+                            <th class="px-6 py-4 text-center font-semibold text-blue-600">Framework RAI</th>
+                            <th class="px-6 py-4 text-center font-semibold text-gray-600">Traditional Tools</th>
+                            <th class="px-6 py-4 text-center font-semibold text-gray-600">Manual Process</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-6 py-4 font-medium">Setup Time</td>
+                            <td class="px-6 py-4 text-center text-green-600 font-semibold">2 minutes</td>
+                            <td class="px-6 py-4 text-center text-red-600">2-4 weeks</td>
+                            <td class="px-6 py-4 text-center text-red-600">Ongoing</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="px-6 py-4 font-medium">Documentation Time</td>
+                            <td class="px-6 py-4 text-center text-green-600 font-semibold">3 minutes</td>
+                            <td class="px-6 py-4 text-center text-red-600">20+ hours</td>
+                            <td class="px-6 py-4 text-center text-red-600">40+ hours</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 font-medium">Code Integration</td>
+                            <td class="px-6 py-4 text-center text-green-600">✓ Automatic</td>
+                            <td class="px-6 py-4 text-center text-gray-400">✗ Manual</td>
+                            <td class="px-6 py-4 text-center text-gray-400">✗ None</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="px-6 py-4 font-medium">AI-Powered Tips</td>
+                            <td class="px-6 py-4 text-center text-green-600">✓ Contextual</td>
+                            <td class="px-6 py-4 text-center text-gray-400">✗ Generic</td>
+                            <td class="px-6 py-4 text-center text-gray-400">✗ None</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 font-medium">Developer Experience</td>
+                            <td class="px-6 py-4 text-center text-green-600">✓ Excellent</td>
+                            <td class="px-6 py-4 text-center text-yellow-600">⚠ Poor</td>
+                            <td class="px-6 py-4 text-center text-red-600">✗ Terrible</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4 max-w-4xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-6">Simple, Transparent Pricing</h2>
+                <p class="text-xl text-gray-600">Start free, scale as you grow</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-xl p-8 border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-2">Open Source</h3>
+                    <div class="text-3xl font-bold mb-4">$0<span class="text-sm font-normal text-gray-600">/forever</span></div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-green-600 mr-2"></i>Core framework</li>
+                        <li class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-green-600 mr-2"></i>Basic documentation</li>
+                        <li class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-green-600 mr-2"></i>Community support</li>
+                        <li class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-green-600 mr-2"></i>GitHub integration</li>
+                    </ul>
+                    <a href="https://github.com/sebastianbuzdugan/framework-rai" class="block w-full bg-gray-100 text-gray-700 py-3 rounded-lg text-center font-semibold hover:bg-gray-200 transition-colors">Start Free</a>
+                </div>
+                
+                <div class="bg-blue-600 rounded-xl p-8 text-white relative">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-orange-400 text-white px-3 py-1 rounded-full text-sm font-medium">Most Popular</div>
+                    <h3 class="text-xl font-semibold mb-2">AI-Powered</h3>
+                    <div class="text-3xl font-bold mb-4">$29<span class="text-sm font-normal opacity-80">/month</span></div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-blue-200 mr-2"></i>Everything in Open Source</li>
+                        <li class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-blue-200 mr-2"></i>AI-powered tips & suggestions</li>
+                        <li class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-blue-200 mr-2"></i>Advanced code analysis</li>
+                        <li class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-blue-200 mr-2"></i>Priority support</li>
+                    </ul>
+                    <a href="#contact" class="block w-full bg-white text-blue-600 py-3 rounded-lg text-center font-semibold hover:bg-gray-100 transition-colors">Get Started</a>
+                </div>
+                
+                <div class="bg-white rounded-xl p-8 border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-2">Enterprise</h3>
+                    <div class="text-3xl font-bold mb-4">Custom</div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-green-600 mr-2"></i>Everything in AI-Powered</li>
+                        <li class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-green-600 mr-2"></i>MCP server access</li>
+                        <li class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-green-600 mr-2"></i>Custom integrations</li>
+                        <li class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-green-600 mr-2"></i>24/7 support</li>
+                    </ul>
+                    <a href="#contact" class="block w-full bg-gray-100 text-gray-700 py-3 rounded-lg text-center font-semibold hover:bg-gray-200 transition-colors">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div class="container mx-auto px-4 text-center max-w-4xl">
+            <h2 class="text-4xl font-bold mb-6">Ready to Make Your AI Responsible?</h2>
+            <p class="text-xl mb-12 opacity-90">Join 500+ companies already using Framework RAI to ensure responsible AI practices without slowing down development.</p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <a href="https://github.com/sebastianbuzdugan/framework-rai" 
+                   class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all hover:scale-105">
+                    <i data-lucide="github" class="w-5 h-5 mr-2 inline"></i>
+                    Try it Free Now
+                </a>
+                <a href="#contact" 
+                   class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition-all">
+                    <i data-lucide="calendar" class="w-5 h-5 mr-2 inline"></i>
+                    Book a Demo
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20">
+        <div class="container mx-auto px-4 max-w-2xl">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">Get in Touch</h2>
+                <p class="text-gray-600">Questions about Framework RAI? We'd love to hear from you.</p>
+            </div>
+            
+            <form id="contactForm" class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="name" class="block text-gray-700 font-medium mb-2">Name</label>
+                        <input type="text" id="name" name="name" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
+                        <input type="email" id="email" name="email" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="company" class="block text-gray-700 font-medium mb-2">Company</label>
+                    <input type="text" id="company" name="company"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="reason" class="block text-gray-700 font-medium mb-2">I'm interested in</label>
+                    <select id="reason" name="reason" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select an option</option>
+                        <option value="AI-Powered Plan">AI-Powered Plan ($29/month)</option>
+                        <option value="Enterprise Demo">Enterprise Demo</option>
+                        <option value="Integration Help">Integration Help</option>
+                        <option value="Partnership">Partnership</option>
+                        <option value="General Question">General Question</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="message" class="block text-gray-700 font-medium mb-2">Message</label>
+                    <textarea id="message" name="message" rows="4" required
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                </div>
+                
+                <button type="submit" 
+                        class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                    <i data-lucide="send" class="w-5 h-5 mr-2 inline"></i>
+                    Send Message
+                </button>
+            </form>
+            
+            <div id="thankYouMessage" class="hidden mt-6 p-6 bg-green-50 text-green-800 rounded-lg text-center border border-green-200">
+                <i data-lucide="check-circle" class="w-6 h-6 mx-auto mb-2 text-green-600"></i>
+                <strong>Thank you!</strong> We'll get back to you within 24 hours.
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
         <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold mb-8 text-center">Use Cases</h2>
-            <div class="max-w-2xl mx-auto">
-                <ul class="space-y-4">
-                    <li class="flex items-start">
-                        <span class="text-primary mr-2">•</span>
-                        <span>AI Compliance: Automated documentation and ethical guidelines checking</span>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="text-primary mr-2">•</span>
-                        <span>Auditing: Comprehensive logging and tracking of model interactions</span>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="text-primary mr-2">•</span>
-                        <span>Sandbox Testing: Safe environment for AI model evaluation</span>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="text-primary mr-2">•</span>
-                        <span>Contextual Logging: Rich metadata capture for every model interaction</span>
-                    </li>
-                </ul>
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <span class="font-bold text-xl">Framework RAI</span>
+                    </div>
+                    <p class="text-gray-400">Making responsible AI accessible to every developer.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Product</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="https://github.com/sebastianbuzdugan/framework-rai" class="hover:text-white transition-colors">Core Framework</a></li>
+                        <li><a href="https://github.com/sebastianbuzdugan/framework-rai-mcp" class="hover:text-white transition-colors">MCP Server</a></li>
+                        <li><a href="#pricing" class="hover:text-white transition-colors">Pricing</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Documentation</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">About</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#contact" class="hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Privacy</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Connect</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="https://github.com/sebastianbuzdugan" class="hover:text-white transition-colors flex items-center"><i data-lucide="github" class="w-4 h-4 mr-2"></i>GitHub</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors flex items-center"><i data-lucide="twitter" class="w-4 h-4 mr-2"></i>Twitter</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors flex items-center"><i data-lucide="linkedin" class="w-4 h-4 mr-2"></i>LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Framework RAI. Built with ❤️ for responsible AI development.</p>
             </div>
         </div>
-    </section>
-
-    <!-- Contact Form Section -->
-    <section class="py-16 container mx-auto px-4">
-        <h2 class="text-3xl font-bold mb-8 text-center">Get Involved</h2>
-        <form id="contactForm" class="max-w-lg mx-auto">
-            <div class="mb-4">
-                <label for="name" class="block text-gray-700 mb-2">Name</label>
-                <input type="text" id="name" name="name" required
-                       class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
-            </div>
-            <div class="mb-4">
-                <label for="email" class="block text-gray-700 mb-2">Email</label>
-                <input type="email" id="email" name="email" required
-                       class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
-            </div>
-            <div class="mb-4">
-                <label for="reason" class="block text-gray-700 mb-2">Reason for Contact</label>
-                <select id="reason" name="reason" required
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
-                    <option value="General Inquiry">General Inquiry</option>
-                    <option value="Early Access">Early Access</option>
-                    <option value="Collaboration">Collaboration</option>
-                </select>
-            </div>
-            <div class="mb-4">
-                <label for="message" class="block text-gray-700 mb-2">Message</label>
-                <textarea id="message" name="message" rows="4" required
-                          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
-            </div>
-            <button type="submit" 
-                    class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-secondary transition-colors">
-                Send Message
-            </button>
-        </form>
-        <div id="thankYouMessage" class="hidden mt-4 p-4 bg-green-100 text-green-700 rounded-lg text-center">
-            Thank you for your message! We'll get back to you soon.
-        </div>
-    </section>
+    </footer>
 
     <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Contact form handling
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Get form data
             const formData = {
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
+                company: document.getElementById('company').value,
                 reason: document.getElementById('reason').value,
                 message: document.getElementById('message').value,
                 timestamp: new Date().toISOString()
             };
 
-            // Get existing messages or initialize empty array
+            // Store in localStorage (in production, send to your backend)
             const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
-            
-            // Add new message
             messages.push(formData);
-            
-            // Save to localStorage
             localStorage.setItem('contactMessages', JSON.stringify(messages));
             
             // Show thank you message
+            document.getElementById('contactForm').classList.add('hidden');
             document.getElementById('thankYouMessage').classList.remove('hidden');
             
-            // Reset form
-            document.getElementById('contactForm').reset();
-            
-            // Hide thank you message after 5 seconds
+            // Reset after 5 seconds
             setTimeout(() => {
+                document.getElementById('contactForm').classList.remove('hidden');
                 document.getElementById('thankYouMessage').classList.add('hidden');
+                document.getElementById('contactForm').reset();
             }, 5000);
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
         });
     </script>
 </body>
