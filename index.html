@@ -48,17 +48,36 @@
                 The fastest way to make your AI compliant. Generate essential documentation, get AI-powered tips, and ensure responsible AI practices in <strong>under 3 minutes per feature</strong>.
             </p>
             
-            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
                 <a href="https://github.com/sebastianbuzdugan/framework-rai" 
                    class="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-all hover:shadow-lg hover:scale-105">
                     <i data-lucide="download" class="w-5 h-5 mr-2 inline"></i>
                     Start Free - 2 Minutes Setup
                 </a>
-                <a href="#demo" 
+                <a href="#pricing" 
                    class="border-2 border-gray-200 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:border-gray-300 transition-all">
-                    <i data-lucide="play" class="w-5 h-5 mr-2 inline"></i>
-                    Watch Demo
+                    <i data-lucide="zap" class="w-5 h-5 mr-2 inline"></i>
+                    View Pricing
                 </a>
+            </div>
+
+            <!-- NPM Installation -->
+            <div class="max-w-2xl mx-auto mb-16">
+                <div class="bg-gray-900 rounded-xl p-6 text-left">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-gray-400 text-sm">Quick Install</span>
+                        <div class="flex gap-2">
+                            <a href="https://www.npmjs.com/package/framework-rai" class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded hover:bg-gray-600 transition-colors">📦 NPM</a>
+                            <a href="https://www.npmjs.com/package/framework-rai-mcp" class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded hover:bg-gray-600 transition-colors">📦 MCP</a>
+                        </div>
+                    </div>
+                    <div class="font-mono text-green-400 text-sm space-y-2">
+                        <div class="text-gray-400"># Core Framework (20+ weekly downloads)</div>
+                        <div>npm install -g framework-rai</div>
+                        <div class="text-gray-400"># MCP Server (26+ weekly downloads)</div>
+                        <div>npm install -g framework-rai-mcp</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Key Benefits -->
@@ -68,16 +87,16 @@
                     <div class="text-gray-600 text-sm">Complete compliance</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-3xl font-bold text-green-600">Open</div>
-                    <div class="text-gray-600 text-sm">Source & free</div>
+                    <div class="text-3xl font-bold text-green-600">46+</div>
+                    <div class="text-gray-600 text-sm">Weekly downloads</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-3xl font-bold text-purple-600">AI</div>
-                    <div class="text-gray-600 text-sm">Powered tips</div>
+                    <div class="text-3xl font-bold text-purple-600">2</div>
+                    <div class="text-gray-600 text-sm">NPM packages</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-3xl font-bold text-orange-600">Zero</div>
-                    <div class="text-gray-600 text-sm">Setup needed</div>
+                    <div class="text-3xl font-bold text-orange-600">MIT</div>
+                    <div class="text-gray-600 text-sm">Open source</div>
                 </div>
             </div>
         </div>
@@ -397,15 +416,21 @@
                 <p class="text-gray-600">Questions about Framework RAI? We'd love to hear from you.</p>
             </div>
             
-            <form id="contactForm" class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+            <!-- Contact Form with Netlify Forms -->
+            <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+                <!-- Hidden field for bot protection -->
+                <p class="hidden">
+                    <label>Don't fill this out if you're human: <input name="bot-field" /></label>
+                </p>
+                
                 <div class="grid md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label for="name" class="block text-gray-700 font-medium mb-2">Name</label>
+                        <label for="name" class="block text-gray-700 font-medium mb-2">Name *</label>
                         <input type="text" id="name" name="name" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
                     <div>
-                        <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
+                        <label for="email" class="block text-gray-700 font-medium mb-2">Email *</label>
                         <input type="email" id="email" name="email" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
@@ -418,21 +443,22 @@
                 </div>
                 
                 <div class="mb-6">
-                    <label for="reason" class="block text-gray-700 font-medium mb-2">I'm interested in</label>
-                    <select id="reason" name="reason" required
+                    <label for="interest" class="block text-gray-700 font-medium mb-2">I'm interested in *</label>
+                    <select id="interest" name="interest" required
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">Select an option</option>
-                        <option value="AI-Powered Plan">AI-Powered Plan ($29/month)</option>
+                        <option value="AI-Powered Plan ($29/month)">AI-Powered Plan ($29/month)</option>
                         <option value="Enterprise Demo">Enterprise Demo</option>
                         <option value="Integration Help">Integration Help</option>
-                        <option value="Partnership">Partnership</option>
-                        <option value="General Question">General Question</option>
+                        <option value="Partnership Opportunity">Partnership Opportunity</option>
+                        <option value="Technical Question">Technical Question</option>
+                        <option value="General Inquiry">General Inquiry</option>
                     </select>
                 </div>
                 
                 <div class="mb-6">
-                    <label for="message" class="block text-gray-700 font-medium mb-2">Message</label>
-                    <textarea id="message" name="message" rows="4" required
+                    <label for="message" class="block text-gray-700 font-medium mb-2">Message *</label>
+                    <textarea id="message" name="message" rows="4" required placeholder="Tell us about your AI compliance needs or ask any questions..."
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
                 </div>
                 
@@ -443,14 +469,35 @@
                 </button>
             </form>
             
-            <div id="thankYouMessage" class="hidden mt-6 p-6 bg-green-50 text-green-800 rounded-lg text-center border border-green-200">
-                <i data-lucide="check-circle" class="w-6 h-6 mx-auto mb-2 text-green-600"></i>
-                <strong>Thank you!</strong> Your message has been saved locally. For immediate support, please reach out on <a href="https://www.linkedin.com/in/sebastian-buzdugan-b3565b187/" class="underline font-semibold">LinkedIn</a> or <a href="https://x.com/sebuzdugan" class="underline font-semibold">X</a>.
+            <!-- Alternative Contact Methods -->
+            <div class="mt-8 p-6 bg-blue-50 rounded-xl">
+                <h4 class="font-semibold text-blue-900 mb-4 flex items-center">
+                    <i data-lucide="zap" class="w-5 h-5 mr-2"></i>
+                    Need faster response? Connect directly:
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <a href="https://www.linkedin.com/in/sebastian-buzdugan-b3565b187/" 
+                       class="flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                        <i data-lucide="linkedin" class="w-4 h-4 mr-2"></i>
+                        LinkedIn
+                    </a>
+                    <a href="https://x.com/sebuzdugan" 
+                       class="flex items-center justify-center px-4 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm">
+                        <i data-lucide="twitter" class="w-4 h-4 mr-2"></i>
+                        X (Twitter)
+                    </a>
+                    <a href="https://github.com/sebastianbuzdugan/framework-rai/issues" 
+                       class="flex items-center justify-center px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                        <i data-lucide="github" class="w-4 h-4 mr-2"></i>
+                        GitHub Issues
+                    </a>
+                </div>
             </div>
             
-            <div class="mt-6 p-4 bg-blue-50 text-blue-800 rounded-lg text-sm">
-                <i data-lucide="info" class="w-4 h-4 inline mr-2"></i>
-                <strong>Note:</strong> Messages are currently stored locally. For faster response, connect directly via social media above.
+            <!-- Form Status Info -->
+            <div class="mt-6 p-4 bg-green-50 text-green-800 rounded-lg text-sm">
+                <i data-lucide="check-circle" class="w-4 h-4 inline mr-2"></i>
+                <strong>Form submissions are now properly collected!</strong> All messages go directly to our Netlify dashboard. Response time: Usually within 24 hours.
             </div>
         </div>
     </section>
@@ -509,53 +556,8 @@
         // Initialize Lucide icons
         lucide.createIcons();
         
-        // Contact form handling
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                company: document.getElementById('company').value,
-                reason: document.getElementById('reason').value,
-                message: document.getElementById('message').value,
-                timestamp: new Date().toISOString()
-            };
-
-            // Store in localStorage (messages stored locally in browser)
-            const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
-            messages.push(formData);
-            localStorage.setItem('contactMessages', JSON.stringify(messages));
-            
-            // Log for developer (you can check browser console)
-            console.log('New contact message:', formData);
-            console.log('All messages:', messages);
-            
-            // Show thank you message
-            document.getElementById('contactForm').classList.add('hidden');
-            document.getElementById('thankYouMessage').classList.remove('hidden');
-            
-            // Reset after 8 seconds
-            setTimeout(() => {
-                document.getElementById('contactForm').classList.remove('hidden');
-                document.getElementById('thankYouMessage').classList.add('hidden');
-                document.getElementById('contactForm').reset();
-            }, 8000);
-        });
-
-        // Add function to view stored messages (for developer use)
-        // To view messages, open browser console and type: viewContactMessages()
-        window.viewContactMessages = function() {
-            const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
-            console.table(messages);
-            return messages;
-        };
-        
-        // Add function to clear stored messages
-        window.clearContactMessages = function() {
-            localStorage.removeItem('contactMessages');
-            console.log('All contact messages cleared');
-        };
+        // Analytics tracking (you can add Google Analytics or similar here)
+        console.log('Framework RAI website loaded successfully!');
 
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
