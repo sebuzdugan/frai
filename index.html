@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsible AI Framework</title>
     <link href="/public/styles.css" rel="stylesheet">
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body class="bg-gray-50">
     <!-- Hero Section -->
@@ -105,34 +104,37 @@
     </section>
 
     <script>
-        // Initialize EmailJS
-        (function() {
-            emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your EmailJS public key
-        })();
-
-        // Handle form submission
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const templateParams = {
-                from_name: document.getElementById('name').value,
-                from_email: document.getElementById('email').value,
+            // Get form data
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
                 reason: document.getElementById('reason').value,
                 message: document.getElementById('message').value,
-                to_email: 'sebastian.buzdugan03@gmail.com'
+                timestamp: new Date().toISOString()
             };
 
-            emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams)
-                .then(function() {
-                    document.getElementById('thankYouMessage').classList.remove('hidden');
-                    document.getElementById('contactForm').reset();
-                    setTimeout(() => {
-                        document.getElementById('thankYouMessage').classList.add('hidden');
-                    }, 5000);
-                }, function(error) {
-                    console.error('Failed to send email:', error);
-                    alert('Failed to send message. Please try again later.');
-                });
+            // Get existing messages or initialize empty array
+            const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+            
+            // Add new message
+            messages.push(formData);
+            
+            // Save to localStorage
+            localStorage.setItem('contactMessages', JSON.stringify(messages));
+            
+            // Show thank you message
+            document.getElementById('thankYouMessage').classList.remove('hidden');
+            
+            // Reset form
+            document.getElementById('contactForm').reset();
+            
+            // Hide thank you message after 5 seconds
+            setTimeout(() => {
+                document.getElementById('thankYouMessage').classList.add('hidden');
+            }, 5000);
         });
     </script>
 </body>
