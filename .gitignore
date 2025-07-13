@@ -62,7 +62,7 @@ Thumbs.db
 # Generated documentation
 checklist.md
 model_card.md
-risk_file.md
+risk_file.md 
 
 # Website files (not part of CLI tool)
 index.html

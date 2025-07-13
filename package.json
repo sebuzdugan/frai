@@ -1,7 +1,7 @@
 {
   "name": "frai",
-  "version": "1.0.3",
-  "description": "FRAI - Responsible AI in minutes, not months. Quick compliance documentation with AI-powered tips",
+  "version": "1.1.1",
+  "description": "Responsible AI compliance framework - Generate comprehensive documentation in under 3 minutes",
   "main": "frai.mjs",
   "bin": {
     "frai": "frai.mjs"

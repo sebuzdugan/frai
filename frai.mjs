@@ -1,39 +1,107 @@
 #!/usr/bin/env node
-import inquirer from 'inquirer';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { createRequire } from 'module';
 import path from 'path';
 import os from 'os';
+import { execSync } from 'child_process';
 
 const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Check for required packages
-let dotenv, fetch;
-try {
-  dotenv = await import('dotenv');
-  dotenv.config();
-} catch (e) {
-  console.log('Required package "dotenv" not found. Installing it now...');
-  console.log('Please run: npm install dotenv');
-  process.exit(1);
-}
-
-try {
-  fetch = (await import('node-fetch')).default;
-} catch (e) {
-  console.log('Required package "node-fetch" not found. Installing it now...');
-  console.log('Please run: npm install node-fetch');
-  process.exit(1);
-}
+// Read version from package.json for --version
+const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
 
 // Define config paths
 const LOCAL_ENV_PATH = path.join(process.cwd(), '.env');
 const GLOBAL_CONFIG_DIR = path.join(os.homedir(), '.config', 'frai');
 const GLOBAL_CONFIG_PATH = path.join(GLOBAL_CONFIG_DIR, 'config');
+
+// Early CLI argument handling for instant exit commands
+const args = process.argv.slice(2);
+function printHelp() {
+  console.log(`\nFRAI - Responsible AI in Minutes\n\nUsage:\n  frai                # Interactive mode for documenting an AI feature\n  frai --scan         # Scan codebase for AI/ML code and generate docs\n  frai --setup        # Set up your OpenAI API key (local/global)\n  frai --ci           # Run in CI mode (non-interactive)\n\nGeneral Commands:\n  frai --help, -h     # Show this help message\n  frai --version, -v  # Show version\n  frai --update       # Check for new versions of FRAI\n\nDocumentation Management:\n  frai --list-docs    # List generated documentation files\n  frai --clean        # Remove generated documentation files\n  frai --export-pdf   # Export documentation markdown files as PDFs\n\nConfiguration:\n  frai --show-config  # Show API key config status\n  frai --key=API_KEY  # Provide OpenAI API key directly\n  frai --global       # Use with --setup to save API key globally\n\nDocs generated:\n  - checklist.md      # Implementation checklist\n  - model_card.md     # Model card\n  - risk_file.md      # Risk & compliance\n\nLearn more: https://github.com/sebastianbuzdugan/frai\n`);
+}
+function printListDocs() {
+  const files = ['checklist.md', 'model_card.md', 'risk_file.md'];
+  let found = false;
+  console.log('\nDocumentation files in current directory:');
+  for (const file of files) {
+    if (fs.existsSync(file)) {
+      console.log(`  - ${file}`);
+      found = true;
+    }
+  }
+  if (!found) {
+    console.log('  (none found)');
+  }
+}
+function cleanDocs() {
+  const files = ['checklist.md', 'model_card.md', 'risk_file.md'];
+  let removed = false;
+  for (const file of files) {
+    if (fs.existsSync(file)) {
+      fs.unlinkSync(file);
+      removed = true;
+      console.log(`Removed ${file}`);
+    }
+  }
+  if (!removed) {
+    console.log('No documentation files to remove.');
+  }
+}
+function showConfig() {
+  let local = fs.existsSync(LOCAL_ENV_PATH);
+  let global = fs.existsSync(GLOBAL_CONFIG_PATH);
+  console.log('\nFRAI API Key Configuration:');
+  if (local) {
+    console.log('  - Local .env file: PRESENT');
+  } else {
+    console.log('  - Local .env file: not found');
+  }
+  if (global) {
+    console.log('  - Global config (~/.config/frai/config): PRESENT');
+  } else {
+    console.log('  - Global config (~/.config/frai/config): not found');
+  }
+  if (!local && !global) {
+    console.log('  No API key configured.');
+  }
+}
+async function checkUpdate() {
+  try {
+    const latest = execSync('npm view frai version', { encoding: 'utf8' }).trim();
+    if (latest !== pkg.version) {
+      console.log(`\nA newer version of FRAI is available: ${latest} (current: ${pkg.version})`);
+      console.log('Update with: npm install -g frai');
+    } else {
+      console.log('\nYou are using the latest version of FRAI.');
+    }
+  } catch (e) {
+    console.log('Could not check for updates (npm not available or network issue).');
+  }
+}
+async function exportPDF() {
+  const files = ['checklist.md', 'model_card.md', 'risk_file.md'];
+  let converted = false;
+  for (const file of files) {
+    if (fs.existsSync(file)) {
+      const pdfFile = file.replace(/\.md$/, '.pdf');
+      try {
+        execSync(`npx markdown-pdf "${file}" -o "${pdfFile}"`, { stdio: 'ignore' });
+        console.log(`Exported ${file} -> ${pdfFile}`);
+        converted = true;
+      } catch (e) {
+        console.log(`Could not export ${file} to PDF. Please install markdown-pdf globally or use another tool.`);
+      }
+    }
+  }
+  if (!converted) {
+    console.log('No documentation markdown files found to export.');
+  }
+}
 
 // AI-related library patterns to detect
 const AI_LIBRARIES = [
@@ -92,21 +160,29 @@ async function setupApiKey(options = {}) {
   
   // If still no key, prompt the user
   if (!apiKey && !options.ci) {
-    console.log('OpenAI API key not found.');
-    
-    const { shouldSetup } = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'shouldSetup',
-        message: 'Would you like to set up your OpenAI API key now?',
-        default: true,
-      },
-    ]);
-    
-    if (shouldSetup) {
-      apiKey = await promptAndSaveKey(options);
-    } else {
-      console.log('No API key provided. AI tips will be disabled.');
+    try {
+      // Defensive: check if inquirer is defined
+      if (typeof inquirer === 'undefined') {
+        console.error('You must run frai --setup to configure your OpenAI API key before using FRAI.');
+        process.exit(1);
+      }
+      console.log('OpenAI API key not found.');
+      const { shouldSetup } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'shouldSetup',
+          message: 'Would you like to set up your OpenAI API key now?',
+          default: true,
+        },
+      ]);
+      if (shouldSetup) {
+        apiKey = await promptAndSaveKey(options);
+      } else {
+        console.log('No API key provided. AI tips will be disabled.');
+      }
+    } catch (e) {
+      console.error('You must run frai --setup to configure your OpenAI API key before using FRAI.');
+      process.exit(1);
     }
   }
   
@@ -151,7 +227,7 @@ async function promptAndSaveKey(options = {}) {
   return key;
 }
 
-// Parse command line arguments
+// Enhanced parseArgs to support help/version
 function parseArgs() {
   const args = process.argv.slice(2);
   const options = {
@@ -159,9 +235,10 @@ function parseArgs() {
     global: false,
     key: null,
     scan: false,
-    ci: false
+    ci: false,
+    help: false,
+    version: false
   };
-  
   for (const arg of args) {
     if (arg === '--setup') {
       options.setup = true;
@@ -171,11 +248,14 @@ function parseArgs() {
       options.scan = true;
     } else if (arg === '--ci') {
       options.ci = true;
+    } else if (arg === '--help' || arg === '-h') {
+      options.help = true;
+    } else if (arg === '--version' || arg === '-v') {
+      options.version = true;
     } else if (arg.startsWith('--key=')) {
       options.key = arg.split('=')[1];
     }
   }
-  
   return options;
 }
 
@@ -778,45 +858,94 @@ function calculateRiskLevel(answers) {
   return { level, score, factors };
 }
 
-async function main() {
-  // Parse command line arguments
-  const options = parseArgs();
+// Check for required packages
+let dotenv, fetch;
+
+(async () => {
+  if (args.includes('--help') || args.includes('-h')) {
+    printHelp();
+    process.exit(0);
+  }
+  if (args.includes('--version') || args.includes('-v')) {
+    console.log(pkg.version);
+    process.exit(0);
+  }
+  if (args.includes('--list-docs')) {
+    printListDocs();
+    process.exit(0);
+  }
+  if (args.includes('--clean')) {
+    cleanDocs();
+    process.exit(0);
+  }
+  if (args.includes('--show-config')) {
+    showConfig();
+    process.exit(0);
+  }
+  if (args.includes('--update')) {
+    await checkUpdate();
+    process.exit(0);
+  }
+  if (args.includes('--export-pdf')) {
+    await exportPDF();
+    process.exit(0);
+  }
   
+  // Only import heavy modules after early exit checks pass
+  try {
+    dotenv = await import('dotenv');
+    dotenv.config();
+  } catch (e) {
+    console.log('Required package "dotenv" not found. Installing it now...');
+    console.log('Please run: npm install dotenv');
+    process.exit(1);
+  }
+
+  try {
+    fetch = (await import('node-fetch')).default;
+  } catch (e) {
+    console.log('Required package "node-fetch" not found. Installing it now...');
+    console.log('Please run: npm install node-fetch');
+    process.exit(1);
+  }
+
+  const inquirer = (await import('inquirer')).default;
+
   // Setup API key if needed
-  const apiKey = await setupApiKey(options);
+  const apiKey = await setupApiKey(parseArgs());
   
   // If only --setup, configure API key and exit
-  if (options.setup && !options.key && !options.scan && process.argv.length <= 3) {
+  if (parseArgs().setup && !parseArgs().key && !parseArgs().scan && process.argv.length <= 3) {
     console.log('Setup complete. Run again without --setup to use the framework.');
     process.exit(0);
   }
   
   // If the user just wants to set up the key or provide it directly, and not run the full tool
-  if (options.setup && !options.scan && process.argv.length <= 4) {
+  if (parseArgs().setup && !parseArgs().scan && process.argv.length <= 4) {
     process.exit(0);
   }
   
   // If scan mode is requested, run the code scanner
-  if (options.scan) {
-    const foundAI = await runCodeScan(options, apiKey);
+  if (parseArgs().scan) {
+    const foundAI = await runCodeScan(parseArgs(), apiKey);
     
     // If in CI mode and AI code found, exit successfully
-    if (options.ci && foundAI) {
+    if (parseArgs().ci && foundAI) {
       console.log('RAI documentation generated successfully in CI mode.');
       process.exit(0);
     }
     
     // If in CI mode and no AI code found, exit successfully but with a message
-    if (options.ci && !foundAI) {
+    if (parseArgs().ci && !foundAI) {
       console.log('No AI code detected in CI mode, skipping documentation generation.');
       process.exit(0);
     }
     
     // If not in CI mode, continue with interactive mode if AI code found
-    if (!options.ci && foundAI) {
+    if (!parseArgs().ci && foundAI) {
       console.log('\nWould you like to refine the documentation with interactive mode?');
       
-      if (!options.ci) {
+      if (!parseArgs().ci) {
         const { interactive } = await inquirer.prompt([
           {
             type: 'confirm',
@@ -832,7 +961,7 @@ async function main() {
       } else {
         process.exit(0);
       }
-    } else if (!options.ci && !foundAI) {
+    } else if (!parseArgs().ci && !foundAI) {
       console.log('\nWould you like to manually document an AI feature?');
       
       const { manualMode } = await inquirer.prompt([
@@ -1187,6 +1316,4 @@ ${riskFileTips}
   console.log('  - risk_file.md');
   console.log('\n🚀 Ready for production with responsible AI practices!');
   process.exit(0);
-}
-
-main(); 
+})(); 
