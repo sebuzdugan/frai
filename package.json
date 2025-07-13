@@ -1,11 +1,10 @@
 {
-  "name": "framework-rai",
+  "name": "frai",
   "version": "1.0.3",
-  "description": "Responsible AI framework for quick compliance documentation with AI-powered tips",
-  "main": "ai-responsible.mjs",
+  "description": "FRAI - Responsible AI in minutes, not months. Quick compliance documentation with AI-powered tips",
+  "main": "frai.mjs",
   "bin": {
-    "ai-responsible": "ai-responsible.mjs",
-    "framework-rai": "ai-responsible.mjs"
+    "frai": "frai.mjs"
   },
   "type": "module",
   "dependencies": {
@@ -31,14 +30,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sebastianbuzdugan/framework-rai.git"
+    "url": "git+https://github.com/sebastianbuzdugan/frai.git"
   },
   "scripts": {
-    "start": "node ai-responsible.mjs",
-    "setup": "node ai-responsible.mjs --setup",
-    "scan": "node ai-responsible.mjs --scan",
-    "dev": "npx tailwindcss -i ./src/input.css -o ./public/styles.css --watch",
-    "build": "npx tailwindcss -i ./src/input.css -o ./public/styles.css --minify"
+    "start": "node frai.mjs",
+    "setup": "node frai.mjs --setup",
+    "scan": "node frai.mjs --scan"
   },
   "engines": {
     "node": ">=16.0.0"

@@ -1,9 +1,9 @@
-# Framework-RAI: Responsible AI in Minutes
+# FRAI: Responsible AI in Minutes
 
 A lightweight, developer-friendly framework that ensures responsible AI practices with minimal effort. Generate essential documentation, receive actionable tips, and comply with ethical guidelines—all in under 3 minutes per feature.
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-![npm version](https://img.shields.io/npm/v/framework-rai)
+![npm version](https://img.shields.io/npm/v/frai)
 
 ## 🚀 Features
 
@@ -12,13 +12,13 @@ A lightweight, developer-friendly framework that ensures responsible AI practice
 - **Minimal Questions**: Answer only the most impactful questions
 - **Pre-commit Integration**: Automate checks before code is committed
 - **Automatic Code Scanning**: Detect AI libraries and functions in your codebase
-- **GitHub Actions Integration**: Run framework-rai checks in your CI pipeline
+- **GitHub Actions Integration**: Run frai checks in your CI pipeline
 - **Comprehensive Documentation**: Generate three essential documents:
   - `checklist.md`: Essential questions for every AI feature
   - `model_card.md`: Simple model documentation
   - `risk_file.md`: Minimal audit & compliance steps
 
-## 📋 Why Use Framework-RAI?
+## 📋 Why Use FRAI?
 
 Responsible AI shouldn't be a burden. This framework helps you:
 
@@ -31,10 +31,10 @@ Responsible AI shouldn't be a burden. This framework helps you:
 
 ```bash
 # Install globally
-npm install -g framework-rai
+npm install -g frai
 
 # Or use without installing
-npx framework-rai
+npx frai
 ```
 
 ### Setting Up Your OpenAI API Key
@@ -43,19 +43,19 @@ The first time you run the tool, it will prompt you to set up your OpenAI API ke
 
 ```bash
 # Initial setup wizard (interactive)
-npx framework-rai --setup
+npx frai --setup
 
 # Set up a global key (used across all projects)
-npx framework-rai --setup --global
+npx frai --setup --global
 
 # Run with a specific key without saving it
-npx framework-rai --key=your-api-key-here
+npx frai --key=your-api-key-here
 ```
 
 #### API Key Storage Options
 
 - **Project-specific**: Stored in `.env` in your project directory (default)
-- **Global**: Stored in `~/.config/framework-rai/config` (works across all projects)
+- **Global**: Stored in `~/.config/frai/config` (works across all projects)
 - **Session-only**: Use the `--key` option for temporary use without saving
 
 ## 📝 Usage
@@ -66,10 +66,10 @@ Run the CLI tool in your project directory:
 
 ```bash
 # If installed globally
-ai-responsible
+frai
 
 # Or using npx
-npx framework-rai
+npx frai
 ```
 
 Answer the simple questions about your AI feature, and the framework will generate three markdown files:
@@ -82,25 +82,25 @@ Answer the simple questions about your AI feature, and the framework will genera
 
 ```bash
 # Basic usage
-npx framework-rai
+npx frai
 
 # Configure API key (interactive)
-npx framework-rai --setup
+npx frai --setup
 
 # Use a global API key (shared between projects)
-npx framework-rai --global
+npx frai --global
 
 # Specify an API key directly (won't be saved)
-npx framework-rai --key=your-api-key-here
+npx frai --key=your-api-key-here
 
 # Scan codebase for AI-related code
-npx framework-rai --scan
+npx frai --scan
 
 # Run in CI mode (non-interactive)
-npx framework-rai --scan --ci
+npx frai --scan --ci
 
 # Combine options
-npx framework-rai --global --setup
+npx frai --global --setup
 ```
 
 ### Pre-commit Hook (Recommended)
@@ -113,19 +113,19 @@ npm install husky --save-dev
 npx husky init
 
 # Add the pre-commit hook
-npx husky add .husky/pre-commit "npx framework-rai"
+npx husky add .husky/pre-commit "npx frai"
 ```
 
 ### GitHub Actions Integration
 
-You can automatically run Framework-RAI checks in your CI pipeline:
+You can automatically run FRAI checks in your CI pipeline:
 
 1. Create a GitHub Secret called `OPENAI_API_KEY` with your OpenAI API key
 2. Add the workflow file to your repository:
 
 ```yaml
-# .github/workflows/rai-check.yml
-name: Responsible AI Framework Check
+# .github/workflows/frai-check.yml
+name: FRAI - Responsible AI Check
 
 on:
   push:
@@ -134,7 +134,7 @@ on:
     branches: [ main, master ]
 
 jobs:
-  rai-check:
+  frai-check:
     runs-on: ubuntu-latest
     
     steps:
@@ -148,16 +148,16 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Run Framework-RAI
+    - name: Run FRAI
       run: |
-        node ./ai-responsible.mjs --scan --ci
+        node ./frai.mjs --scan --ci
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     
-    - name: Upload RAI Documentation
+    - name: Upload FRAI Documentation
       uses: actions/upload-artifact@v3
       with:
-        name: rai-documentation
+        name: frai-documentation
         path: |
           checklist.md
           model_card.md
