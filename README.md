@@ -1,4 +1,4 @@
-# FRAI - Responsible AI in Minutes
+# FRAI - Framework of Responsible Artificial Intelligence
 
 ![npm version](https://img.shields.io/npm/v/frai)
 
