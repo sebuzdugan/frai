@@ -47,6 +47,22 @@ frai
 | `frai rag index`       | Index compliance docs into a local vector store |
 | `frai eval`            | Run baseline evaluation metrics and write reports |
 
+### RAG Indexing
+
+```bash
+frai rag index --input docs/policies --output .frai/compliance-index.json --chunk-size 400
+```
+- Scans `.md`, `.txt`, `.json`, `.yaml` files recursively.
+- Generates a lightweight JSON vector store consumable by SDKs and future connectors.
+
+### Evaluation Harness
+
+```bash
+frai eval --outputs runs/outputs.json --references runs/golden.json --report reports/eval --format markdown
+```
+- Runs baseline metrics (exact match, toxicity keyword scan, length variance).
+- Produces JSON and/or Markdown summaries for CI and governance reviews.
+
 **Docs generated:**
 - `checklist.md`      — Implementation checklist
 - `model_card.md`     — Model card
@@ -61,6 +77,19 @@ frai
 - **PDF export**: Convert docs to PDF with one command
 - **Codebase scanning**: Detects AI/ML code and generates relevant docs
 - **Easy setup**: One-time API key configuration
+- **Compliance-aware RAG**: Build vector stores from policies for knowledge-grounded guardrails
+- **Evaluation harness**: Run baseline metrics and capture auditable reports
+
+### Monorepo Layout
+
+```
+frai/
+├─ packages/
+│  ├─ frai-cli/      # CLI entry point and command wiring
+│  └─ frai-core/     # Reusable services (config, questionnaire, documents, scanners, RAG, eval)
+├─ docs/             # Roadmaps, design notes, and feature backlogs
+└─ examples/         # Sample AI projects used in tests and demos
+```
 
 ---
 
@@ -76,6 +105,8 @@ If you skip this step, FRAI will prompt you to set up your key on first use.
 ## 📖 Learn More
 - [GitHub Repository](https://github.com/sebastianbuzdugan/frai)
 - [NPM Package](https://www.npmjs.com/package/frai)
+- [AI Feature Backlog](docs/ai_feature_backlog.md)
+- [Evaluation Harness Design](docs/eval_harness_design.md)
 
 ---
 
