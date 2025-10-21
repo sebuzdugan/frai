@@ -15,13 +15,13 @@
 ## Day-by-Day Plan (First 14 Days)
 
 ### Week 1 – Restructure & Baseline
-- **Day 1:** Run repository inventory, document current architecture, capture CLI behaviour; store findings in `docs/analysis.md`.
-- **Day 2:** Finalise target monorepo design, module contracts, and dependency graph; draft `docs/architecture-target.md`.
-- **Day 3:** Initialize pnpm/Turborepo workspace, scaffold `packages/frai-core` & `packages/frai-cli`, configure shared lint/test setup.
-- **Day 4:** Port configuration & environment handling into `frai-core` modules; create unit tests for config loaders.
-- **Day 5:** Migrate questionnaire logic and answer validation into `frai-core`; add Jest/Vitest coverage for prompt flows.
-- **Day 6:** Extract document generators/templates, implement override mechanism, and add snapshot tests.
-- **Day 7:** Build modular scanning engine with pluggable detectors; run integration tests using `examples/` fixtures.
+- ✅ **Day 1:** Run repository inventory, document current architecture, capture CLI behaviour; store findings in `docs/analysis.md`.
+- ✅ **Day 2:** Finalise target monorepo design, module contracts, and dependency graph; draft `docs/architecture-target.md`.
+- ✅ **Day 3:** Initialize pnpm/Turborepo workspace, scaffold `packages/frai-core` & `packages/frai-cli`, configure shared lint/test setup.
+- ✅ **Day 4:** Port configuration & environment handling into `frai-core` modules; create unit tests for config loaders.
+- ✅ **Day 5:** Migrate questionnaire logic and answer validation into `frai-core`; add Jest/Vitest coverage for prompt flows.
+- ✅ **Day 6:** Extract document generators/templates, implement override mechanism, and add snapshot tests.
+- ✅ **Day 7:** Build modular scanning engine with pluggable detectors; run integration tests using `examples/` fixtures.
 
 ### Week 2 – AI Feature Foundations & Tooling
 - **Day 8:** Assemble AI feature backlog with user stories; prioritise RAG, eval, fine-tuning governance; publish roadmap entries.

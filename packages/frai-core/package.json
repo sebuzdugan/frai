@@ -12,6 +12,10 @@
     "lint": "eslint .",
     "test": "vitest"
   },
+  "devDependencies": {
+    "eslint": "workspace:*",
+    "vitest": "workspace:*"
+  },
   "keywords": [
     "frai",
     "responsible-ai",

@@ -4,8 +4,43 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { createRequire } from 'module';
 import path from 'path';
-import os from 'os';
 import { execSync } from 'child_process';
+import inquirer from 'inquirer';
+
+let coreModules;
+try {
+  coreModules = await import('frai-core');
+} catch (error) {
+  coreModules = await import('../../frai-core/src/index.js');
+}
+
+const {
+  Config: {
+    hasGlobalApiKey = () => false,
+    hasLocalApiKey = () => false,
+    getGlobalApiKey = () => null,
+    getLocalApiKey = () => null,
+    setGlobalApiKey = () => {
+      throw new Error('Global config not available');
+    },
+    setLocalApiKey = () => {
+      throw new Error('Local config not available');
+    }
+  } = {},
+  Questionnaire: { runQuestionnaire } = { runQuestionnaire: async () => ({}) },
+  Documents: {
+    generateDocuments = () => ({ checklist: '', modelCard: '', riskFile: '', context: {} }),
+    buildContextForAITips = () => ''
+  } = {},
+  Scanners: {
+    scanCodebase = () => ({
+      aiFiles: [],
+      totalFiles: 0,
+      aiLibraryMatches: {},
+      aiFunctionMatches: {}
+    })
+  } = {}
+} = coreModules;
 
 const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
@@ -14,10 +49,8 @@ const __dirname = dirname(__filename);
 // Read version from package.json for --version
 const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
 
-// Define config paths
-const LOCAL_ENV_PATH = path.join(process.cwd(), '.env');
-const GLOBAL_CONFIG_DIR = path.join(os.homedir(), '.config', 'frai');
-const GLOBAL_CONFIG_PATH = path.join(GLOBAL_CONFIG_DIR, 'config');
+const LOCAL_ENV_DISPLAY = '.env';
+const GLOBAL_CONFIG_DISPLAY = '~/.config/frai/config';
 
 // Early CLI argument handling for instant exit commands
 const args = process.argv.slice(2);
@@ -53,20 +86,12 @@ function cleanDocs() {
   }
 }
 function showConfig() {
-  let local = fs.existsSync(LOCAL_ENV_PATH);
-  let global = fs.existsSync(GLOBAL_CONFIG_PATH);
+  const localPresent = hasLocalApiKey();
+  const globalPresent = hasGlobalApiKey();
   console.log('\nFRAI API Key Configuration:');
-  if (local) {
-    console.log('  - Local .env file: PRESENT');
-  } else {
-    console.log('  - Local .env file: not found');
-  }
-  if (global) {
-    console.log('  - Global config (~/.config/frai/config): PRESENT');
-  } else {
-    console.log('  - Global config (~/.config/frai/config): not found');
-  }
-  if (!local && !global) {
+  console.log(`  - Local ${LOCAL_ENV_DISPLAY}: ${localPresent ? 'PRESENT' : 'not found'}`);
+  console.log(`  - Global config (${GLOBAL_CONFIG_DISPLAY}): ${globalPresent ? 'PRESENT' : 'not found'}`);
+  if (!localPresent && !globalPresent) {
     console.log('  No API key configured.');
   }
 }
@@ -103,33 +128,6 @@ async function exportPDF() {
   }
 }
 
-// AI-related library patterns to detect
-const AI_LIBRARIES = [
-  // Python ML/AI libraries
-  'sklearn', 'scikit-learn', 'tensorflow', 'torch', 'pytorch', 'keras', 'xgboost',
-  'lightgbm', 'catboost', 'transformers', 'huggingface', 'spacy', 'nltk', 
-  'gensim', 'fastai', 'opencv', 'cv2',
-  // JavaScript ML/AI libraries
-  '@tensorflow', 'ml5', 'brain.js', 'synaptic', '@huggingface', 
-  // R packages
-  'caret', 'randomForest', 'xgboost', 'kernlab', 'nnet', 'rpart'
-];
-
-// AI-related function patterns to detect
-const AI_FUNCTIONS = [
-  // Training/fitting
-  'fit', 'train', 'fit_transform', 'compile',
-  // Prediction/inference
-  'predict', 'transform', 'inference', 'forward',
-  // Evaluation
-  'score', 'evaluate', 'accuracy_score', 'classification_report',
-  // Data preparation
-  'preprocessing', 'tokenize', 'encode', 'normalize'
-];
-
-// File extensions to scan
-const CODE_EXTENSIONS = ['.py', '.ipynb', '.js', '.ts', '.jsx', '.tsx', '.r', '.rmd', '.java', '.scala'];
-
 // Setup function to initialize API key if not present
 async function setupApiKey(options = {}) {
   // If key is provided directly via --key, use it without saving
@@ -143,19 +141,10 @@ async function setupApiKey(options = {}) {
   }
   
   // Try to get key from environment or config files
-  let apiKey = process.env.OPENAI_API_KEY;
-  
-  // If not in env, try local .env file (dotenv already loaded it)
-  if (!apiKey && options.global) {
-    // Try global config
-    try {
-      if (fs.existsSync(GLOBAL_CONFIG_PATH)) {
-        const config = JSON.parse(fs.readFileSync(GLOBAL_CONFIG_PATH, 'utf8'));
-        apiKey = config.OPENAI_API_KEY;
-      }
-    } catch (error) {
-      // If error reading global config, continue without it
-    }
+  let apiKey = process.env.OPENAI_API_KEY || getLocalApiKey();
+
+  if (!apiKey) {
+    apiKey = getGlobalApiKey();
   }
   
   // If still no key, prompt the user
@@ -213,14 +202,10 @@ async function promptAndSaveKey(options = {}) {
   ]);
   
   if (saveLocation === 'local') {
-    fs.writeFileSync(LOCAL_ENV_PATH, `OPENAI_API_KEY=${key}\n`, { flag: 'w' });
+    setLocalApiKey(key);
     console.log('API key saved to .env file in current directory.');
   } else {
-    // Global config
-    if (!fs.existsSync(GLOBAL_CONFIG_DIR)) {
-      fs.mkdirSync(GLOBAL_CONFIG_DIR, { recursive: true });
-    }
-    fs.writeFileSync(GLOBAL_CONFIG_PATH, JSON.stringify({ OPENAI_API_KEY: key }, null, 2));
+    setGlobalApiKey(key);
     console.log('API key saved globally in ~/.config/frai/config.');
   }
   
@@ -261,82 +246,6 @@ function parseArgs() {
 
 const OPENAI_MODEL = 'gpt-4.1-nano-2025-04-14';
 
-// Function to recursively scan directories for AI-related code
-function scanForAICode(directory, excludedDirs = ['node_modules', '.git']) {
-  const result = {
-    aiFiles: [],
-    totalFiles: 0,
-    aiLibraryMatches: {},
-    aiFunctionMatches: {}
-  };
-  
-  function scanDirectory(dir) {
-    try {
-      const items = fs.readdirSync(dir);
-      
-      for (const item of items) {
-        // Skip excluded directories
-        if (excludedDirs.includes(item)) {
-          continue;
-        }
-        
-        const fullPath = path.join(dir, item);
-        const stats = fs.statSync(fullPath);
-        
-        if (stats.isDirectory()) {
-          // Recursively scan subdirectory
-          scanDirectory(fullPath);
-        } else if (stats.isFile() && CODE_EXTENSIONS.includes(path.extname(fullPath).toLowerCase())) {
-          // Scan code file
-          result.totalFiles++;
-          
-          try {
-            const fileContent = fs.readFileSync(fullPath, 'utf8');
-            let isAIFile = false;
-            
-            // Check for AI libraries
-            for (const library of AI_LIBRARIES) {
-              // Look for import/require statements with the library name
-              const regex = new RegExp(`(import|from|require\\s*\\(\\s*['"'])\\s*${library}`, 'i');
-              if (regex.test(fileContent)) {
-                isAIFile = true;
-                result.aiLibraryMatches[fullPath] = result.aiLibraryMatches[fullPath] || [];
-                result.aiLibraryMatches[fullPath].push(library);
-              }
-            }
-            
-            // Check for AI functions
-            for (const func of AI_FUNCTIONS) {
-              // Pattern matches function calls like functionName() or object.functionName()
-              const regex = new RegExp(`[\\s\\.\(]${func}\\s*\\(`, 'g');
-              if (regex.test(fileContent)) {
-                isAIFile = true;
-                result.aiFunctionMatches[fullPath] = result.aiFunctionMatches[fullPath] || [];
-                result.aiFunctionMatches[fullPath].push(func);
-              }
-            }
-            
-            if (isAIFile) {
-              result.aiFiles.push(fullPath);
-            }
-          } catch (e) {
-            console.error(`Error reading file ${fullPath}: ${e.message}`);
-          }
-        }
-      }
-    } catch (e) {
-      console.error(`Error scanning directory ${dir}: ${e.message}`);
-    }
-  }
-  
-  scanDirectory(directory);
-  
-  // Remove duplicates in aiFiles
-  result.aiFiles = [...new Set(result.aiFiles)];
-  
-  return result;
-}
-
 // Generate suggestions based on code scan
 async function generateSuggestions(scanResults, apiKey) {
   if (!apiKey || !scanResults.aiFiles.length) {
@@ -370,13 +279,6 @@ async function generateSuggestions(scanResults, apiKey) {
       .slice(0, 5)
       .map(([func, count]) => `${func} (${count})`);
     
-    const scanSummary = {
-      aiFilesCount: scanResults.aiFiles.length,
-      totalFiles: scanResults.totalFiles,
-      topLibraries,
-      topFunctions,
-      fileCount: Math.min(scanResults.aiFiles.length, 5)  // List up to 5 files
-    };
     
     const prompt = `You are an expert in responsible AI development. Based on automatic code scanning, I detected AI-related code in ${scanResults.aiFiles.length} files out of ${scanResults.totalFiles} total code files.
 
@@ -488,39 +390,6 @@ Risk File Tips:
   }
 }
 
-function buildContextForAITips(answers) {
-  const { core, impact, data, performance, monitoring, bias } = answers;
-  
-  let context = `Purpose: ${getPurposeDescription(core.purpose)}\n`;
-  context += `Model Type: ${getModelTypeDescription(core.modelType)}\n`;
-  context += `Data Type: ${getDataDescription(core.dataType)}\n`;
-  
-  // Add impact details
-  const impactInfo = getImpactDescription(impact);
-  if (impactInfo) {
-    context += `Impact Level: ${impactInfo}\n`;
-  }
-  
-  // Add data protection/source details
-  if (data.dataProtection) {
-    context += `Data Protection: ${getDataProtectionDescription(data.dataProtection)}\n`;
-  }
-  if (data.dataSource) {
-    context += `Data Source: ${getDataSourceDescription(data.dataSource)}\n`;
-  }
-  
-  context += `Primary Metric: ${getMetricDescription(performance.primaryMetric)}\n`;
-  context += `Monitoring: ${getMonitoringDescription(monitoring.monitoring)}\n`;
-  context += `Bias Considerations: ${getBiasDescription(bias.biasConsiderations)}\n`;
-  
-  // Add risk assessment
-  const riskLevel = calculateRiskLevel(answers);
-  context += `Risk Level: ${riskLevel.level} (${riskLevel.score}/10)\n`;
-  context += `Risk Factors: ${riskLevel.factors.join(', ')}\n`;
-  
-  return context;
-}
-
 function extractTipsSection(aiTips, sectionName) {
   if (!aiTips || typeof aiTips !== 'string') {
     return 'No specific tips available for this section.';
@@ -538,7 +407,7 @@ function extractTipsSection(aiTips, sectionName) {
 
 async function runCodeScan(options, apiKey) {
   console.log('Scanning codebase for AI-related patterns...');
-  const scanResults = scanForAICode(process.cwd());
+  const scanResults = scanCodebase({ root: process.cwd() });
   
   console.log(`\nScan Results:`);
   console.log(`- Found ${scanResults.aiFiles.length} files with AI code out of ${scanResults.totalFiles} total code files`);
@@ -593,271 +462,6 @@ async function runCodeScan(options, apiKey) {
   }
 }
 
-// Helper functions for generating structured summaries
-function generateChecklistSummary(answers) {
-  const { core, impact, data, performance, monitoring, bias } = answers;
-  
-  // Build contextual summary
-  let summary = `## AI Feature Overview\n\n`;
-  summary += `**Purpose**: ${getPurposeDescription(core.purpose)}\n`;
-  summary += `**Model Type**: ${getModelTypeDescription(core.modelType)}\n`;
-  summary += `**Data Handling**: ${getDataDescription(core.dataType)}\n`;
-  
-  // Add impact assessment
-  const impactInfo = getImpactDescription(impact);
-  if (impactInfo) {
-    summary += `**Impact Level**: ${impactInfo}\n`;
-  }
-  
-  // Add data protection if relevant
-  if (data.dataProtection) {
-    summary += `**Data Protection**: ${getDataProtectionDescription(data.dataProtection)}\n`;
-  } else if (data.dataSource) {
-    summary += `**Data Source**: ${getDataSourceDescription(data.dataSource)}\n`;
-  }
-  
-  summary += `**Primary Metric**: ${getMetricDescription(performance.primaryMetric)}\n`;
-  summary += `**Monitoring**: ${getMonitoringDescription(monitoring.monitoring)}\n`;
-  summary += `**Bias Considerations**: ${getBiasDescription(bias.biasConsiderations)}\n`;
-  
-  return summary;
-}
-
-function generateModelCardSummary(answers) {
-  const { core, impact, data, performance, monitoring, bias } = answers;
-  
-  let summary = `## Model Information\n\n`;
-  summary += `**Model Type**: ${getModelTypeDescription(core.modelType)}\n`;
-  summary += `**Primary Use Case**: ${getPurposeDescription(core.purpose)}\n`;
-  summary += `**Key Performance Metric**: ${getMetricDescription(performance.primaryMetric)}\n`;
-  
-  // Add model-specific details
-  const impactInfo = getImpactDescription(impact);
-  if (impactInfo) {
-    summary += `**Risk Level**: ${impactInfo}\n`;
-  }
-  
-  summary += `\n## Data & Training\n\n`;
-  summary += `**Data Type**: ${getDataDescription(core.dataType)}\n`;
-  
-  if (data.dataSource) {
-    summary += `**Data Source**: ${getDataSourceDescription(data.dataSource)}\n`;
-  }
-  
-  summary += `\n## Performance & Monitoring\n\n`;
-  summary += `**Monitoring Approach**: ${getMonitoringDescription(monitoring.monitoring)}\n`;
-  summary += `**Bias Mitigation**: ${getBiasDescription(bias.biasConsiderations)}\n`;
-  
-  return summary;
-}
-
-function generateRiskSummary(answers) {
-  const { core, impact, data, performance, monitoring, bias } = answers;
-  
-  let summary = `## Risk Assessment\n\n`;
-  
-  // Calculate risk level
-  const riskLevel = calculateRiskLevel(answers);
-  summary += `**Overall Risk Level**: ${riskLevel.level} (${riskLevel.score}/10)\n`;
-  summary += `**Risk Factors**: ${riskLevel.factors.join(', ')}\n\n`;
-  
-  summary += `## Compliance & Governance\n\n`;
-  summary += `**Data Protection**: ${data.dataProtection ? getDataProtectionDescription(data.dataProtection) : 'Standard measures'}\n`;
-  summary += `**Bias & Fairness**: ${getBiasDescription(bias.biasConsiderations)}\n`;
-  summary += `**Monitoring**: ${getMonitoringDescription(monitoring.monitoring)}\n`;
-  
-  // Add specific recommendations based on risk level
-  if (riskLevel.level === 'High' || riskLevel.level === 'Critical') {
-    summary += `\n## Recommended Actions\n\n`;
-    summary += `- Implement comprehensive monitoring and alerting\n`;
-    summary += `- Regular bias testing and fairness audits\n`;
-    summary += `- Enhanced documentation and approval processes\n`;
-    summary += `- Regular security and privacy assessments\n`;
-  }
-  
-  return summary;
-}
-
-// Helper functions for descriptive text
-function getPurposeDescription(purpose) {
-  const descriptions = {
-    'user-facing': 'User-facing feature (recommendations, search, etc.)',
-    'internal': 'Internal analytics and insights',
-    'automation': 'Automation and decision support',
-    'content': 'Content generation and processing',
-    'other': 'Other AI application'
-  };
-  return descriptions[purpose] || purpose;
-}
-
-function getModelTypeDescription(modelType) {
-  const descriptions = {
-    'classification': 'Classification model (categorizing data)',
-    'regression': 'Regression model (predicting numerical values)',
-    'nlp': 'Natural Language Processing model',
-    'vision': 'Computer Vision model',
-    'recommendations': 'Recommendation system',
-    'clustering': 'Clustering/grouping model',
-    'other': 'Other/Multiple model types'
-  };
-  return descriptions[modelType] || modelType;
-}
-
-function getDataDescription(dataType) {
-  const descriptions = {
-    'anonymized': 'Anonymized/aggregated data only',
-    'personal-consent': 'Personal data with user consent',
-    'personal-internal': 'Personal data (internal/employee)',
-    'public': 'Public data only',
-    'sensitive': 'Sensitive data (health, financial, etc.)',
-    'no-personal': 'No personal data'
-  };
-  return descriptions[dataType] || dataType;
-}
-
-function getDataProtectionDescription(protection) {
-  const descriptions = {
-    'full-protection': 'Comprehensive (encryption, access controls, audit logs)',
-    'standard-protection': 'Standard (encryption and access controls)',
-    'basic-protection': 'Basic access controls only',
-    'implementing': 'Currently implementing protections'
-  };
-  return descriptions[protection] || protection;
-}
-
-function getDataSourceDescription(source) {
-  const descriptions = {
-    'internal': 'Internal company data',
-    'public': 'Public datasets and APIs',
-    'third-party': 'Third-party data vendors',
-    'user-generated': 'User-generated content',
-    'mixed': 'Mixed sources'
-  };
-  return descriptions[source] || source;
-}
-
-function getImpactDescription(impact) {
-  if (!impact) return null;
-  
-  const impactKey = Object.keys(impact)[0];
-  const impactValue = impact[impactKey];
-  
-  const descriptions = {
-    'low': 'Low impact',
-    'medium': 'Medium impact',
-    'high': 'High impact',
-    'critical': 'Critical impact',
-    'processing': 'Data processing only',
-    'recommendations': 'Recommendation system',
-    'autonomous-oversight': 'Autonomous with oversight',
-    'autonomous': 'Fully autonomous'
-  };
-  
-  return descriptions[impactValue] || impactValue;
-}
-
-function getMetricDescription(metric) {
-  const descriptions = {
-    'accuracy': 'Accuracy/Precision',
-    'f1': 'F1 Score/Recall',
-    'auc': 'AUC/ROC',
-    'satisfaction': 'User satisfaction/engagement',
-    'business': 'Business KPIs (revenue, conversion, etc.)',
-    'latency': 'Latency/Performance',
-    'other': 'Other/Multiple metrics'
-  };
-  return descriptions[metric] || metric;
-}
-
-function getMonitoringDescription(monitoring) {
-  const descriptions = {
-    'automated-realtime': 'Real-time automated monitoring with alerts',
-    'automated-reports': 'Regular automated reports with manual review',
-    'manual-periodic': 'Manual periodic reviews',
-    'user-feedback': 'User feedback collection',
-    'basic-logging': 'Basic logging only',
-    'no-monitoring': 'No monitoring implemented yet'
-  };
-  return descriptions[monitoring] || monitoring;
-}
-
-function getBiasDescription(bias) {
-  const descriptions = {
-    'comprehensive': 'Comprehensive testing across demographic groups',
-    'statistical': 'Statistical bias testing on key metrics',
-    'diverse-data': 'Diverse training data with basic testing',
-    'planning': 'Aware of issue, planning to address',
-    'not-applicable': 'Not applicable or not considered yet'
-  };
-  return descriptions[bias] || bias;
-}
-
-function calculateRiskLevel(answers) {
-  const { core, impact, data, performance, monitoring, bias } = answers;
-  let score = 0;
-  const factors = [];
-  
-  // Data sensitivity scoring
-  if (core.dataType === 'sensitive') {
-    score += 3;
-    factors.push('Sensitive data');
-  } else if (core.dataType.includes('personal')) {
-    score += 2;
-    factors.push('Personal data');
-  }
-  
-  // Impact scoring
-  const impactValue = impact ? Object.values(impact)[0] : null;
-  if (impactValue === 'critical') {
-    score += 4;
-    factors.push('Critical impact');
-  } else if (impactValue === 'high') {
-    score += 3;
-    factors.push('High impact');
-  } else if (impactValue === 'medium') {
-    score += 2;
-    factors.push('Medium impact');
-  }
-  
-  // Monitoring scoring (lower is higher risk)
-  if (monitoring.monitoring === 'no-monitoring') {
-    score += 2;
-    factors.push('No monitoring');
-  } else if (monitoring.monitoring === 'basic-logging') {
-    score += 1;
-    factors.push('Basic monitoring');
-  }
-  
-  // Bias considerations (lower is higher risk)
-  if (bias.biasConsiderations === 'not-applicable') {
-    score += 2;
-    factors.push('No bias considerations');
-  } else if (bias.biasConsiderations === 'planning') {
-    score += 1;
-    factors.push('Bias planning needed');
-  }
-  
-  // Purpose-based scoring
-  if (core.purpose === 'user-facing') {
-    score += 1;
-    factors.push('User-facing');
-  }
-  
-  // Determine risk level
-  let level;
-  if (score >= 7) {
-    level = 'Critical';
-  } else if (score >= 5) {
-    level = 'High';
-  } else if (score >= 3) {
-    level = 'Medium';
-  } else {
-    level = 'Low';
-  }
-  
-  return { level, score, factors };
-}
-
 // Check for required packages
 let dotenv, fetch;
 
@@ -909,7 +513,6 @@ let dotenv, fetch;
     process.exit(1);
   }
 
-  const inquirer = (await import('inquirer')).default;
 
   // Setup API key if needed
   const apiKey = await setupApiKey(parseArgs());
@@ -996,180 +599,12 @@ let dotenv, fetch;
   // Progressive questionnaire - starts with core questions, then adapts based on answers
   console.log('\n🎯 Let\'s gather some context about your AI feature...\n');
 
-  // Core context questions (always asked)
-  const coreQuestions = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'purpose',
-      message: '1/8 - What\'s the main purpose of this AI feature?',
-      choices: [
-        { name: 'User-facing feature (recommendations, search, etc.)', value: 'user-facing' },
-        { name: 'Internal analytics/insights', value: 'internal' },
-        { name: 'Automation/decision support', value: 'automation' },
-        { name: 'Content generation/processing', value: 'content' },
-        { name: 'Other', value: 'other' }
-      ]
-    },
-    {
-      type: 'list',
-      name: 'modelType',
-      message: '2/8 - What type of AI model/approach are you using?',
-      choices: [
-        { name: 'Classification (categorizing data)', value: 'classification' },
-        { name: 'Regression (predicting numbers)', value: 'regression' },
-        { name: 'NLP/Language models (text processing)', value: 'nlp' },
-        { name: 'Computer Vision (image/video)', value: 'vision' },
-        { name: 'Recommendation system', value: 'recommendations' },
-        { name: 'Clustering/grouping', value: 'clustering' },
-        { name: 'Other/Multiple', value: 'other' }
-      ]
-    },
-    {
-      type: 'list',
-      name: 'dataType',
-      message: '3/8 - What type of data does your AI feature process?',
-      choices: [
-        { name: 'Only anonymized/aggregated data', value: 'anonymized' },
-        { name: 'Personal data with user consent', value: 'personal-consent' },
-        { name: 'Personal data (internal/employee)', value: 'personal-internal' },
-        { name: 'Public data only', value: 'public' },
-        { name: 'Sensitive data (health, financial, etc.)', value: 'sensitive' },
-        { name: 'No personal data', value: 'no-personal' }
-      ]
-    }
-  ]);
-
-  // Progressive questions based on context
-  let progressiveQuestions = {};
-  
-  // Question 4: Impact-based question
-  if (coreQuestions.purpose === 'user-facing') {
-    progressiveQuestions.impact = await inquirer.prompt([{
-      type: 'list',
-      name: 'userImpact',
-      message: '4/8 - What\'s the potential impact on users if the AI makes mistakes?',
-      choices: [
-        { name: 'Low - Minor inconvenience (e.g., bad recommendations)', value: 'low' },
-        { name: 'Medium - Affects user experience significantly', value: 'medium' },
-        { name: 'High - Could affect user decisions/wellbeing', value: 'high' },
-        { name: 'Critical - Could cause harm or major consequences', value: 'critical' }
-      ]
-    }]);
-  } else if (coreQuestions.purpose === 'automation') {
-    progressiveQuestions.impact = await inquirer.prompt([{
-      type: 'list',
-      name: 'automationImpact',
-      message: '4/8 - What decisions does this AI automation make?',
-      choices: [
-        { name: 'Data processing/routing only', value: 'processing' },
-        { name: 'Recommendations that humans review', value: 'recommendations' },
-        { name: 'Autonomous decisions with human oversight', value: 'autonomous-oversight' },
-        { name: 'Fully autonomous decisions', value: 'autonomous' }
-      ]
-    }]);
-  } else {
-    progressiveQuestions.impact = await inquirer.prompt([{
-      type: 'list',
-      name: 'generalImpact',
-      message: '4/8 - What\'s the potential business/operational impact?',
-      choices: [
-        { name: 'Low - Internal insights/analytics', value: 'low' },
-        { name: 'Medium - Affects workflows/processes', value: 'medium' },
-        { name: 'High - Key business decisions depend on it', value: 'high' }
-      ]
-    }]);
-  }
-
-  // Question 5: Data-specific follow-up
-  let dataQuestions = {};
-  if (coreQuestions.dataType.includes('personal') || coreQuestions.dataType === 'sensitive') {
-    dataQuestions = await inquirer.prompt([{
-      type: 'list',
-      name: 'dataProtection',
-      message: '5/8 - How is sensitive data protected?',
-      choices: [
-        { name: 'Encryption + access controls + audit logs', value: 'full-protection' },
-        { name: 'Encryption + access controls', value: 'standard-protection' },
-        { name: 'Basic access controls only', value: 'basic-protection' },
-        { name: 'Still implementing protections', value: 'implementing' }
-      ]
-    }]);
-  } else {
-    dataQuestions = await inquirer.prompt([{
-      type: 'list',
-      name: 'dataSource',
-      message: '5/8 - Where does your training/input data come from?',
-      choices: [
-        { name: 'Internal company data', value: 'internal' },
-        { name: 'Public datasets/APIs', value: 'public' },
-        { name: 'Third-party data vendors', value: 'third-party' },
-        { name: 'User-generated content', value: 'user-generated' },
-        { name: 'Mixed sources', value: 'mixed' }
-      ]
-    }]);
-  }
-
-  // Question 6: Performance & monitoring
-  const performanceQuestions = await inquirer.prompt([{
-    type: 'list',
-    name: 'primaryMetric',
-    message: '6/8 - What\'s your primary success metric?',
-    choices: [
-      { name: 'Accuracy/Precision', value: 'accuracy' },
-      { name: 'F1 Score/Recall', value: 'f1' },
-      { name: 'AUC/ROC', value: 'auc' },
-      { name: 'User satisfaction/engagement', value: 'satisfaction' },
-      { name: 'Business KPIs (revenue, conversion, etc.)', value: 'business' },
-      { name: 'Latency/Performance', value: 'latency' },
-      { name: 'Other/Multiple', value: 'other' }
-    ]
-  }]);
-
-  // Question 7: Monitoring approach
-  const monitoringQuestions = await inquirer.prompt([{
-    type: 'list',
-    name: 'monitoring',
-    message: '7/8 - How do you monitor the AI system in production?',
-    choices: [
-      { name: 'Real-time automated monitoring + alerts', value: 'automated-realtime' },
-      { name: 'Regular automated reports + manual review', value: 'automated-reports' },
-      { name: 'Manual periodic reviews', value: 'manual-periodic' },
-      { name: 'User feedback collection', value: 'user-feedback' },
-      { name: 'Basic logging only', value: 'basic-logging' },
-      { name: 'No monitoring yet', value: 'no-monitoring' }
-    ]
-  }]);
-
-  // Question 8: Bias & fairness considerations
-  const biasQuestions = await inquirer.prompt([{
-    type: 'list',
-    name: 'biasConsiderations',
-    message: '8/8 - How do you address potential bias and fairness?',
-    choices: [
-      { name: 'Comprehensive testing across demographic groups', value: 'comprehensive' },
-      { name: 'Statistical bias testing on key metrics', value: 'statistical' },
-      { name: 'Diverse training data + basic testing', value: 'diverse-data' },
-      { name: 'Aware of issue, planning to address', value: 'planning' },
-      { name: 'Not applicable/not considered yet', value: 'not-applicable' }
-    ]
-  }]);
-
-  // Combine all answers
-  const allAnswers = {
-    core: coreQuestions,
-    impact: progressiveQuestions.impact,
-    data: dataQuestions,
-    performance: performanceQuestions,
-    monitoring: monitoringQuestions,
-    bias: biasQuestions
-  };
+  const allAnswers = await runQuestionnaire({
+    prompt: (questions) => inquirer.prompt(questions)
+  });
 
   // Generate improved summaries with more context
   console.log('\n✨ Generating documentation...\n');
-  
-  const checklistSummary = generateChecklistSummary(allAnswers);
-  const modelCardSummary = generateModelCardSummary(allAnswers);
-  const riskSummary = generateRiskSummary(allAnswers);
 
   // Get AI tips with improved context
   let aiTips = '';
@@ -1184,130 +619,19 @@ let dotenv, fetch;
   const modelCardTips = extractTipsSection(aiTips, 'Model Card Tips:');
   const riskFileTips = extractTipsSection(aiTips, 'Risk File Tips:');
 
-  // Generate comprehensive checklist file
-  const checklistContent = `# Responsible AI Feature Checklist
-
-${checklistSummary}
-
-## Implementation Checklist
-
-### Data & Privacy
-- [ ] Data collection consent properly obtained and documented
-- [ ] Data storage and access controls implemented
-- [ ] Data retention and deletion policies defined
-- [ ] Privacy impact assessment completed (if required)
-
-### Model Development
-- [ ] Training data quality and bias assessment completed
-- [ ] Model validation and testing performed
-- [ ] Performance benchmarks established
-- [ ] Model limitations and assumptions documented
-
-### Deployment & Monitoring
-- [ ] Production monitoring and alerting configured
-- [ ] Rollback procedures defined
-- [ ] Performance degradation detection implemented
-- [ ] User feedback collection mechanism established
-
-### Governance & Compliance
-- [ ] Stakeholder approval obtained
-- [ ] Regulatory compliance verified
-- [ ] Documentation review completed
-- [ ] Incident response plan prepared
-
-## AI-Powered Recommendations
-
-${checklistTips}
-
----
-*Generated by FRAI - Responsible AI in Minutes*`;
-
-  // Generate comprehensive model card
-  const modelCardContent = `# Model Card
-
-${modelCardSummary}
-
-## Intended Use
-- **Primary Use Cases**: ${getPurposeDescription(allAnswers.core.purpose)}
-- **Out-of-scope Uses**: To be defined based on specific implementation
-
-## Training Data
-- **Data Sources**: ${allAnswers.data.dataSource ? getDataSourceDescription(allAnswers.data.dataSource) : 'See data section above'}
-- **Data Preprocessing**: Standard preprocessing applied
-- **Data Limitations**: ${allAnswers.core.dataType === 'sensitive' ? 'Sensitive data requires careful handling' : 'Standard data limitations apply'}
-
-## Evaluation
-- **Primary Metric**: ${getMetricDescription(allAnswers.performance.primaryMetric)}
-- **Performance**: To be measured in production
-- **Bias Testing**: ${getBiasDescription(allAnswers.bias.biasConsiderations)}
-
-## Ethical Considerations
-- **Bias & Fairness**: ${getBiasDescription(allAnswers.bias.biasConsiderations)}
-- **Privacy**: ${allAnswers.data.dataProtection ? getDataProtectionDescription(allAnswers.data.dataProtection) : 'Standard privacy measures'}
-- **Transparency**: Model decisions should be explainable where possible
-
-## Monitoring & Maintenance
-- **Monitoring Strategy**: ${getMonitoringDescription(allAnswers.monitoring.monitoring)}
-- **Update Frequency**: To be determined based on performance
-- **Version Control**: Standard ML model versioning practices
-
-## AI-Powered Recommendations
-
-${modelCardTips}
-
----
-*Generated by FRAI - Responsible AI in Minutes*`;
-
-  // Generate comprehensive risk file
-  const riskFileContent = `# AI Model Risk & Compliance
-
-${riskSummary}
-
-## Risk Mitigation Strategies
-
-### Technical Risks
-- **Model Performance**: Regular performance monitoring and validation
-- **Data Quality**: Continuous data quality checks and validation
-- **Security**: Secure model deployment and access controls
-- **Scalability**: Performance testing under various load conditions
-
-### Operational Risks
-- **Human Oversight**: ${allAnswers.impact?.automationImpact === 'autonomous' ? 'Critical - implement human oversight' : 'Implement appropriate human oversight'}
-- **Process Integration**: Ensure smooth integration with existing workflows
-- **Training & Documentation**: Adequate training for operators and users
-- **Incident Response**: Clear procedures for handling model failures
-
-### Regulatory & Compliance
-- **Data Protection**: ${allAnswers.data.dataProtection ? getDataProtectionDescription(allAnswers.data.dataProtection) : 'Standard compliance measures'}
-- **Industry Standards**: Compliance with relevant industry standards
-- **Audit Trail**: Comprehensive logging and audit capabilities
-- **Documentation**: Complete documentation for regulatory review
-
-## Monitoring & Alerting
-
-### Key Metrics to Monitor
-- Model performance metrics
-- Data quality indicators
-- System performance and availability
-- User satisfaction and feedback
-
-### Alert Thresholds
-- Performance degradation beyond acceptable limits
-- Data quality issues or anomalies
-- System failures or errors
-- Unusual usage patterns
-
-## AI-Powered Recommendations
-
-${riskFileTips}
-
----
-*Generated by FRAI - Responsible AI in Minutes*`;
+  const { checklist, modelCard, riskFile } = generateDocuments({
+    answers: allAnswers,
+    tips: {
+      checklist: checklistTips,
+      modelCard: modelCardTips,
+      riskFile: riskFileTips
+    }
+  });
 
   // Write files
-  fs.writeFileSync('checklist.md', checklistContent);
-  fs.writeFileSync('model_card.md', modelCardContent);
-  fs.writeFileSync('risk_file.md', riskFileContent);
+  fs.writeFileSync('checklist.md', checklist);
+  fs.writeFileSync('model_card.md', modelCard);
+  fs.writeFileSync('risk_file.md', riskFile);
 
   console.log('✅ Responsible AI documentation generated successfully!');
   console.log('📄 Generated files:');

@@ -7,8 +7,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "pnpm --filter frai-cli run start",
-    "cli": "pnpm --filter frai-cli exec node src/cli.mjs",
+    "dev": "pnpm --filter frai run start",
+    "cli": "pnpm --filter frai exec node src/cli.mjs",
     "lint": "turbo lint",
     "test": "turbo test",
     "build": "turbo build"

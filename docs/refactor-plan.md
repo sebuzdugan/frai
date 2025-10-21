@@ -8,15 +8,15 @@
 ## Task Breakdown
 
 ### 1. Workspace Setup
-- [x] Introduce `pnpm-workspace.yaml` and convert root `package.json` to workspace mode.
-- [x] Create `packages/frai-core` and `packages/frai-cli` with placeholder `package.json` files.
-- [x] Configure shared `tsconfig.json` (or `jsconfig` with JSDoc) for typed interfaces.
+- ✅ Introduce `pnpm-workspace.yaml` and convert root `package.json` to workspace mode.
+- ✅ Create `packages/frai-core` and `packages/frai-cli` with placeholder `package.json` files.
+- ✅ Configure shared `tsconfig.json` (or `jsconfig` with JSDoc) for typed interfaces.
 
 ### 2. Module Extraction
-- [ ] Move configuration + environment handling into `frai-core/src/config`.
-- [ ] Extract questionnaire prompts, answer mapping, and validation into `frai-core/src/questionnaire`.
-- [ ] Relocate document templates/builders into `frai-core/src/documents` with override support.
-- [ ] Refactor scanning heuristics into `frai-core/src/scanners` with plugin registry pattern.
+- ✅ Move configuration + environment handling into `frai-core/src/config`.
+- ✅ Extract questionnaire prompts, answer mapping, and validation into `frai-core/src/questionnaire`.
+- ✅ Relocate document templates/builders into `frai-core/src/documents` with override support.
+- ✅ Refactor scanning heuristics into `frai-core/src/scanners` with plugin registry pattern.
 - [ ] Implement AI provider abstraction (`frai-core/src/providers`) supporting OpenAI + future adapters.
 
 ### 3. CLI Rebuild
