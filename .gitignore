@@ -63,6 +63,8 @@ Thumbs.db
 checklist.md
 model_card.md
 risk_file.md 
+frai-index.json
+.frai/
 
 # Website files (not part of CLI tool)
 index.html

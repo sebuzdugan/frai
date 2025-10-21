@@ -39,6 +39,12 @@ const {
       aiLibraryMatches: {},
       aiFunctionMatches: {}
     })
+  } = {},
+  Rag: {
+    indexDocuments: indexRagDocuments = () => ({
+      metadata: {},
+      entries: []
+    })
   } = {}
 } = coreModules;
 
@@ -55,7 +61,10 @@ const GLOBAL_CONFIG_DISPLAY = '~/.config/frai/config';
 // Early CLI argument handling for instant exit commands
 const args = process.argv.slice(2);
 function printHelp() {
-  console.log(`\nFRAI - Responsible AI in Minutes\n\nUsage:\n  frai                # Interactive mode for documenting an AI feature\n  frai --scan         # Scan codebase for AI/ML code and generate docs\n  frai --setup        # Set up your OpenAI API key (local/global)\n  frai --ci           # Run in CI mode (non-interactive)\n\nGeneral Commands:\n  frai --help, -h     # Show this help message\n  frai --version, -v  # Show version\n  frai --update       # Check for new versions of FRAI\n\nDocumentation Management:\n  frai --list-docs    # List generated documentation files\n  frai --clean        # Remove generated documentation files\n  frai --export-pdf   # Export documentation markdown files as PDFs\n\nConfiguration:\n  frai --show-config  # Show API key config status\n  frai --key=API_KEY  # Provide OpenAI API key directly\n  frai --global       # Use with --setup to save API key globally\n\nDocs generated:\n  - checklist.md      # Implementation checklist\n  - model_card.md     # Model card\n  - risk_file.md      # Risk & compliance\n\nLearn more: https://github.com/sebastianbuzdugan/frai\n`);
+  console.log(`\nFRAI - Responsible AI in Minutes\n\nUsage:\n  frai                # Interactive mode for documenting an AI feature\n  frai --scan         # Scan codebase for AI/ML code and generate docs\n  frai --setup        # Set up your OpenAI API key (local/global)\n  frai --ci           # Run in CI mode (non-interactive)\n  frai rag index      # Index policies/docs for compliance-aware RAG\n\nGeneral Commands:\n  frai --help, -h     # Show this help message\n  frai --version, -v  # Show version\n  frai --update       # Check for new versions of FRAI\n\nDocumentation Management:\n  frai --list-docs    # List generated documentation files\n  frai --clean        # Remove generated documentation files\n  frai --export-pdf   # Export documentation markdown files as PDFs\n\nConfiguration:\n  frai --show-config  # Show API key config status\n  frai --key=API_KEY  # Provide OpenAI API key directly\n  frai --global       # Use with --setup to save API key globally\n\nDocs generated:\n  - checklist.md      # Implementation checklist\n  - model_card.md     # Model card\n  - risk_file.md      # Risk & compliance\n\nLearn more: https://github.com/sebastianbuzdugan/frai\n`);
+}
+function printRagHelp() {
+  console.log(`\nFRAI RAG Commands\n\nUsage:\n  frai rag index --input <path> [--output <file>] [--chunk-size <words>]\n\nOptions:\n  --input        File or directory containing docs (default: current directory)\n  --output       Vector store JSON output (default: frai-index.json)\n  --chunk-size   Words per chunk for embeddings (default: 800)\n\nExample:\n  frai rag index --input docs/policies --output .frai/compliance-index.json --chunk-size 400\n`);
 }
 function printListDocs() {
   const files = ['checklist.md', 'model_card.md', 'risk_file.md'];
@@ -215,7 +224,35 @@ async function promptAndSaveKey(options = {}) {
 // Enhanced parseArgs to support help/version
 function parseArgs() {
   const args = process.argv.slice(2);
+  if (args[0] === 'rag') {
+    const ragOptions = {
+      command: 'rag',
+      action: args[1] || 'help',
+      input: process.cwd(),
+      output: path.resolve('frai-index.json'),
+      chunkSize: 800
+    };
+    for (let i = 2; i < args.length; i += 1) {
+      const arg = args[i];
+      if (arg === '--input' && args[i + 1]) {
+        ragOptions.input = args[i + 1];
+        i += 1;
+      } else if (arg === '--output' && args[i + 1]) {
+        ragOptions.output = args[i + 1];
+        i += 1;
+      } else if (arg === '--chunk-size' && args[i + 1]) {
+        ragOptions.chunkSize = Number(args[i + 1]);
+        i += 1;
+      } else if (arg === '--help' || arg === '-h') {
+        ragOptions.action = 'help';
+      }
+    }
+    return { command: 'rag', rag: ragOptions };
+  }
+
   const options = {
+    command: null,
+    rag: null,
     setup: false,
     global: false,
     key: null,
@@ -462,12 +499,62 @@ async function runCodeScan(options, apiKey) {
   }
 }
 
+async function handleRagCommand(ragOptions) {
+  if (!ragOptions || ragOptions.action === 'help') {
+    printRagHelp();
+    return;
+  }
+
+  if (ragOptions.action !== 'index') {
+    console.error(`Unknown RAG action "${ragOptions.action}".`);
+    printRagHelp();
+    process.exit(1);
+  }
+
+  const rawInput = ragOptions.input || process.cwd();
+  const inputSources = Array.isArray(rawInput)
+    ? rawInput
+    : String(rawInput)
+        .split(',')
+        .map((entry) => entry.trim())
+        .filter(Boolean);
+
+  if (!inputSources.length) {
+    console.error('No input sources provided for RAG indexing.');
+    printRagHelp();
+    process.exit(1);
+  }
+
+  const outputPath = path.resolve(ragOptions.output || 'frai-index.json');
+  const chunkSize = Number(ragOptions.chunkSize) || 800;
+
+  try {
+    const index = indexRagDocuments({
+      input: inputSources.length === 1 ? inputSources[0] : inputSources,
+      output: outputPath,
+      chunkSize
+    });
+
+    console.log('\n✅ RAG indexing complete.');
+    console.log(`📄 Documents processed: ${index.metadata.documentCount}`);
+    console.log(`🔢 Chunks stored: ${index.metadata.entryCount}`);
+    console.log(`💾 Output: ${outputPath}`);
+  } catch (error) {
+    console.error(`Failed to index documents for RAG: ${error.message}`);
+    process.exit(1);
+  }
+}
+
 // Check for required packages
 let dotenv, fetch;
 
 (async () => {
   if (args.includes('--help') || args.includes('-h')) {
-    printHelp();
+    if (args[0] === 'rag') {
+      printRagHelp();
+    } else {
+      printHelp();
+    }
     process.exit(0);
   }
   if (args.includes('--version') || args.includes('-v')) {
@@ -513,42 +600,48 @@ let dotenv, fetch;
     process.exit(1);
   }
 
+  const options = parseArgs();
+
+  if (options.command === 'rag') {
+    await handleRagCommand(options.rag);
+    process.exit(0);
+  }
 
   // Setup API key if needed
-  const apiKey = await setupApiKey(parseArgs());
+  const apiKey = await setupApiKey(options);
   
   // If only --setup, configure API key and exit
-  if (parseArgs().setup && !parseArgs().key && !parseArgs().scan && process.argv.length <= 3) {
+  if (options.setup && !options.key && !options.scan && process.argv.length <= 3) {
     console.log('Setup complete. Run again without --setup to use the framework.');
     process.exit(0);
   }
   
   // If the user just wants to set up the key or provide it directly, and not run the full tool
-  if (parseArgs().setup && !parseArgs().scan && process.argv.length <= 4) {
+  if (options.setup && !options.scan && process.argv.length <= 4) {
     process.exit(0);
   }
   
   // If scan mode is requested, run the code scanner
-  if (parseArgs().scan) {
-    const foundAI = await runCodeScan(parseArgs(), apiKey);
+  if (options.scan) {
+    const foundAI = await runCodeScan(options, apiKey);
     
     // If in CI mode and AI code found, exit successfully
-    if (parseArgs().ci && foundAI) {
+    if (options.ci && foundAI) {
       console.log('RAI documentation generated successfully in CI mode.');
       process.exit(0);
     }
     
     // If in CI mode and no AI code found, exit successfully but with a message
-    if (parseArgs().ci && !foundAI) {
+    if (options.ci && !foundAI) {
       console.log('No AI code detected in CI mode, skipping documentation generation.');
       process.exit(0);
     }
     
     // If not in CI mode, continue with interactive mode if AI code found
-    if (!parseArgs().ci && foundAI) {
+    if (!options.ci && foundAI) {
       console.log('\nWould you like to refine the documentation with interactive mode?');
       
-      if (!parseArgs().ci) {
+      if (!options.ci) {
         const { interactive } = await inquirer.prompt([
           {
             type: 'confirm',
@@ -564,7 +657,7 @@ let dotenv, fetch;
       } else {
         process.exit(0);
       }
-    } else if (!parseArgs().ci && !foundAI) {
+    } else if (!options.ci && !foundAI) {
       console.log('\nWould you like to manually document an AI feature?');
       
       const { manualMode } = await inquirer.prompt([
