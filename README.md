@@ -45,6 +45,7 @@ frai
 | `frai --key=API_KEY`   | Provide OpenAI API key directly (one-off use) |
 | `frai --global`        | Use with --setup to save API key globally |
 | `frai rag index`       | Index compliance docs into a local vector store |
+| `frai eval`            | Run baseline evaluation metrics and write reports |
 
 **Docs generated:**
 - `checklist.md`      — Implementation checklist

@@ -45,6 +45,12 @@ const {
       metadata: {},
       entries: []
     })
+  } = {},
+  Eval: {
+    loadDataset: loadEvaluationDatasetFromCore = () => ({ outputs: [], references: [] }),
+    runEvaluations: runEvaluationMetricsFromCore = () => [],
+    generateReport: generateEvaluationReportFromCore = () => ({ metadata: {}, metrics: [] }),
+    writeReport: writeEvaluationReportFromCore = () => 'frai-eval-report.json'
   } = {}
 } = coreModules;
 
@@ -65,6 +71,9 @@ function printHelp() {
 }
 function printRagHelp() {
   console.log(`\nFRAI RAG Commands\n\nUsage:\n  frai rag index --input <path> [--output <file>] [--chunk-size <words>]\n\nOptions:\n  --input        File or directory containing docs (default: current directory)\n  --output       Vector store JSON output (default: frai-index.json)\n  --chunk-size   Words per chunk for embeddings (default: 800)\n\nExample:\n  frai rag index --input docs/policies --output .frai/compliance-index.json --chunk-size 400\n`);
+}
+function printEvalHelp() {
+  console.log(`\nFRAI Evaluation Commands\n\nUsage:\n  frai eval --outputs <file> [--references <file>] [--report <path>] [--format json|markdown]\n\nOptions:\n  --outputs      JSON file containing model outputs (required)\n  --references   JSON file containing reference responses (optional for metrics)\n  --report       Path to write evaluation report (default: frai-eval-report.json)\n  --format       Report format (json or markdown, default: json)\n\nExample:\n  frai eval --outputs runs/outputs.json --references runs/golden.json --report reports/eval --format markdown\n`);
 }
 function printListDocs() {
   const files = ['checklist.md', 'model_card.md', 'risk_file.md'];
@@ -249,10 +258,39 @@ function parseArgs() {
     }
     return { command: 'rag', rag: ragOptions };
   }
+  if (args[0] === 'eval') {
+    const evalOptions = {
+      command: 'eval',
+      outputs: null,
+      references: null,
+      report: null,
+      format: 'json'
+    };
+    for (let i = 1; i < args.length; i += 1) {
+      const arg = args[i];
+      if ((arg === '--outputs' || arg === '--output') && args[i + 1]) {
+        evalOptions.outputs = args[i + 1];
+        i += 1;
+      } else if ((arg === '--references' || arg === '--refs') && args[i + 1]) {
+        evalOptions.references = args[i + 1];
+        i += 1;
+      } else if (arg === '--report' && args[i + 1]) {
+        evalOptions.report = args[i + 1];
+        i += 1;
+      } else if (arg === '--format' && args[i + 1]) {
+        evalOptions.format = args[i + 1].toLowerCase();
+        i += 1;
+      } else if (arg === '--help' || arg === '-h') {
+        evalOptions.action = 'help';
+      }
+    }
+    return { command: 'eval', eval: evalOptions };
+  }
 
   const options = {
     command: null,
     rag: null,
+    eval: null,
     setup: false,
     global: false,
     key: null,
@@ -545,6 +583,68 @@ async function handleRagCommand(ragOptions) {
   }
 }
 
+async function handleEvalCommand(evalOptions) {
+  if (!evalOptions || evalOptions.action === 'help') {
+    printEvalHelp();
+    return;
+  }
+
+  if (!evalOptions.outputs) {
+    console.error('Evaluation requires --outputs <file>.');
+    printEvalHelp();
+    process.exit(1);
+  }
+
+  try {
+    const dataset = loadEvaluationDataset(evalOptions);
+    const evaluations = runEvaluationMetrics(dataset);
+    const report = buildEvaluationReport(dataset, evaluations);
+    const savedPath = persistEvaluationReport(report, evalOptions);
+
+    console.log('\n✅ Evaluation complete.');
+    console.log(`📄 Report written to: ${savedPath}`);
+    console.log('📊 Metrics:');
+    report.metrics.forEach((metric) => {
+      console.log(`  - ${metric.label}: ${metric.score ?? 'n/a'}`);
+    });
+  } catch (error) {
+    console.error(`Evaluation failed: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+function loadEvaluationDataset(evalOptions) {
+  return loadEvaluationDatasetFromCore({
+    outputsPath: evalOptions.outputs,
+    referencesPath: evalOptions.references
+  });
+}
+
+function runEvaluationMetrics(dataset) {
+  return runEvaluationMetricsFromCore({
+    outputs: dataset.outputs,
+    references: dataset.references
+  });
+}
+
+function buildEvaluationReport(dataset, evaluations) {
+  return generateEvaluationReportFromCore({
+    evaluations,
+    outputsPath: dataset.outputsPath,
+    referencesPath: dataset.referencesPath
+  });
+}
+
+function persistEvaluationReport(report, evalOptions) {
+  const format = (evalOptions.format || 'json').toLowerCase();
+  const normalizedFormat = format === 'markdown' ? 'markdown' : 'json';
+  return writeEvaluationReportFromCore({
+    report,
+    format: normalizedFormat,
+    reportPath: evalOptions.report
+  });
+}
+
 // Check for required packages
 let dotenv, fetch;
 
@@ -552,6 +652,8 @@ let dotenv, fetch;
   if (args.includes('--help') || args.includes('-h')) {
     if (args[0] === 'rag') {
       printRagHelp();
+    } else if (args[0] === 'eval') {
+      printEvalHelp();
     } else {
       printHelp();
     }
@@ -604,6 +706,11 @@ let dotenv, fetch;
 
   if (options.command === 'rag') {
     await handleRagCommand(options.rag);
+    process.exit(0);
+  }
+
+  if (options.command === 'eval') {
+    await handleEvalCommand(options.eval);
     process.exit(0);
   }
 

@@ -65,6 +65,8 @@ model_card.md
 risk_file.md 
 frai-index.json
 .frai/
+frai-eval-report.json
+frai-eval-report.md
 
 # Website files (not part of CLI tool)
 index.html
