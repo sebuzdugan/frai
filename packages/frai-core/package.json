@@ -1,0 +1,21 @@
+{
+  "name": "frai-core",
+  "version": "0.0.1",
+  "description": "Shared core services for FRAI tooling",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "build": "echo \"TODO: build step\"",
+    "lint": "eslint .",
+    "test": "vitest"
+  },
+  "keywords": [
+    "frai",
+    "responsible-ai",
+    "governance"
+  ],
+  "license": "MIT"
+}

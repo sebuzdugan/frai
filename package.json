@@ -1,43 +1,27 @@
 {
-  "name": "frai",
-  "version": "1.1.1",
-  "description": "Responsible AI compliance framework - Generate comprehensive documentation in under 3 minutes",
-  "main": "frai.mjs",
-  "bin": {
-    "frai": "frai.mjs"
-  },
-  "type": "module",
-  "dependencies": {
-    "dotenv": "^16.5.0",
-    "inquirer": "^8.2.6",
-    "node-fetch": "^3.3.2"
+  "name": "frai-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@8.15.4",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "pnpm --filter frai-cli run start",
+    "cli": "pnpm --filter frai-cli exec node src/cli.mjs",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "build": "turbo build"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.1",
-    "autoprefixer": "^10.4.17",
-    "postcss": "^8.4.35"
-  },
-  "keywords": [
-    "ai",
-    "responsible-ai",
-    "ethics",
-    "compliance",
-    "documentation",
-    "ai-governance",
-    "model-cards"
-  ],
-  "author": "Sebastian Buzdugan",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sebastianbuzdugan/frai.git"
-  },
-  "scripts": {
-    "start": "node frai.mjs",
-    "setup": "node frai.mjs --setup",
-    "scan": "node frai.mjs --scan"
-  },
-  "engines": {
-    "node": ">=16.0.0"
+    "@eslint/js": "^9.1.1",
+    "@types/node": "^20.11.19",
+    "eslint": "^9.1.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.2.5",
+    "turbo": "^1.12.3",
+    "typescript": "^5.4.5",
+    "vitest": "^1.4.0"
   }
 }

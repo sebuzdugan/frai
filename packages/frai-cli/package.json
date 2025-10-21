@@ -1,0 +1,44 @@
+{
+  "name": "frai",
+  "version": "1.1.1",
+  "description": "Responsible AI compliance framework - Generate comprehensive documentation in under 3 minutes",
+  "type": "module",
+  "main": "src/cli.mjs",
+  "bin": {
+    "frai": "src/cli.mjs"
+  },
+  "scripts": {
+    "start": "node src/cli.mjs",
+    "setup": "node src/cli.mjs --setup",
+    "scan": "node src/cli.mjs --scan",
+    "lint": "eslint .",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "inquirer": "^8.2.6",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.1.1",
+    "vitest": "^1.4.0"
+  },
+  "keywords": [
+    "ai",
+    "responsible-ai",
+    "ethics",
+    "compliance",
+    "documentation",
+    "ai-governance",
+    "model-cards"
+  ],
+  "author": "Sebastian Buzdugan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sebastianbuzdugan/frai.git"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
