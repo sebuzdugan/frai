@@ -5,3 +5,4 @@ export * as Scanners from './scanners/index.js';
 export * as Rag from './rag/index.js';
 
 export * as Eval from './eval/index.js';
+export * as Providers from './providers/index.js';

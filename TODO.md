@@ -27,10 +27,11 @@
 - ✅ **Day 8:** Assemble AI feature backlog with user stories; prioritise RAG, eval, fine-tuning governance; publish roadmap entries.
 - ✅ **Day 9:** Implement `frai rag index` command, vector store abstraction, and RAG helper modules; cover with CLI tests.
 - ✅ **Day 10:** Scaffold `frai eval` baseline metrics leveraging open-source models; ensure configurable thresholds and reporting.
-- **Day 11:** Draft fine-tuning governance spec (dataset audit, training hooks, bias evals); prototype config schema.
-- **Day 12:** Develop VS Code MCP endpoint + extension scaffold reading data from `frai-core`; document protocol usage.
-- **Day 13:** Author problem-solution playbooks (RAG compliance, LLM agent docs) in `/docs`; tie features to user pain points.
-- **Day 14:** Add opt-in telemetry, gather KPIs (usage of new commands/tests), and produce sprint retrospective summary.
+- ✅ **Day 11:** Implement AI provider abstraction (`frai-core/src/providers`) supporting OpenAI + future adapters with comprehensive test coverage.
+- **Day 12:** Draft fine-tuning governance spec (dataset audit, training hooks, bias evals); prototype config schema.
+- **Day 13:** Develop VS Code MCP endpoint + extension scaffold reading data from `frai-core`; document protocol usage.
+- **Day 14:** Author problem-solution playbooks (RAG compliance, LLM agent docs) in `/docs`; tie features to user pain points.
+- **Day 15:** Add opt-in telemetry, gather KPIs (usage of new commands/tests), and produce sprint retrospective summary.
 
 ## Workstreams (Weeks 3-6)
 

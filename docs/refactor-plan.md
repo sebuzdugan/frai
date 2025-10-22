@@ -17,7 +17,12 @@
 - ✅ Extract questionnaire prompts, answer mapping, and validation into `frai-core/src/questionnaire`.
 - ✅ Relocate document templates/builders into `frai-core/src/documents` with override support.
 - ✅ Refactor scanning heuristics into `frai-core/src/scanners` with plugin registry pattern.
-- [ ] Implement AI provider abstraction (`frai-core/src/providers`) supporting OpenAI + future adapters.
+- ✅ Implement AI provider abstraction (`frai-core/src/providers`) supporting OpenAI + future adapters with comprehensive test coverage.
+  - Provider registry system with factory pattern
+  - OpenAI provider with chat completion API
+  - Error handling and response parsing
+  - Full test coverage with mocked fetch
+  - Export integration in main index.js
 
 ### 3. AI Feature Delivery
 - ✅ Assemble AI feature backlog (Day 8) with prioritised user stories (RAG, eval, fine-tune).
