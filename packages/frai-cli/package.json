@@ -1,6 +1,6 @@
 {
   "name": "frai",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "FRAI - Framework of Responsible Artificial Intelligence",
   "type": "module",
   "main": "dist/index.js",
@@ -36,10 +36,19 @@
   ],
   "author": "Sebastian Buzdugan",
   "license": "MIT",
+  "files": [
+    "README.md",
+    "LICENSE",
+    "dist/",
+    "checklist.md",
+    "model_card.md",
+    "risk_file.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sebastianbuzdugan/frai.git"
   },
+  "homepage": "https://github.com/sebastianbuzdugan/frai#readme",
   "engines": {
     "node": ">=16.0.0"
   }
