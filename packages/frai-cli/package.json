@@ -17,7 +17,7 @@
   "dependencies": {
     "commander": "^11.1.0",
     "dotenv": "^16.5.0",
-    "frai-core": "workspace:*",
+    "frai-core": "^0.0.1",
     "inquirer": "^8.2.6",
     "node-fetch": "^3.3.2"
   },

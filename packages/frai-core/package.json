@@ -7,8 +7,13 @@
   "exports": {
     ".": "./src/index.js"
   },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "src/"
+  ],
   "scripts": {
-    "build": "echo \"TODO: build step\"",
+    "build": "echo \"No build step needed - ES modules\"",
     "lint": "eslint .",
     "test": "vitest"
   },
@@ -21,5 +26,11 @@
     "responsible-ai",
     "governance"
   ],
-  "license": "MIT"
+  "author": "Sebastian Buzdugan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sebastianbuzdugan/frai.git"
+  },
+  "homepage": "https://github.com/sebastianbuzdugan/frai#readme"
 }
