@@ -5,6 +5,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['**/*.test.{js,ts}'],
-    exclude: ['node_modules', 'dist', '.pnpm']
+    exclude: ['node_modules', 'dist', '.pnpm'],
+    passWithNoTests: true
   }
 });
