@@ -13,8 +13,8 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "eslint": "workspace:*",
-    "vitest": "workspace:*"
+    "eslint": "^9.1.1",
+    "vitest": "^1.4.0"
   },
   "keywords": [
     "frai",

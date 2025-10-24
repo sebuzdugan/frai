@@ -28,7 +28,7 @@
 - ✅ Assemble AI feature backlog (Day 8) with prioritised user stories (RAG, eval, fine-tune).
 - ✅ Implement compliance-aware RAG toolkit (frai-rag).
 - ✅ Build evaluation harness (frai-eval).
-- [ ] Design fine-tuning governance schema (frai-finetune).
+- ✅ Design fine-tuning governance schema (frai-finetune).
 
 ### 4. CLI Rebuild
 - [ ] Build new CLI entry using `commander` (or similar) within `frai-cli/src/index.ts`.

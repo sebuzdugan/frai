@@ -1,11 +1,20 @@
-# FRAI - Framework of Responsible Artificial Intelligence
+ ███████████ ███████████     █████████   █████
+░░███░░░░░░█░░███░░░░░███   ███░░░░░███ ░░███ 
+ ░███   █ ░  ░███    ░███  ░███    ░███  ░███ 
+ ░███████    ░██████████   ░███████████  ░███ 
+ ░███░░░█    ░███░░░░░███  ░███░░░░░███  ░███ 
+ ░███  ░     ░███    ░███  ░███    ░███  ░███ 
+ █████       █████   █████ █████   █████ █████
+░░░░░       ░░░░░   ░░░░░ ░░░░░   ░░░░░ ░░░░░ 
+                                
+
+# FRAI · Framework of Responsible Artificial Intelligence
 
 ![npm version](https://img.shields.io/npm/v/frai)
 
-FRAI is a responsible AI compliance framework that generates comprehensive documentation in under 3 minutes. It guides you through a progressive, context-aware questionnaire and produces:
-- Implementation Checklist
-- Model Card
-- Risk & Compliance File
+FRAI (Framework of Responsible Artificial Intelligence) is an open-source toolkit that helps any team — from solo developers to compliance officers — ship AI features responsibly. It walks you through quick questions, scans your code, and generates documentation you can actually hand to stakeholders: implementation checklists, model cards, risk files, evaluation reports, and policy-aware RAG indexes.
+
+Think of FRAI as a safety net for AI launches: it collects the right facts, highlights blind spots, and keeps evidence tidy so production reviews stop feeling like guesswork.
 
 ## 🚀 Getting Started
 
@@ -24,6 +33,8 @@ You only need to do this once per machine or project. Your key is stored securel
 ```bash
 frai
 ```
+
+> **Tip:** `frai` is available globally after installing the published npm package. If you're working from a local clone, follow the steps in [Local Development](#-local-development) to run the CLI from source.
 
 ---
 
@@ -99,6 +110,37 @@ FRAI requires an OpenAI API key for generating AI-powered tips and documentation
 frai --setup
 ```
 If you skip this step, FRAI will prompt you to set up your key on first use.
+
+---
+
+## 🧑‍💻 Local Development
+
+Run FRAI directly from this repository without publishing:
+
+```bash
+pnpm install
+pnpm --filter frai run build
+node packages/frai-cli/dist/index.js --help
+```
+
+### Configure an OpenAI key from source
+
+- Interactive CLI:
+  ```bash
+  node packages/frai-cli/dist/index.js --setup YOUR_KEY
+  ```
+- Manual `.env`:
+  ```
+  OPENAI_API_KEY=YOUR_KEY
+  ```
+
+To test the global binary locally (without npm publishing), install the workspace package:
+
+```bash
+pnpm install --global ./packages/frai-cli
+# then:
+frai --setup
+```
 
 ---
 

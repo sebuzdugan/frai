@@ -38,9 +38,15 @@ importers:
 
   packages/frai-cli:
     dependencies:
+      commander:
+        specifier: ^11.1.0
+        version: 11.1.0
       dotenv:
         specifier: ^16.5.0
         version: 16.6.1
+      frai-core:
+        specifier: workspace:*
+        version: link:../frai-core
       inquirer:
         specifier: ^8.2.6
         version: 8.2.7(@types/node@20.19.23)
@@ -55,7 +61,14 @@ importers:
         specifier: ^1.4.0
         version: 1.6.1(@types/node@20.19.23)
 
-  packages/frai-core: {}
+  packages/frai-core:
+    devDependencies:
+      eslint:
+        specifier: ^9.1.1
+        version: 9.38.0
+      vitest:
+        specifier: ^1.4.0
+        version: 1.6.1(@types/node@20.19.23)
 
 packages:
 
@@ -896,6 +909,11 @@ packages:
 
   /color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
+
+  /commander@11.1.0:
+    resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
+    engines: {node: '>=16'}
+    dev: false
 
   /concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}

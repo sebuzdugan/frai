@@ -3,18 +3,19 @@
   "version": "1.1.1",
   "description": "Responsible AI compliance framework - Generate comprehensive documentation in under 3 minutes",
   "type": "module",
-  "main": "src/cli.mjs",
+  "main": "dist/index.js",
   "bin": {
-    "frai": "src/cli.mjs"
+    "frai": "dist/index.js"
   },
   "scripts": {
-    "start": "node src/cli.mjs",
-    "setup": "node src/cli.mjs --setup",
-    "scan": "node src/cli.mjs --scan",
+    "build": "tsc --project tsconfig.json",
+    "start": "pnpm run build && node dist/index.js",
+    "dev": "tsc --project tsconfig.json --watch",
     "lint": "eslint .",
     "test": "vitest"
   },
   "dependencies": {
+    "commander": "^11.1.0",
     "dotenv": "^16.5.0",
     "frai-core": "workspace:*",
     "inquirer": "^8.2.6",
