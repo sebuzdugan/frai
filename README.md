@@ -1,8 +1,25 @@
+<div align="center">
+
+<pre>
+
+ ███████████ ███████████     █████████   █████
+░░███░░░░░░█░░███░░░░░███   ███░░░░░███ ░░███ 
+ ░███   █ ░  ░███    ░███  ░███    ░███  ░███ 
+ ░███████    ░██████████   ░███████████  ░███ 
+ ░███░░░█    ░███░░░░░███  ░███░░░░░███  ░███ 
+ ░███  ░     ░███    ░███  ░███    ░███  ░███ 
+ █████       █████   █████ █████   █████ █████
+░░░░░       ░░░░░   ░░░░░ ░░░░░   ░░░░░ ░░░░░ 
+                                 
+</pre>
+
+</div>
+
 # FRAI · Framework of Responsible Artificial Intelligence
 
 ![npm version](https://img.shields.io/npm/v/frai)
-![npm version core](https://img.shields.io/npm/v/frai-core)
 ![npm downloads](https://img.shields.io/npm/dt/frai)
+
 
 FRAI is an open-source toolkit that helps teams launch AI features responsibly. It guides you through evidence gathering, scans your code, and assembles documentation you can hand to reviewers: implementation checklists, model cards, risk files, evaluation reports, and compliance-aware RAG indexes. The toolkit ships as two packages that work together:
 
@@ -209,6 +226,8 @@ FRAI ships as two npm packages and they must be published independently.
 ---
 
 ## Learn More
+- Website: [frai.cc](https://frai.cc)
+- NPM package: [frai](https://www.npmjs.com/package/frai)
 - docs/ai_feature_backlog.md – roadmap for AI capabilities.
 - docs/eval_harness_design.md – evaluation harness design notes.
 - docs/architecture-target.md – monorepo architecture.

@@ -15,149 +15,221 @@
 
 </div>
 
-
 # FRAI · Framework of Responsible Artificial Intelligence
 
 ![npm version](https://img.shields.io/npm/v/frai)
+![npm downloads](https://img.shields.io/npm/dt/frai)
 
-FRAI (Framework of Responsible Artificial Intelligence) is an open-source toolkit that helps any team — from solo developers to compliance officers — ship AI features responsibly. It walks you through quick questions, scans your code, and generates documentation you can actually hand to stakeholders: implementation checklists, model cards, risk files, evaluation reports, and policy-aware RAG indexes.
 
-Think of FRAI as a safety net for AI launches: it collects the right facts, highlights blind spots, and keeps evidence tidy so production reviews stop feeling like guesswork.
+FRAI is an open-source toolkit that helps teams launch AI features responsibly. It guides you through evidence gathering, scans your code, and assembles documentation you can hand to reviewers: implementation checklists, model cards, risk files, evaluation reports, and compliance-aware RAG indexes. The toolkit ships as two packages that work together:
 
-## 🚀 Getting Started
+- `frai` – the command-line app with ready-to-run workflows.
+- `frai-core` – the reusable SDK that powers the CLI and any custom integrations.
 
-**1. Install FRAI globally:**
-```bash
-npm install -g frai
-```
+### Short Answer
+- `frai-core` is the library/SDK. Use it when you are embedding FRAI capabilities into your own tools, servers, automations, or extensions.
+- `frai` is the CLI. It wraps `frai-core` to deliver an end-user experience with no coding required.
 
-**2. Set up your OpenAI API key (required for AI-powered tips):**
-```bash
-frai --setup
-```
-You only need to do this once per machine or project. Your key is stored securely and never shared.
+### Why Keep Both?
+- Independent versioning and stability  
+  - `frai-core` can evolve APIs for integrators without forcing a CLI release.  
+  - `frai` can improve UX/commands without breaking programmatic users.
+- Reuse across surfaces  
+  - `frai-core` powers the CLI today and future VS Code/Chrome extensions, GitHub Actions, internal CLIs, services, or SDKs.
+- Smaller, focused installs  
+  - Operators install the CLI.  
+  - Builders install only the core library they need.
 
-**3. Run FRAI in your project:**
-```bash
-frai
-```
+### When to Use Each
+- Choose **`frai` (CLI)** when you want interactive prompts, one-command scans, RAG indexing, evaluation reports, or CI-friendly automation without writing code.
+- Choose **`frai-core` (SDK)** when you want API access to FRAI capabilities from Node scripts, services, custom CLIs, extensions, or unusual I/O flows.
 
-> **Tip:** `frai` is available globally after installing the published npm package. If you're working from a local clone, follow the steps in [Local Development](#-local-development) to run the CLI from source.
+### Concrete Examples
+- CLI user: run `frai --scan` and `frai eval` in a repository to generate governance docs and audit reports.
+- Library user: call `Documents.generateDocuments` from an internal portal to produce standardized docs, use `Scanners.scanCodebase` inside a GitHub Action, or embed `Rag.indexDocuments` inside a VS Code extension for grounded hints.
 
----
-
-## 🛠️ CLI Commands & Features
-
-| Command                | Description |
-|------------------------|-------------|
-| `frai`                 | Interactive mode for documenting an AI feature (8-question progressive system) |
-| `frai --scan`          | Scan codebase for AI/ML code and generate docs |
-| `frai --setup`         | Set up your OpenAI API key (local/global) |
-| `frai --ci`            | Run in CI mode (non-interactive) |
-| `frai --help`, `-h`    | Show help and usage info |
-| `frai --version`, `-v` | Show current version |
-| `frai --update`        | Check for new versions of FRAI |
-| `frai --list-docs`     | List generated documentation files |
-| `frai --clean`         | Remove generated documentation files |
-| `frai --export-pdf`    | Export documentation markdown files as PDFs |
-| `frai --show-config`   | Show API key config status |
-| `frai --key=API_KEY`   | Provide OpenAI API key directly (one-off use) |
-| `frai --global`        | Use with --setup to save API key globally |
-| `frai rag index`       | Index compliance docs into a local vector store |
-| `frai eval`            | Run baseline evaluation metrics and write reports |
-
-### RAG Indexing
-
-```bash
-frai rag index --input docs/policies --output .frai/compliance-index.json --chunk-size 400
-```
-- Scans `.md`, `.txt`, `.json`, `.yaml` files recursively.
-- Generates a lightweight JSON vector store consumable by SDKs and future connectors.
-
-### Evaluation Harness
-
-```bash
-frai eval --outputs runs/outputs.json --references runs/golden.json --report reports/eval --format markdown
-```
-- Runs baseline metrics (exact match, toxicity keyword scan, length variance).
-- Produces JSON and/or Markdown summaries for CI and governance reviews.
-
-**Docs generated:**
-- `checklist.md`      — Implementation checklist
-- `model_card.md`     — Model card
-- `risk_file.md`      — Risk & compliance
+In short: CLI = product; Core = platform. They overlap in capability on purpose but target different audiences and distribution needs.
 
 ---
 
-## 💡 Features
-- **Progressive 8-question system**: Context-aware, fast, and actionable
-- **AI-powered recommendations**: Get tailored tips for responsible AI
-- **Comprehensive documentation**: Checklist, model card, and risk file
-- **PDF export**: Convert docs to PDF with one command
-- **Codebase scanning**: Detects AI/ML code and generates relevant docs
-- **Easy setup**: One-time API key configuration
-- **Compliance-aware RAG**: Build vector stores from policies for knowledge-grounded guardrails
-- **Evaluation harness**: Run baseline metrics and capture auditable reports
+## Getting Started with the CLI
 
-### Monorepo Layout
+1. Install the published CLI:
+   ```bash
+   npm install -g frai
+   ```
+2. Configure your OpenAI API key (needed for AI-generated tips and evaluations):
+   ```bash
+   frai --setup
+   ```
+   Keys can be stored per-project (`.env`) or globally (`~/.config/frai/config`). You can also provide a one-off key using `frai --key sk-...`.
+3. Run the interactive workflow:
+   ```bash
+   frai
+   ```
+   FRAI walks you through feature discovery, writes `checklist.md`, `model_card.md`, and `risk_file.md`, and optionally exports PDFs.
 
-```
-frai/
-├─ packages/
-│  ├─ frai-cli/      # CLI entry point and command wiring
-│  └─ frai-core/     # Reusable services (config, questionnaire, documents, scanners, RAG, eval)
-├─ docs/             # Roadmaps, design notes, and feature backlogs
-└─ examples/         # Sample AI projects used in tests and demos
-```
+Generated artefacts live in your current working directory. Supplementary commands cover scanning, evaluation, RAG indexing, and fine-tuning governance.
 
 ---
 
-## 🔑 API Key Setup
-FRAI requires an OpenAI API key for generating AI-powered tips and documentation. Run:
+## CLI Command Reference
+
+| Command | Purpose |
+|---------|---------|
+| `frai [options]` | Interactive documentation workflow with backward-compatible shortcut flags. |
+| `frai generate [options]` | Explicit interactive workflow command. |
+| `frai scan [--ci] [--json]` | Scan the repository for AI/ML indicators. |
+| `frai setup [--key <apiKey>] [--global]` | Store an OpenAI API key locally or globally. |
+| `frai config` | Show key configuration status. |
+| `frai docs list` / `frai docs clean` / `frai docs export` | Manage generated documentation. |
+| `frai rag index [options]` | Build a local compliance-aware vector index. |
+| `frai eval --outputs <file> [...]` | Run baseline evaluation metrics and write reports. |
+| `frai finetune template` / `frai finetune validate <plan>` | Create or validate fine-tuning governance plans. |
+| `frai update` | Check npm for the latest CLI release. |
+
+### Default Command: `frai [options]`
+Runs the interactive documentation flow. Optional flags add shortcuts:
+- `--scan` – run code scanning before questions.
+- `--ci` – exit after scanning when no AI indicators are detected.
+- `--setup` – jump directly into key configuration.
+- `--key <apiKey>` / `--global` – provide a key and optionally persist it globally.
+- `--list-docs` / `--clean` – list or remove generated docs.
+- `--export-pdf` – convert generated markdown to PDFs (requires `markdown-pdf`).
+- `--show-config` – display key storage status.
+- `--update` – check npm for a newer CLI version.
+
+### `frai generate [options]`
+Same workflow as the default command, but scoped to documentation only. Options mirror the defaults: `--scan`, `--ci`, `--key`, `--global`, `--export-pdf`, and `--show-config`.
+
+### `frai scan`
+Scans the repository for AI-related libraries, functions, and files. Use `--ci` for non-interactive mode or `--json` to emit raw JSON.
+
+### `frai setup`
+Guided API key storage. Supply `--key <apiKey>` for headless use and `--global` to persist at `~/.config/frai/config`.
+
+### `frai config`
+Prints whether local (`.env`) or global configuration holds an API key.
+
+### `frai docs`
+Utilities for generated artefacts:
+- `frai docs list` – list detected `checklist.md`, `model_card.md`, and `risk_file.md`.
+- `frai docs clean` – delete generated docs.
+- `frai docs export` – export docs to PDF via `markdown-pdf`.
+
+### `frai rag index [options]`
+Create a lightweight JSON vector store for compliance policies.
+- `--input <path>` – file or directory to index (defaults to cwd).
+- `--output <path>` – target JSON file (defaults to `frai-index.json`).
+- `--chunk-size <words>` – words per chunk (default 800).
+- `--extensions <a,b,c>` – allowlisted extensions (default `.md,.markdown,.txt,.json,.yaml,.yml`).
+
+### `frai eval`
+Generate evaluation reports for model outputs.
+- `--outputs <file>` *(required)* – JSON file with model outputs.
+- `--references <file>` – JSON file with reference answers.
+- `--report <path>` – output location (`frai-eval-report.json` by default).
+- `--format <json|markdown>` – output format (defaults to JSON). Markdown reports include human-readable summaries for review boards.
+
+### `frai finetune`
+Fine-tuning governance helpers:
+- `frai finetune template [--output <path>]` – write a governance template JSON (`frai-finetune-plan.json` by default).
+- `frai finetune validate <plan> [--readiness]` – validate a plan and optionally print readiness checkpoints and summaries.
+
+### `frai update`
+Check npm for the latest `frai` release and print upgrade instructions.
+
+---
+
+## Using `frai-core` (SDK)
+
+Install from npm:
 ```bash
-frai --setup
+pnpm add frai-core
 ```
-If you skip this step, FRAI will prompt you to set up your key on first use.
+
+`frai-core` exposes modular helpers that the CLI uses under the hood:
+- `Questionnaire` – interactive question flows.
+- `Documents` – generate checklists, model cards, and risk files.
+- `Scanners` – static analysis for AI indicators.
+- `Rag` – policy-grounded indexing utilities.
+- `Eval` – baseline evaluation metrics and report writers.
+- `Finetune` – governance templates, validation, and readiness scoring.
+- `Config` & `Providers` – key management and LLM provider wiring.
+
+Example: generate documentation programmatically.
+
+```ts
+import fs from 'fs/promises';
+import inquirer from 'inquirer';
+import { Documents, Questionnaire, Scanners } from 'frai-core';
+
+const answers = await Questionnaire.runQuestionnaire({
+  prompt: (questions) => inquirer.prompt(questions)
+});
+
+const { checklist, modelCard, riskFile } = Documents.generateDocuments({ answers });
+const scan = Scanners.scanCodebase({ root: process.cwd() });
+const aiContext = Documents.buildContextForAITips(answers);
+
+await fs.writeFile('checklist.md', checklist);
+await fs.writeFile('model_card.md', modelCard);
+await fs.writeFile('risk_file.md', riskFile);
+await fs.writeFile('scan-summary.json', JSON.stringify(scan, null, 2));
+await fs.writeFile('ai-context.txt', aiContext);
+```
+
+Because `frai-core` is a regular ESM package, you can import only the modules you need and embed FRAI capabilities inside automation pipelines, CI jobs, or custom products.
 
 ---
 
-## 🧑‍💻 Local Development
+## Local Development
 
-Run FRAI directly from this repository without publishing:
-
+Clone the repository and work from source:
 ```bash
 pnpm install
 pnpm --filter frai run build
 node packages/frai-cli/dist/index.js --help
 ```
 
-### Configure an OpenAI key from source
-
-- Interactive CLI:
-  ```bash
-  node packages/frai-cli/dist/index.js --setup YOUR_KEY
-  ```
-- Manual `.env`:
-  ```
-  OPENAI_API_KEY=YOUR_KEY
-  ```
-
-To test the global binary locally (without npm publishing), install the workspace package:
-
+During development you can install the CLI locally without publishing:
 ```bash
 pnpm install --global ./packages/frai-cli
-# then:
+# then
 frai --setup
 ```
 
----
-
-## 📖 Learn More
-- [GitHub Repository](https://github.com/sebastianbuzdugan/frai)
-- [NPM Package](https://www.npmjs.com/package/frai)
-- [AI Feature Backlog](docs/ai_feature_backlog.md)
-- [Evaluation Harness Design](docs/eval_harness_design.md)
+Store your OpenAI key by running the CLI setup flow or setting `OPENAI_API_KEY` in `.env`.
 
 ---
 
-*Generated by FRAI - Responsible AI in Minutes* 
+## Publishing (Maintainers)
+
+FRAI ships as two npm packages and they must be published independently.
+
+1. Bump versions in `packages/frai-core/package.json` and `packages/frai-cli/package.json`. Update the CLI dependency to match the published `frai-core` version (drop `workspace:*`).
+2. Build the CLI:  
+   ```bash
+   pnpm --filter frai run build
+   ```
+3. Publish `frai-core` first, then `frai`:  
+   ```bash
+   cd packages/frai-core && npm publish
+   cd ../frai-cli   && npm publish
+   ```
+4. Verify on npm:  
+   ```bash
+   npm view frai versions --json
+   npm view frai-core versions --json
+   ```
+
+---
+
+## Learn More
+- Website: [frai.cc](https://frai.cc)
+- NPM package: [frai](https://www.npmjs.com/package/frai)
+- docs/ai_feature_backlog.md – roadmap for AI capabilities.
+- docs/eval_harness_design.md – evaluation harness design notes.
+- docs/architecture-target.md – monorepo architecture.
+
+*Framework of Responsible Artificial Intelligence*
