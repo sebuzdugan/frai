@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "pnpm --filter frai run start",
     "cli": "pnpm --filter frai run build && pnpm --filter frai exec node dist/index.js",
+    "agent:frai": "pnpm --filter frai-agent exec pnpm start",
     "lint": "turbo lint",
     "test": "turbo test",
     "build": "turbo build"
