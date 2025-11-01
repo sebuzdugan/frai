@@ -21,10 +21,11 @@
 ![npm downloads](https://img.shields.io/npm/dt/frai)
 
 
-FRAI is an open-source toolkit that helps teams launch AI features responsibly. It guides you through evidence gathering, scans your code, and assembles documentation you can hand to reviewers: implementation checklists, model cards, risk files, evaluation reports, and compliance-aware RAG indexes. The toolkit ships as two packages that work together:
+FRAI is an open-source toolkit that helps teams launch AI features responsibly. It guides you through evidence gathering, scans your code, and assembles documentation you can hand to reviewers: implementation checklists, model cards, risk files, evaluation reports, and compliance-aware RAG indexes. The toolkit ships as three packages that work together:
 
 - `frai` – the command-line app with ready-to-run workflows.
 - `frai-core` – the reusable SDK that powers the CLI and any custom integrations.
+- `frai-agent` – a LangChain-powered conversational agent for FRAI workflows.
 
 ### Short Answer
 - `frai-core` is the library/SDK. Use it when you are embedding FRAI capabilities into your own tools, servers, automations, or extensions.
@@ -43,10 +44,12 @@ FRAI is an open-source toolkit that helps teams launch AI features responsibly. 
 ### When to Use Each
 - Choose **`frai` (CLI)** when you want interactive prompts, one-command scans, RAG indexing, evaluation reports, or CI-friendly automation without writing code.
 - Choose **`frai-core` (SDK)** when you want API access to FRAI capabilities from Node scripts, services, custom CLIs, extensions, or unusual I/O flows.
+- Choose **`frai-agent`** when you want a conversational AI assistant that can intelligently orchestrate FRAI workflows using natural language commands.
 
 ### Concrete Examples
 - CLI user: run `frai --scan` and `frai eval` in a repository to generate governance docs and audit reports.
 - Library user: call `Documents.generateDocuments` from an internal portal to produce standardized docs, use `Scanners.scanCodebase` inside a GitHub Action, or embed `Rag.indexDocuments` inside a VS Code extension for grounded hints.
+- Agent user: interact with `frai-agent` conversationally: "scan the repo and tell me what risks you found" or "generate docs based on this questionnaire data".
 
 In short: CLI = product; Core = platform. They overlap in capability on purpose but target different audiences and distribution needs.
 
@@ -180,6 +183,69 @@ await fs.writeFile('ai-context.txt', aiContext);
 ```
 
 Because `frai-core` is a regular ESM package, you can import only the modules you need and embed FRAI capabilities inside automation pipelines, CI jobs, or custom products.
+
+---
+
+## Using `frai-agent`
+
+`frai-agent` is a LangChain-powered conversational agent that wraps FRAI scanning and documentation workflows behind a natural language interface. It provides an intelligent assistant that can scan repositories, generate documentation, and answer questions about your AI features.
+
+### Getting Started
+
+From the monorepo root:
+```bash
+pnpm agent:frai "Scan the repository and summarize AI risks."
+```
+
+### Interactive Mode
+
+Launch a chat-style session:
+```bash
+pnpm agent:frai --interactive --verbose
+```
+
+The agent supports two tools:
+- **`scan_repository`** – Scans your codebase for AI indicators using FRAI's static detectors.
+- **`generate_responsible_ai_docs`** – Generates `checklist.md`, `model_card.md`, and `risk_file.md` from questionnaire answers.
+
+### Example Usage
+
+Scan a repository:
+```bash
+pnpm agent:frai "Scan the repo and tell me what AI-related code you found."
+```
+
+Generate documentation (with questionnaire answers):
+```bash
+pnpm agent:frai "Generate the docs with these answers: {
+  \"core\": { \"name\": \"ReviewCopilot\", \"purpose\": \"assistant\" },
+  \"impact\": { \"stakeholders\": [\"developers\"], \"impactLevel\": \"medium\" },
+  \"data\": { \"sources\": [\"internal docs\"], \"retention\": \"30 days\" },
+  \"performance\": { \"metrics\": [\"accuracy\"] },
+  \"monitoring\": { \"strategy\": \"daily review\" },
+  \"bias\": { \"mitigations\": [\"red teaming\"] }
+}"
+```
+
+### API Usage
+
+```ts
+import { createFraIAgentExecutor } from "frai-agent";
+
+const executor = await createFraIAgentExecutor({
+  model: "gpt-4o-mini",
+  verbose: true
+});
+
+const result = await executor.invoke({
+  input: "scan the repository",
+  chat_history: []
+});
+
+console.log(result.output);
+```
+
+`frai-agent` reuses FRAI's configuration system, so it automatically discovers your `OPENAI_API_KEY` from `.env` or global config.
 
 ---
 
