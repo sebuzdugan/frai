@@ -20,12 +20,27 @@
 ![npm version](https://img.shields.io/npm/v/frai)
 ![npm downloads](https://img.shields.io/npm/dt/frai)
 
+**Live platform:** [frai.cc](https://www.frai.cc/)
+
+![FRAI website screenshot showing the AI compliance platform, compliance snapshot, and FRAI Guard overview.](assets/frai_cc_screenshot.png)
 
 FRAI is an open-source toolkit that helps teams launch AI features responsibly. It guides you through evidence gathering, scans your code, and assembles documentation you can hand to reviewers: implementation checklists, model cards, risk files, evaluation reports, and compliance-aware RAG indexes. The toolkit ships as three packages that work together:
 
 - `frai` – the command-line app with ready-to-run workflows.
 - `frai-core` – the reusable SDK that powers the CLI and any custom integrations.
 - `frai-agent` – a LangChain-powered conversational agent for FRAI workflows.
+
+## FRAI Ecosystem
+
+FRAI is growing into a connected set of responsible AI tools for scanning, testing, documentation, evaluation, and compliance workflows.
+
+| Project | What it does | Links |
+|---------|--------------|-------|
+| FRAI Platform | Free AI compliance platform for website scans, chatbot tests, compliance snapshots, and responsible AI workflows. | [Website](https://www.frai.cc/) |
+| FRAI CLI / SDK | Open-source CLI and reusable SDK for responsible AI docs, code scanning, RAG indexing, evaluations, and governance workflows. | [GitHub](https://github.com/sebuzdugan/frai) |
+| FRAI Chat | Browser-based responsible AI copilot with grounded RAG, citations, EU AI Act tier classification, model-card drafting, and risk-file drafting. | [GitHub](https://github.com/sebuzdugan/frai-chat) · [Live demo](https://sebuzdugan.github.io/frai-chat/) |
+| FRAI Benchmark | Open-source safety and compliance benchmark with a model registry, test suites, automated runs, and an interactive leaderboard. | [GitHub](https://github.com/sebuzdugan/frai-benchmark) · [Leaderboard](https://sebuzdugan.github.io/frai-benchmark/) |
+| FRAI Judge | Evaluation companion for judging AI outputs and supporting responsible AI review workflows. | [GitHub](https://github.com/sebuzdugan/frai-judge) |
 
 ### Short Answer
 - `frai-core` is the library/SDK. Use it when you are embedding FRAI capabilities into your own tools, servers, automations, or extensions.
