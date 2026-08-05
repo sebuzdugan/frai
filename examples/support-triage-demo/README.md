@@ -1,4 +1,4 @@
-# support-triage demo — the Responsible AI Gate, end to end
+# support-triage demo - the Responsible AI Gate, end to end
 
 The exact project from the frai-gate demo video. An Express service where an LLM
 triages support tickets and P1s page on-call.
@@ -21,5 +21,5 @@ What the pipeline caught on the ORIGINAL version of this code (see
 
 `src/` contains the FIXED version (message-only payload, enum validation,
 `TRIAGE_MODE` kill switch). `FRAI-SPEC.md` is the completed spec that PASSes the
-deterministic check — and the `--smart` review still finds honest gaps in it,
+deterministic check - and the `--smart` review still finds honest gaps in it,
 which is the point.

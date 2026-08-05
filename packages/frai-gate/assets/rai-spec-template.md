@@ -6,7 +6,7 @@
 ════════════════════════════════════════════════════════════════════
  How to use (3 steps):
 
- 1. Describe the feature below (sections 1-4 are a lean skeleton —
+ 1. Describe the feature below (sections 1-4 are a lean skeleton -
     replace them with your own spec format if you have one).
  2. Answer the FRAI Gate (section 5). Every field. No TBDs.
     Stuck?  npx frai-gate draft   → an agent drafts answers FROM your code.
@@ -14,10 +14,10 @@
     ✅ PASS = clear to build · ⛔ BLOCK = fix what it lists first.
 
  Golden rule for every answer: include a NUMBER, a NAME, or a
- MECHANISM — something that could be proven wrong. "We take privacy
+ MECHANISM - something that could be proven wrong. "We take privacy
  seriously" fails. "Prompts deleted after 30 days" passes.
 
- (These comment blocks are guidance — the checker ignores them and
+ (These comment blocks are guidance - the checker ignores them and
  GitHub doesn't render them. Delete them when you're done if you like.)
 ════════════════════════════════════════════════════════════════════
 -->
@@ -49,17 +49,17 @@
 ## FRAI Gate
 
 <!-- The Responsible AI Gate: 7 checks answered BEFORE implementation starts.
-     High-risk tier? A named human signs off — an AI agent must never self-approve it. -->
+     High-risk tier? A named human signs off - an AI agent must never self-approve it. -->
 
 ### 1 · 🎯 Risk tier
 
 <!-- Pick one:
-       prohibited — banned practice (social scoring, manipulation). Don't build.
-       high       — affects rights/livelihood: hiring, credit, medical, education,
+       prohibited - banned practice (social scoring, manipulation). Don't build.
+       high       - affects rights/livelihood: hiring, credit, medical, education,
                     essential services, biometrics, law enforcement.
-       limited    — users chat with AI or consume AI content, no big decisions about them.
-       minimal    — everything else (internal copilots with human review, spam filters...).
-     Example: "limited — chatbot answers policy questions; no automated decisions about people." -->
+       limited    - users chat with AI or consume AI content, no big decisions about them.
+       minimal    - everything else (internal copilots with human review, spam filters...).
+     Example: "limited - chatbot answers policy questions; no automated decisions about people." -->
 
 - **Tier** (prohibited / high / limited / minimal):
 - **Why this tier** (what it decides or produces, who is affected):
@@ -67,11 +67,11 @@
 
 ### 2 · 🔒 Data & privacy
 
-<!-- Example: "Runtime only: the ticket message. No PII by design — name/email stripped
+<!-- Example: "Runtime only: the ticket message. No PII by design - name/email stripped
      before the model call. OpenAI retention 30 days, no training on our data." -->
 
 - **Data going in** (training, retrieval, runtime):
-- **PII?** (yes/no — if yes: which fields, and the lawful basis):
+- **PII?** (yes/no - if yes: which fields, and the lawful basis):
 - **Retention** (how long, where, how deleted):
 - **Trained on user data?** (yes/no + the control that guarantees it):
 

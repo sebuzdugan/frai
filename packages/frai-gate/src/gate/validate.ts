@@ -66,7 +66,7 @@ function splitSubsections(gateSection: string): Section[] {
 }
 
 function extractTier(body: string): RiskTier | null {
-  // When an explicit "Tier" field line exists, it is authoritative — a fallback body
+  // When an explicit "Tier" field line exists, it is authoritative - a fallback body
   // search would pick up incidental mentions like "(tier below high)" in the sign-off.
   const fieldLine = body
     .split(/\r?\n/)
@@ -176,7 +176,7 @@ export function validateSpec(markdown: string): GateResult {
         findings.push({
           checkId: check.id,
           severity: 'block',
-          message: 'Risk tier is "prohibited" — this feature must not be built.',
+          message: 'Risk tier is "prohibited" - this feature must not be built.',
           source: 'validator'
         });
       } else if (tier === 'high') {

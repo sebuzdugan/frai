@@ -9,7 +9,7 @@ Task: $ARGUMENTS
 
 - If the argument is a feature idea: classify its EU AI Act risk tier (prohibited / high /
   limited / minimal), then write a spec from the template with every FRAI Gate field
-  answered concretely — seven checks: risk tier, data & privacy, human oversight,
+  answered concretely - seven checks: risk tier, data & privacy, human oversight,
   evaluation thresholds, bias & fairness, monitoring & rollback, transparency & incidents.
   Ground answers in this repository's actual code; every answer needs a number, a name,
   or a mechanism. Flag anything needing a human decision as "NEEDS HUMAN INPUT".
@@ -18,4 +18,4 @@ Task: $ARGUMENTS
   specific fix.
 - If no argument: ask what feature to spec.
 
-Hard rule: high-risk tier requires a named human sign-off — never self-approve it.
+Hard rule: high-risk tier requires a named human sign-off - never self-approve it.

@@ -23,7 +23,7 @@ jobs:
       # Blocks the build until every Responsible AI Gate check in the spec is answered.
       - run: npx frai-gate check FRAI-SPEC.md
 `;
-const HELP = `frai-gate — the FRAI Gate: a Responsible AI Gate for specs
+const HELP = `frai-gate - the FRAI Gate: a Responsible AI Gate for specs
 
 Usage:
   frai-gate init [--out <file>] [--ci]   Drop the RAI spec template into the repo (default: FRAI-SPEC.md);
@@ -71,7 +71,7 @@ async function cmdInit(args) {
         return 2;
     }
     catch {
-        // does not exist — good
+        // does not exist - good
     }
     const template = await fs.readFile(TEMPLATE_PATH, 'utf8');
     await fs.writeFile(target, template);
@@ -87,7 +87,7 @@ async function cmdInit(args) {
             await fs.mkdir(wfDir, { recursive: true });
             const workflow = out === 'FRAI-SPEC.md' ? CI_WORKFLOW : CI_WORKFLOW.replace('FRAI-SPEC.md', out);
             await fs.writeFile(wfPath, workflow);
-            console.log('Created .github/workflows/rai-gate.yml — the gate now runs on every PR.');
+            console.log('Created .github/workflows/rai-gate.yml - the gate now runs on every PR.');
         }
     }
     return 0;

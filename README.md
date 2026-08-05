@@ -42,7 +42,7 @@ FRAI is growing into a connected set of responsible AI tools for scanning, testi
 | FRAI Chat | Browser-based responsible AI copilot with grounded RAG, citations, EU AI Act tier classification, model-card drafting, and risk-file drafting. | [GitHub](https://github.com/sebuzdugan/frai-chat) · [Live demo](https://sebuzdugan.github.io/frai-chat/) |
 | FRAI Benchmark | Open-source safety and compliance benchmark with a model registry, test suites, automated runs, and an interactive leaderboard. | [GitHub](https://github.com/sebuzdugan/frai-benchmark) · [Leaderboard](https://sebuzdugan.github.io/frai-benchmark/) |
 | FRAI Judge | Evaluation companion for judging AI outputs and supporting responsible AI review workflows. | [GitHub](https://github.com/sebuzdugan/frai-judge) |
-| FRAI Skills | Agent skills for responsible AI engineering — the FRAI Gate spec workflow for AI coding agents (`npx skills add sebuzdugan/frai-skills`). | [GitHub](https://github.com/sebuzdugan/frai-skills) |
+| FRAI Skills | Agent skills for responsible AI engineering - the FRAI Gate spec workflow for AI coding agents (`npx skills add sebuzdugan/frai-skills`). | [GitHub](https://github.com/sebuzdugan/frai-skills) |
 
 ### Short Answer
 - `frai-core` is the library/SDK. Use it when you are embedding FRAI capabilities into your own tools, servers, automations, or extensions.
@@ -277,7 +277,7 @@ The seven checks: **risk tier** (EU AI Act-aligned; high-risk needs a named huma
 
 ### Add it to any app in 60 seconds
 
-Works in any repo — new app, existing app, any language:
+Works in any repo - new app, existing app, any language:
 
 ```bash
 npx frai-gate init --ci
@@ -304,7 +304,7 @@ npx frai-gate check FRAI-SPEC.md --smart   # adversarial review: catches vague a
 npx skills add sebuzdugan/frai-skills
 ```
 
-installs the `responsible-ai-spec` skill: every spec your agent writes includes the gate, and the agent is forbidden from self-approving high-risk features — a named human signs. Claude Code users in this repo also get `/rai-spec`.
+installs the `responsible-ai-spec` skill: every spec your agent writes includes the gate, and the agent is forbidden from self-approving high-risk features - a named human signs. Claude Code users in this repo also get `/rai-spec`.
 
 Everything is also available as `frai gate ...` inside the main CLI, and programmatically via `import { validateSpec } from 'frai-gate'`. Worked example (the one from the demo video): [`examples/support-triage-demo/`](examples/support-triage-demo). Design notes: `docs/rai-gate-design.md`.
 

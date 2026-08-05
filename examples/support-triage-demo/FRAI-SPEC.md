@@ -27,15 +27,15 @@
 ### 5.1 Risk tier
 
 - **Tier**: limited
-- **Justification**: The system routes internal operational urgency; it makes no decision about a person's rights, access, or eligibility. It is above minimal because a model output autonomously pages a human (P1 path) and customer text is processed by a third-party model. If tickets can carry safety-of-life or regulated-financial content, this re-tiers to high — confirmed with support leadership on 2026-08-05 that this surface cannot (product is a developer tool).
+- **Justification**: The system routes internal operational urgency; it makes no decision about a person's rights, access, or eligibility. It is above minimal because a model output autonomously pages a human (P1 path) and customer text is processed by a third-party model. If tickets can carry safety-of-life or regulated-financial content, this re-tiers to high - confirmed with support leadership on 2026-08-05 that this surface cannot (product is a developer tool).
 - **Sign-off**: not required (tier below high)
 
 ### 5.2 Data provenance & privacy
 
-- **Data sources**: runtime only — the ticket `message` free text. No training, fine-tuning, or retrieval data.
-- **PII involved?**: Not by design — `name` and `email` are stripped before the model call (`src/triage.js`); free text may incidentally contain personal data, covered under legitimate interest with OpenAI as a DPA-covered sub-processor listed in the privacy notice.
+- **Data sources**: runtime only - the ticket `message` free text. No training, fine-tuning, or retrieval data.
+- **PII involved?**: Not by design - `name` and `email` are stripped before the model call (`src/triage.js`); free text may incidentally contain personal data, covered under legitimate interest with OpenAI as a DPA-covered sub-processor listed in the privacy notice.
 - **Retention**: nothing persisted by this service; OpenAI API retention 30 days (abuse monitoring, no training), pager payload retained 90 days in the incident tool, deleted with the incident record.
-- **Used for training?**: no — org-level OpenAI data controls confirmed off, evidence attached to the compliance folder.
+- **Used for training?**: no - org-level OpenAI data controls confirmed off, evidence attached to the compliance folder.
 
 ### 5.3 Human oversight
 
@@ -46,7 +46,7 @@
 ### 5.4 Evaluation plan
 
 - **Pre-ship metrics & thresholds**: P1 recall >= 0.95; P1 precision >= 0.80; severity accuracy >= 0.85; team routing >= 0.90; schema validity >= 0.999; injection resistance >= 0.95 on the adversarial slice.
-- **Eval dataset**: evals/triage-golden.jsonl — 300 de-identified historical tickets labeled by support leads, oversampled to 50 P1s plus 30 injection attempts.
+- **Eval dataset**: evals/triage-golden.jsonl - 300 de-identified historical tickets labeled by support leads, oversampled to 50 P1s plus 30 injection attempts.
 - **Who runs it and when**: CI blocks any change to `src/triage.js` (prompt or model) on threshold breach; monthly drift re-run.
 
 ### 5.5 Bias & fairness

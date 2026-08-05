@@ -14,7 +14,7 @@ function line(finding: Finding): string {
 
 export function renderText(result: GateResult, specPath: string): string {
   const out: string[] = [];
-  out.push(`FRAI Gate — ${specPath}`);
+  out.push(`FRAI Gate - ${specPath}`);
   out.push(`Verdict: ${VERDICT_ICON[result.verdict]} ${result.verdict}`);
   if (result.tier) out.push(`Risk tier: ${result.tier}`);
   if (result.findings.length === 0) {

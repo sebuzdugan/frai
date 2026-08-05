@@ -52,7 +52,7 @@ function splitSubsections(gateSection) {
     return sections;
 }
 function extractTier(body) {
-    // When an explicit "Tier" field line exists, it is authoritative — a fallback body
+    // When an explicit "Tier" field line exists, it is authoritative - a fallback body
     // search would pick up incidental mentions like "(tier below high)" in the sign-off.
     const fieldLine = body
         .split(/\r?\n/)
@@ -157,7 +157,7 @@ export function validateSpec(markdown) {
                 findings.push({
                     checkId: check.id,
                     severity: 'block',
-                    message: 'Risk tier is "prohibited" — this feature must not be built.',
+                    message: 'Risk tier is "prohibited" - this feature must not be built.',
                     source: 'validator'
                 });
             }

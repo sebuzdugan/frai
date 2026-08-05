@@ -49,13 +49,13 @@ export async function draftGateSection(cwd: string): Promise<string> {
 ${SECRETS_GUARD}
 
 Then draft a completed "## Responsible AI Gate" spec section with these seven subsections:
-### Risk tier            — tier (prohibited/high/limited/minimal) + justification + sign-off line
-### Data provenance & privacy — sources, PII yes/no + basis, retention, trained-on-user-data
-### Human oversight      — automation level, override path, kill switch
-### Evaluation plan      — metrics with numeric thresholds, eval dataset, owner/when
-### Bias & fairness      — groups at risk, mitigations, test method
-### Monitoring & rollback — signals, numeric degradation definition, rollback trigger/procedure
-### Transparency & incident response — user disclosure, incident owner, response path
+### Risk tier            - tier (prohibited/high/limited/minimal) + justification + sign-off line
+### Data provenance & privacy - sources, PII yes/no + basis, retention, trained-on-user-data
+### Human oversight      - automation level, override path, kill switch
+### Evaluation plan      - metrics with numeric thresholds, eval dataset, owner/when
+### Bias & fairness      - groups at risk, mitigations, test method
+### Monitoring & rollback - signals, numeric degradation definition, rollback trigger/procedure
+### Transparency & incident response - user disclosure, incident owner, response path
 
 Rules:
 - Ground every answer in what you actually found in the code; cite file paths inline where useful.
