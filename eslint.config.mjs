@@ -9,7 +9,8 @@ export default [
       globals: {
         console: 'readonly',
         process: 'readonly',
-        __dirname: 'readonly'
+        __dirname: 'readonly',
+        URL: 'readonly'
       }
     },
     rules: {

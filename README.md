@@ -29,6 +29,7 @@ FRAI is an open-source toolkit that helps teams launch AI features responsibly. 
 - `frai` – the command-line app with ready-to-run workflows.
 - `frai-core` – the reusable SDK that powers the CLI and any custom integrations.
 - `frai-agent` – a LangChain-powered conversational agent for FRAI workflows.
+- `frai-gate` – the Responsible AI Gate: a spec template, an agent skill, and a Claude Agent SDK pipeline that keeps AI features from being specced without answering the responsible-AI questions.
 
 ## FRAI Ecosystem
 
@@ -261,6 +262,34 @@ console.log(result.output);
 ```
 
 `frai-agent` reuses FRAI's configuration system, so it automatically discovers your `OPENAI_API_KEY` from `.env` or global config.
+
+---
+
+## Responsible AI Gate (`frai-gate` + spec skill)
+
+Inspired by the quality-gate pattern in [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), FRAI ships the responsible-AI version of that gate: **every spec for an AI-touching feature must contain a complete `## Responsible AI Gate` section — seven checks (risk tier, data & privacy, human oversight, evaluation, bias, monitoring & rollback, transparency & incidents) — and implementation doesn't start until the gate passes.**
+
+Three pieces, use any or all:
+
+1. **Agent skill** (`skills/responsible-ai-spec/`) — teaches AI coding agents (Claude Code, Cursor, and any agent that reads the standard `skills/` layout) to write specs that include the gate, classify EU AI Act risk tiers, and refuse to self-approve high-risk features:
+   ```bash
+   npx skills add sebuzdugan/frai
+   ```
+   Claude Code users also get a `/rai-spec` command when working inside this repo.
+2. **Spec template** (`skills/responsible-ai-spec/templates/rai-spec-template.md`) — a copy-paste spec skeleton with the gate built in. Or scaffold it:
+   ```bash
+   npx frai-gate init
+   ```
+3. **`frai-gate` pipeline** — a deterministic validator plus a Claude Agent SDK pipeline:
+   ```bash
+   npx frai-gate check RAI-SPEC.md            # deterministic gate check; exit 1 on BLOCK (CI-friendly)
+   npx frai-gate check RAI-SPEC.md --smart    # + adversarial AI review of answer quality
+   npx frai-gate draft                        # read-only agent scans your repo and drafts a gate
+                                              # section grounded in your actual code
+   ```
+   `check` needs no API key. `draft` and `--smart` use the Claude Agent SDK (Claude Code auth or `ANTHROPIC_API_KEY`; model override via `FRAI_GATE_MODEL`).
+
+Verdicts: **PASS** · **WARN** (answers present but weak) · **BLOCK** (missing sections, placeholder text, or a high-risk tier without a named human sign-off). Design notes: `docs/rai-gate-design.md`.
 
 ---
 

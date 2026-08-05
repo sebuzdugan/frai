@@ -1,0 +1,51 @@
+{
+  "name": "frai-gate",
+  "version": "0.0.1",
+  "description": "Responsible AI Gate for specs - deterministic validator plus a Claude Agent SDK pipeline that drafts and reviews the gate",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "bin": {
+    "frai-gate": "dist/cli.js"
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "assets/"
+  ],
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "tsx --watch src/cli.ts",
+    "lint": "eslint .",
+    "start": "tsx src/cli.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.1",
+    "eslint": "^9.1.1",
+    "vitest": "^1.4.0"
+  },
+  "keywords": [
+    "frai",
+    "responsible-ai",
+    "eu-ai-act",
+    "spec",
+    "gate",
+    "claude-agent-sdk"
+  ],
+  "author": "Sebastian Buzdugan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sebastianbuzdugan/frai.git"
+  },
+  "homepage": "https://github.com/sebuzdugan/frai#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
