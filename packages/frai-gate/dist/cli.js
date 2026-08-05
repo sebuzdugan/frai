@@ -21,12 +21,12 @@ jobs:
         with:
           node-version: '20'
       # Blocks the build until every Responsible AI Gate check in the spec is answered.
-      - run: npx frai-gate check RAI-SPEC.md
+      - run: npx frai-gate check FRAI-SPEC.md
 `;
-const HELP = `frai-gate — Responsible AI Gate for specs
+const HELP = `frai-gate — the FRAI Gate: a Responsible AI Gate for specs
 
 Usage:
-  frai-gate init [--out <file>] [--ci]   Drop the RAI spec template into the repo (default: RAI-SPEC.md);
+  frai-gate init [--out <file>] [--ci]   Drop the RAI spec template into the repo (default: FRAI-SPEC.md);
                                          --ci also writes .github/workflows/rai-gate.yml so the gate
                                          runs on every PR
   frai-gate check <spec.md> [options]    Validate the spec's Responsible AI Gate
@@ -63,7 +63,7 @@ function parseArgs(argv) {
     return { command, positional, flags };
 }
 async function cmdInit(args) {
-    const out = typeof args.flags.get('out') === 'string' ? args.flags.get('out') : 'RAI-SPEC.md';
+    const out = typeof args.flags.get('out') === 'string' ? args.flags.get('out') : 'FRAI-SPEC.md';
     const target = path.resolve(process.cwd(), out);
     try {
         await fs.access(target);
@@ -75,7 +75,7 @@ async function cmdInit(args) {
     }
     const template = await fs.readFile(TEMPLATE_PATH, 'utf8');
     await fs.writeFile(target, template);
-    console.log(`Created ${out}. Fill in every Responsible AI Gate field, then run: frai-gate check ${out}`);
+    console.log(`Created ${out}. Fill in every FRAI Gate field, then run: frai-gate check ${out}`);
     if (args.flags.has('ci')) {
         const wfDir = path.resolve(process.cwd(), '.github/workflows');
         const wfPath = path.join(wfDir, 'rai-gate.yml');
@@ -85,7 +85,7 @@ async function cmdInit(args) {
         }
         catch {
             await fs.mkdir(wfDir, { recursive: true });
-            const workflow = out === 'RAI-SPEC.md' ? CI_WORKFLOW : CI_WORKFLOW.replace('RAI-SPEC.md', out);
+            const workflow = out === 'FRAI-SPEC.md' ? CI_WORKFLOW : CI_WORKFLOW.replace('FRAI-SPEC.md', out);
             await fs.writeFile(wfPath, workflow);
             console.log('Created .github/workflows/rai-gate.yml — the gate now runs on every PR.');
         }

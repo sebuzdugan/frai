@@ -10,7 +10,7 @@ function line(finding) {
 }
 export function renderText(result, specPath) {
     const out = [];
-    out.push(`Responsible AI Gate — ${specPath}`);
+    out.push(`FRAI Gate — ${specPath}`);
     out.push(`Verdict: ${VERDICT_ICON[result.verdict]} ${result.verdict}`);
     if (result.tier)
         out.push(`Risk tier: ${result.tier}`);

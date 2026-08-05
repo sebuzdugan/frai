@@ -47,6 +47,6 @@ const result = validateSpec(await fs.readFile('RAI-SPEC.md', 'utf8'));
 // { verdict: 'PASS' | 'WARN' | 'BLOCK', tier, findings, gateSection }
 ```
 
-The companion agent skill and spec template live in
-[`skills/responsible-ai-spec/`](https://github.com/sebuzdugan/frai/tree/main/skills/responsible-ai-spec)
-(`npx skills add sebuzdugan/frai`).
+The companion agent skill lives in
+[sebuzdugan/frai-skills](https://github.com/sebuzdugan/frai-skills)
+(`npx skills add sebuzdugan/frai-skills`).

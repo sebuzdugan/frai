@@ -1,83 +1,127 @@
 # Spec: <feature name>
 
 <!--
-Responsible AI spec template (FRAI · responsible-ai-spec skill).
-Sections 1–4 are a lean spec skeleton — replace them with your own spec format
-if you have one. Section 5, the Responsible AI Gate, is the required part:
-keep it verbatim and answer every field. Validate with: npx frai-gate check <this file>
+════════════════════════════════════════════════════════════════════
+ FRAI GATE SPEC · github.com/sebuzdugan/frai
+════════════════════════════════════════════════════════════════════
+ How to use (3 steps):
+
+ 1. Describe the feature below (sections 1-4 are a lean skeleton —
+    replace them with your own spec format if you have one).
+ 2. Answer the FRAI Gate (section 5). Every field. No TBDs.
+    Stuck?  npx frai-gate draft   → an agent drafts answers FROM your code.
+ 3. Check it:  npx frai-gate check FRAI-SPEC.md
+    ✅ PASS = clear to build · ⛔ BLOCK = fix what it lists first.
+
+ Golden rule for every answer: include a NUMBER, a NAME, or a
+ MECHANISM — something that could be proven wrong. "We take privacy
+ seriously" fails. "Prompts deleted after 30 days" passes.
+
+ (These comment blocks are guidance — the checker ignores them and
+ GitHub doesn't render them. Delete them when you're done if you like.)
+════════════════════════════════════════════════════════════════════
 -->
 
-## 1. Objective
+## 1. What are we building?
 
-**What are we building and why?**
+- **Problem**:
+- **Solution** (one paragraph):
+- **Success metric**:
 
-- Problem:
-- Proposed solution (one paragraph):
-- Success metric (business/user):
+## 2. Scope
 
-## 2. Scope & Non-Goals
-
-- In scope:
-- Out of scope:
+- **In**:
+- **Out**:
 
 ## 3. Design
 
-- Architecture / data flow (where does the model sit, what calls it, what does it return):
-- Model(s) used (provider, version):
-- Prompts / training data location:
+<!-- Where does the model sit? What calls it, what does it return, what acts on the output? -->
 
-## 4. Testing Strategy
+- **Architecture / data flow**:
+- **Model(s)** (provider + version):
+- **Prompts / training data live at**:
 
-- Unit/integration tests:
-- Eval harness (link or path):
+## 4. Testing
 
-## 5. Responsible AI Gate
+- **Tests**:
+- **Eval harness** (path):
 
-<!-- REQUIRED. All seven checks. No TBDs. Answers must be falsifiable. -->
+## FRAI Gate
 
-### 5.1 Risk tier
+<!-- The Responsible AI Gate: 7 checks answered BEFORE implementation starts.
+     High-risk tier? A named human signs off — an AI agent must never self-approve it. -->
+
+### 1 · 🎯 Risk tier
+
+<!-- Pick one:
+       prohibited — banned practice (social scoring, manipulation). Don't build.
+       high       — affects rights/livelihood: hiring, credit, medical, education,
+                    essential services, biometrics, law enforcement.
+       limited    — users chat with AI or consume AI content, no big decisions about them.
+       minimal    — everything else (internal copilots with human review, spam filters...).
+     Example: "limited — chatbot answers policy questions; no automated decisions about people." -->
 
 - **Tier** (prohibited / high / limited / minimal):
-- **Justification** (why this tier — what decision or content does it produce, who is affected):
-- **Sign-off** (REQUIRED if tier is high — name + date; otherwise write "not required (tier below high)"):
+- **Why this tier** (what it decides or produces, who is affected):
+- **Sign-off** (high tier: name + date; otherwise "not required (tier below high)"):
 
-### 5.2 Data provenance & privacy
+### 2 · 🔒 Data & privacy
 
-- **Data sources** (training, retrieval, and runtime inputs):
-- **PII involved?** (yes/no — if yes, which fields and lawful/consent basis):
-- **Retention** (how long is user data kept, where, and how deleted):
-- **Used for training?** (is user data ever used to train or fine-tune — yes/no + control):
+<!-- Example: "Runtime only: the ticket message. No PII by design — name/email stripped
+     before the model call. OpenAI retention 30 days, no training on our data." -->
 
-### 5.3 Human oversight
+- **Data going in** (training, retrieval, runtime):
+- **PII?** (yes/no — if yes: which fields, and the lawful basis):
+- **Retention** (how long, where, how deleted):
+- **Trained on user data?** (yes/no + the control that guarantees it):
+
+### 3 · 👤 Human oversight
+
+<!-- Example: "Assistive. Support lead can re-classify in the admin panel.
+     Kill switch: TRIAGE_MODE=off env flag, on-call owns it, off in under 5 minutes." -->
 
 - **Automation level** (assistive / human-in-the-loop / autonomous):
-- **Override path** (who can override or correct an output, and how):
-- **Kill switch** (how to disable the feature, who has access, target time-to-off):
+- **Override** (who can correct an output, and how):
+- **Kill switch** (how to turn it off, who owns it, time-to-off):
 
-### 5.4 Evaluation plan
+### 4 · 📏 Evaluation
 
-- **Pre-ship metrics & thresholds** (e.g. "groundedness ≥ 0.85 on the eval set; refusal rate ≤ 2%"):
-- **Eval dataset** (name/path, size, how it represents real usage):
-- **Who runs it and when** (CI, pre-release, cadence):
+<!-- Thresholds are the point: a check that cannot fail is not a check.
+     Example: "P1 recall >= 0.95 on evals/golden.jsonl (300 labeled tickets); runs in CI
+     on every prompt change." -->
 
-### 5.5 Bias & fairness
+- **Metrics + thresholds that must pass before shipping**:
+- **Eval dataset** (path, size, how it mirrors real usage):
+- **Who runs it, when** (CI / pre-release / cadence):
 
-- **Groups at risk of disparate impact** (and why):
-- **Mitigations** (data balancing, prompt constraints, filters, red-teaming):
-- **How tested** (disaggregated metrics, counterfactual tests — name the method):
+### 5 · ⚖️ Bias & fairness
 
-### 5.6 Monitoring & rollback
+<!-- Example: "Non-native English writers risk under-triage. Mitigation: language-neutral
+     prompt rule. Tested: recall per language slice; gap > 0.05 blocks release." -->
 
-- **Production monitoring** (what signals: quality, drift, refusals, latency, complaints):
-- **Degradation definition** (the numeric line that counts as "degraded"):
-- **Rollback trigger & procedure** (who decides, how fast, what users see):
+- **Who could be treated unfairly** (and why):
+- **Mitigations**:
+- **How you test it** (disaggregated metrics, counterfactuals, red-team):
 
-### 5.7 Transparency & incident response
+### 6 · 📡 Monitoring & rollback
 
-- **User disclosure** (how users know AI is involved — label, docs, in-product notice):
-- **Incident owner** (named person/rotation):
-- **Incident path** (how a harmful-output report travels from user to fix, target response time):
+<!-- Example: "Watch refusal rate + thumbs-down daily. Degraded = thumbs-down > 10% over 24h.
+     Rollback: on-call flips the flag; users see the legacy flow." -->
+
+- **What you watch in production**:
+- **"Degraded" means** (the numeric line):
+- **Rollback** (trigger, who decides, what users see):
+
+### 7 · 💬 Transparency & incidents
+
+<!-- Example: "'AI assistant' label in the chat header. Incidents: Dana Rivers,
+     in-app report → triage queue, response within 24h." -->
+
+- **How users know AI is involved**:
+- **Incident owner** (a name, not "the team"):
+- **Report → fix path** (with a target response time):
 
 ---
 
-*Gate verdicts: PASS (all answered, specific) · WARN (answered but weak) · BLOCK (missing/placeholder, or high-risk without sign-off). Run `npx frai-gate check` to verify. Generated docs (`model_card.md`, `risk_file.md`) can be produced from this spec with `frai` — see github.com/sebuzdugan/frai.*
+<!-- After PASS: generate model_card.md + risk_file.md with `frai`, scan with `frai scan`,
+     evaluate with `frai eval` · github.com/sebuzdugan/frai -->

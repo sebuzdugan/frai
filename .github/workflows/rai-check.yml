@@ -42,4 +42,4 @@ jobs:
 
       - name: Responsible AI Gate on example spec
         run: |
-          node packages/frai-gate/dist/cli.js check examples/rai-spec-example.md
+          node packages/frai-gate/dist/cli.js check examples/frai-spec-example.md

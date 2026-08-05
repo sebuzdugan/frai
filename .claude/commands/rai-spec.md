@@ -1,20 +1,21 @@
 ---
-description: Write or review a spec with the Responsible AI Gate
+description: Write or review a spec with the FRAI Gate (Responsible AI Gate)
 ---
 
-Load and follow the `responsible-ai-spec` skill (skills/responsible-ai-spec/SKILL.md).
+Follow the FRAI Gate workflow (canonical skill: github.com/sebuzdugan/frai-skills,
+skill `responsible-ai-spec`; local template: packages/frai-gate/assets/rai-spec-template.md).
 
 Task: $ARGUMENTS
 
-- If the argument is a feature idea or description: classify its risk tier
-  (skills/responsible-ai-spec/references/eu-ai-act-tiers.md), then write a spec from
-  skills/responsible-ai-spec/templates/rai-spec-template.md with every Responsible AI
-  Gate field answered concretely — ground the answers in this repository's actual code
-  and data flows, and flag any field you cannot answer without a human decision.
-- If the argument is a path to an existing spec: review it against
-  skills/responsible-ai-spec/references/rai-gate-checklist.md and report a
-  PASS / WARN / BLOCK verdict with the specific failing lines.
+- If the argument is a feature idea: classify its EU AI Act risk tier (prohibited / high /
+  limited / minimal), then write a spec from the template with every FRAI Gate field
+  answered concretely — seven checks: risk tier, data & privacy, human oversight,
+  evaluation thresholds, bias & fairness, monitoring & rollback, transparency & incidents.
+  Ground answers in this repository's actual code; every answer needs a number, a name,
+  or a mechanism. Flag anything needing a human decision as "NEEDS HUMAN INPUT".
+- If the argument is a path to an existing spec: run
+  `node packages/frai-gate/dist/cli.js check <path>` and explain each finding with the
+  specific fix.
 - If no argument: ask what feature to spec.
 
-Remember the hard rule: high-risk tier requires a named human sign-off — never
-self-approve it.
+Hard rule: high-risk tier requires a named human sign-off — never self-approve it.

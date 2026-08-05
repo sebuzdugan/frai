@@ -1,6 +1,6 @@
 # Spec: Policy Chatbot
 
-## Responsible AI Gate
+## FRAI Gate
 
 ### Risk tier
 - **Tier**: limited

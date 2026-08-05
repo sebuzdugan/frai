@@ -16,8 +16,8 @@ Three pieces:
 
 | Piece | Path | What it is |
 |---|---|---|
-| Skill | `skills/responsible-ai-spec/` | An agent skill (agent-skills `SKILL.md` format, installable via `npx skills add sebuzdugan/frai`) that makes any coding agent write specs that include the RAI Gate |
-| Spec template | `skills/responsible-ai-spec/templates/rai-spec-template.md` | Copy-paste spec template with the `## Responsible AI Gate` section built in |
+| Skill | [sebuzdugan/frai-skills](https://github.com/sebuzdugan/frai-skills) (moved out of this repo 2026-08-05) | An agent skill (agent-skills `SKILL.md` format, installable via `npx skills add sebuzdugan/frai`) that makes any coding agent write specs that include the RAI Gate |
+| Spec template | `packages/frai-gate/assets/rai-spec-template.md` (canonical copy also in frai-skills) | Copy-paste spec template with the `## Responsible AI Gate` section built in |
 | Pipeline | `packages/frai-gate/` | `frai-gate` — a Claude Agent SDK pipeline + deterministic validator that drafts, checks, and enforces the gate (CI-friendly) |
 
 ## The gate: seven checks

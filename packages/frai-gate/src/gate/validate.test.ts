@@ -165,6 +165,13 @@ describe('validateSpec', () => {
     expect(result.tier).toBeNull();
   });
 
+  it('accepts the branded "## FRAI Gate" heading', () => {
+    const spec = fullSpec().replace('## 5. Responsible AI Gate', '## FRAI Gate');
+    const result = validateSpec(spec);
+    expect(result.verdict).toBe('PASS');
+    expect(result.tier).toBe('limited');
+  });
+
   it('warns when the evaluation plan has no numbers', () => {
     const result = validateSpec(
       fullSpec({

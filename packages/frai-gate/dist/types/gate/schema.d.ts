@@ -7,6 +7,7 @@ export interface GateCheck {
     /** When true, a body without any digit produces a warning (thresholds expected). */
     expectsNumbers?: boolean;
 }
+/** Matches both the branded "FRAI Gate" heading and the long-form "Responsible AI Gate". */
 export declare const GATE_HEADING: RegExp;
 export declare const RISK_TIERS: readonly ["prohibited", "high", "limited", "minimal"];
 export type RiskTier = (typeof RISK_TIERS)[number];
