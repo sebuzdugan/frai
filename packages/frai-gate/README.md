@@ -16,12 +16,15 @@ section — seven checks — and implementation doesn't start until the gate pas
 ## Usage
 
 ```bash
-npx frai-gate init                      # scaffold RAI-SPEC.md from the template
+npx frai-gate init --ci                 # scaffold RAI-SPEC.md + a GitHub Action that runs
+                                        # the gate on every PR (works in any repo)
 npx frai-gate check RAI-SPEC.md         # deterministic validation — no API key needed
 npx frai-gate check RAI-SPEC.md --smart # + adversarial AI review of answer quality
 npx frai-gate draft                     # read-only agent scans the repo and drafts a
                                         # gate section grounded in your actual code
 ```
+
+Also available as `frai gate ...` from the main [frai CLI](https://www.npmjs.com/package/frai).
 
 Exit codes: `0` PASS/WARN · `1` BLOCK · `2` usage/error — drop `frai-gate check` straight into CI.
 

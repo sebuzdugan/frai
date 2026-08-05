@@ -72,6 +72,9 @@ importers:
       frai-core:
         specifier: ^0.0.1
         version: link:../frai-core
+      frai-gate:
+        specifier: ^0.0.1
+        version: link:../frai-gate
       inquirer:
         specifier: ^8.2.6
         version: 8.2.7(@types/node@20.19.23)
@@ -3998,7 +4001,7 @@ packages:
     dependencies:
       bytes: 3.1.2
       http-errors: 2.0.1
-      iconv-lite: 0.7.0
+      iconv-lite: 0.7.3
       unpipe: 1.0.0
     dev: false
 

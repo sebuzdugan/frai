@@ -105,6 +105,7 @@ Generated artefacts live in your current working directory. Supplementary comman
 | `frai rag index [options]` | Build a local compliance-aware vector index. |
 | `frai eval --outputs <file> [...]` | Run baseline evaluation metrics and write reports. |
 | `frai finetune template` / `frai finetune validate <plan>` | Create or validate fine-tuning governance plans. |
+| `frai gate init [--ci]` / `frai gate check <spec>` / `frai gate draft` | Responsible AI Gate for specs (delegates to `frai-gate`). |
 | `frai update` | Check npm for the latest CLI release. |
 
 ### Default Command: `frai [options]`
@@ -265,31 +266,46 @@ console.log(result.output);
 
 ---
 
-## Responsible AI Gate (`frai-gate` + spec skill)
+## Responsible AI Gate (`frai gate`)
 
-Inspired by the quality-gate pattern in [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), FRAI ships the responsible-AI version of that gate: **every spec for an AI-touching feature must contain a complete `## Responsible AI Gate` section — seven checks (risk tier, data & privacy, human oversight, evaluation, bias, monitoring & rollback, transparency & incidents) — and implementation doesn't start until the gate passes.**
+**The idea in one sentence: an AI feature spec is not done until seven responsible-AI questions are answered, and the gate blocks the build until they are.**
 
-Three pieces, use any or all:
+<img src="assets/frai-gate-demo.gif" width="360" alt="frai-gate demo: BLOCK on empty answers, agent drafts the gate from your code, PASS after fixes" />
 
-1. **Agent skill** (`skills/responsible-ai-spec/`) — teaches AI coding agents (Claude Code, Cursor, and any agent that reads the standard `skills/` layout) to write specs that include the gate, classify EU AI Act risk tiers, and refuse to self-approve high-risk features:
-   ```bash
-   npx skills add sebuzdugan/frai
-   ```
-   Claude Code users also get a `/rai-spec` command when working inside this repo.
-2. **Spec template** (`skills/responsible-ai-spec/templates/rai-spec-template.md`) — a copy-paste spec skeleton with the gate built in. Or scaffold it:
-   ```bash
-   npx frai-gate init
-   ```
-3. **`frai-gate` pipeline** — a deterministic validator plus a Claude Agent SDK pipeline:
-   ```bash
-   npx frai-gate check RAI-SPEC.md            # deterministic gate check; exit 1 on BLOCK (CI-friendly)
-   npx frai-gate check RAI-SPEC.md --smart    # + adversarial AI review of answer quality
-   npx frai-gate draft                        # read-only agent scans your repo and drafts a gate
-                                              # section grounded in your actual code
-   ```
-   `check` needs no API key. `draft` and `--smart` use the Claude Agent SDK (Claude Code auth or `ANTHROPIC_API_KEY`; model override via `FRAI_GATE_MODEL`).
+The seven checks: **risk tier** (EU AI Act-aligned; high-risk needs a named human sign-off) · **data & privacy** · **human oversight** · **evaluation thresholds** · **bias & fairness** · **monitoring & rollback** · **transparency & incidents**. Verdicts: ✅ PASS · ⚠️ WARN · ⛔ BLOCK (exit 1).
 
-Verdicts: **PASS** · **WARN** (answers present but weak) · **BLOCK** (missing sections, placeholder text, or a high-risk tier without a named human sign-off). Design notes: `docs/rai-gate-design.md`.
+### Add it to any app in 60 seconds
+
+Works in any repo — new app, existing app, any language:
+
+```bash
+npx frai-gate init --ci
+```
+
+That drops `RAI-SPEC.md` (a spec template with the gate built in) and a GitHub Action that runs the gate on every PR. Answer the gate, then:
+
+```bash
+npx frai-gate check RAI-SPEC.md
+```
+
+No API key needed for the check. Two smarter commands use a read-only agent (Claude Code auth or `ANTHROPIC_API_KEY`):
+
+```bash
+npx frai-gate draft                       # scans YOUR code and drafts the gate answers from it,
+                                          # with file:line citations and NEEDS HUMAN INPUT markers
+npx frai-gate check RAI-SPEC.md --smart   # adversarial review: catches vague answers and
+                                          # spec claims your code contradicts
+```
+
+### If you build with AI coding agents
+
+```bash
+npx skills add sebuzdugan/frai
+```
+
+installs the `responsible-ai-spec` skill: every spec your agent writes includes the gate, and the agent is forbidden from self-approving high-risk features — a named human signs. Claude Code users in this repo also get `/rai-spec`.
+
+Everything is also available as `frai gate ...` inside the main CLI, and programmatically via `import { validateSpec } from 'frai-gate'`. Worked example (the one from the demo video): [`examples/support-triage-demo/`](examples/support-triage-demo). Design notes: `docs/rai-gate-design.md`.
 
 ---
 

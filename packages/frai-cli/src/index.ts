@@ -735,6 +735,26 @@ async function main() {
     });
 
   program
+    .command('gate [args...]')
+    .description('Responsible AI Gate for specs: init | check <spec> [--smart] | draft. Delegates to frai-gate.')
+    .allowUnknownOption(true)
+    .helpOption(false)
+    .action(async (args: string[]) => {
+      const require = createRequire(import.meta.url);
+      let gateCli: string;
+      try {
+        const gatePkg = require.resolve('frai-gate/package.json');
+        gateCli = path.join(path.dirname(gatePkg), 'dist', 'cli.js');
+      } catch {
+        log.error('frai-gate is not installed. Run: npm install -g frai-gate');
+        process.exit(2);
+      }
+      const { spawnSync } = await import('child_process');
+      const result = spawnSync(process.execPath, [gateCli, ...(args ?? [])], { stdio: 'inherit' });
+      process.exit(result.status ?? 0);
+    });
+
+  program
     .command('update')
     .description('Check for new FRAI CLI releases.')
     .action(() => {
