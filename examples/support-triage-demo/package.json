@@ -1,0 +1,11 @@
+{
+  "name": "support-triage",
+  "version": "1.0.0",
+  "description": "AI triage for inbound support tickets",
+  "type": "module",
+  "main": "src/index.js",
+  "dependencies": {
+    "openai": "^4.52.0",
+    "express": "^4.19.0"
+  }
+}
