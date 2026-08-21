@@ -1,6 +1,6 @@
 {
   "name": "frai-core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Shared core services for FRAI tooling",
   "type": "module",
   "main": "src/index.js",
@@ -10,12 +10,13 @@
   "files": [
     "README.md",
     "LICENSE",
-    "src/"
+    "src/",
+    "!src/**/*.test.js"
   ],
   "scripts": {
     "build": "echo \"No build step needed - ES modules\"",
     "lint": "eslint .",
-    "test": "vitest"
+    "test": "vitest run"
   },
   "devDependencies": {
     "eslint": "^9.1.1",

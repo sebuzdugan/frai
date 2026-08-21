@@ -1,6 +1,6 @@
 {
   "name": "frai",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "FRAI - Framework of Responsible Artificial Intelligence",
   "type": "module",
   "main": "dist/index.js",
@@ -12,12 +12,12 @@
     "start": "pnpm run build && node dist/index.js",
     "dev": "tsc --project tsconfig.json --watch",
     "lint": "eslint .",
-    "test": "vitest"
+    "test": "vitest run"
   },
   "dependencies": {
     "commander": "^11.1.0",
     "dotenv": "^16.5.0",
-    "frai-core": "^0.0.1",
+    "frai-core": "^0.0.2",
     "frai-gate": "^0.0.1",
     "inquirer": "^8.2.6",
     "node-fetch": "^3.3.2"

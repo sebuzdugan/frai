@@ -128,7 +128,9 @@ export function lengthVarianceMetric(outputs, references) {
 
 export const DEFAULT_METRICS = [
   exactMatchMetric,
-  toxicityMetric,
+  // The harness calls every metric as (outputs, references); toxicity's second
+  // parameter is a banned-terms list, so the references must not leak into it.
+  (outputs) => toxicityMetric(outputs),
   lengthVarianceMetric
 ];
 

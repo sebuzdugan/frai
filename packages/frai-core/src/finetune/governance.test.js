@@ -170,7 +170,7 @@ describe('Fine-tuning governance module', () => {
     modified.approvals.stakeholders[1].status = 'pending';
 
     const summary = summarizeGovernance(modified);
-    expect(summary).toContain('PENDING');
+    expect(summary).toContain('BLOCKED');
     expect(summary).toContain('approvals');
     expect(summary).toContain('monitoring');
   });

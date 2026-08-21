@@ -615,9 +615,11 @@ async function main() {
         .action((plan, options) => {
         runFinetuneValidateCommand(plan, options);
     });
+    program.enablePositionalOptions();
     program
         .command('gate [args...]')
         .description('Responsible AI Gate for specs: init | check <spec> [--smart] | draft. Delegates to frai-gate.')
+        .passThroughOptions()
         .allowUnknownOption(true)
         .helpOption(false)
         .action(async (args) => {

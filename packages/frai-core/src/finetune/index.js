@@ -6,6 +6,8 @@ import {
   RISK_LEVELS
 } from './schema.js';
 
+export { APPROVAL_STATUSES, DATA_SENSITIVITY_LEVELS, GOVERNANCE_SECTIONS, RISK_LEVELS } from './schema.js';
+
 const isPlainObject = (value) => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 const asArray = (value) => (Array.isArray(value) ? value : value ? [value] : []);
 const hasStringValue = (value) => typeof value === 'string' && value.trim().length > 0;
