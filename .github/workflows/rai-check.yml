@@ -37,7 +37,7 @@ jobs:
 
       - name: Unit tests (frai-core + frai-gate)
         run: |
-          pnpm --filter frai-core exec vitest run || echo "::warning::frai-core tests failing (known, tracked)"
+          pnpm --filter frai-core exec vitest run
           pnpm --filter frai-gate exec vitest run
 
       - name: Responsible AI Gate on example spec
