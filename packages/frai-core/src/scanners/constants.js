@@ -23,6 +23,32 @@ export const DEFAULT_CODE_EXTENSIONS = [
 ];
 
 export const DEFAULT_AI_LIBRARIES = [
+  // LLM and generative AI SDKs (the integrations AI disclosure rules care about most)
+  'openai',
+  '@openai',
+  'anthropic',
+  '@anthropic-ai',
+  'langchain',
+  '@langchain',
+  'llama_index',
+  'llamaindex',
+  'google.generativeai',
+  'google.genai',
+  '@google/generative-ai',
+  '@google/genai',
+  'vertexai',
+  'cohere',
+  'cohere-ai',
+  'mistralai',
+  '@mistralai',
+  'groq',
+  'groq-sdk',
+  'replicate',
+  'ollama',
+  'litellm',
+  '@ai-sdk',
+  '@azure/openai',
+  'azure.ai.inference',
   // Python ML/AI libraries
   'sklearn',
   'scikit-learn',

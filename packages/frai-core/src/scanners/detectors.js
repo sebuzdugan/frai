@@ -14,7 +14,13 @@ export const createLibraryDetector = (libraries = DEFAULT_AI_LIBRARIES) => ({
   id: 'libraries',
   analyze({ content, filePath, result }) {
     for (const library of libraries) {
-      const regex = new RegExp(`(import|from|require\\s*\\(\\s*['"\`])\\s*${library}`, 'i');
+      const escaped = library.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Matches Python imports (import x / from x import), CommonJS require('x') and ESM import ... from 'x'.
+      // The trailing boundary stops short names like "ai" matching "aiohttp".
+      const regex = new RegExp(
+        `(?:\\bimport|\\bfrom|require\\s*\\()\\s*['"\`]?${escaped}(?=['"\`/\\s.;,)]|$)`,
+        'im'
+      );
       if (regex.test(content)) {
         uniqPush(result.aiLibraryMatches, filePath, library);
         result.markAiFile(filePath);
