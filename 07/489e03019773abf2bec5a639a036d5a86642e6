@@ -1,0 +1,30 @@
+README.md
+  s_ba30fff77c85e6::t_ac2a197af4b5e9 39
+  s_ba30fff77c85e6::t_99efde2ab20b96 122
+  s_ba30fff77c85e6::t_eb222241c78fba 202
+  s_ba30fff77c85e6::t_ae626e47486cf9 113
+  s_ba30fff77c85e6::t_d06528ea9bd56b 18,23,25,27,29,31-33,37,41-43,45,47-48,50,53,58,60,62-68,70,72,74,76,79-81,84-86,89,92,94,96-98,101,104,106,108-112,114-118,120,124,126,128-130,132,134,136-137,139,141,143-148,150,152-154,156,159,161-165,169,173-174,178,180-182,184-186,188,190-192,194,198-201,203-204,206
+  s_ba30fff77c85e6::t_6af19d1d031a20 56
+packages/frai-core/src/scanners/llm-imports.test.js
+  s_ba30fff77c85e6::t_5cc5d314a86dc2 1-36
+packages/frai-core/src/scanners/detectors.js
+  s_ba30fff77c85e6::t_b9558cfc913557 17-23
+packages/frai-core/src/scanners/constants.js
+  s_ba30fff77c85e6::t_b9558cfc913557 26-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "07489e03019773abf2bec5a639a036d5a86642e6",
+  "prompts": {},
+  "sessions": {
+    "s_ba30fff77c85e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa476d27-5697-42ad-89e4-0945c44ac8ff",
+        "model": "claude-opus-5"
+      },
+      "human_author": "sebastianbuzdugan <81054605+sebastianbuzdugan@users.noreply.github.com>"
+    }
+  }
+}
