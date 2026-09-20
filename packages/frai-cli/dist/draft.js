@@ -41,6 +41,12 @@ async function draftHosted(root, files, libraries, projectName, yes) {
         libraries,
         files: files.slice(0, MAX_FILES).map((f) => ({ path: path.relative(root, f), excerpt: excerpt(f) })),
     };
+    if (!yes && !process.stdin.isTTY) {
+        // Nobody is there to answer, and sending someone's code on a guess is not ours to make.
+        console.log(`\n  This would send ${payload.files.length} file excerpt${payload.files.length === 1 ? '' : 's'} to ${HOSTED}, and there is no terminal to ask.`);
+        console.log(dim('  Re-run with --yes to allow it, or set ANTHROPIC_API_KEY to draft locally instead.\n'));
+        return null;
+    }
     if (!yes) {
         console.log(`\n  FRAI will send these files to ${HOSTED} to draft your answers:`);
         payload.files.forEach((f) => console.log(dim(`    ${f.path}`)));
@@ -53,11 +59,21 @@ async function draftHosted(root, files, libraries, projectName, yes) {
             return null;
         }
     }
-    const res = await fetch(`${HOSTED}/api/cli/draft-spec`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-    });
+    console.log(dim('  Drafting…'));
+    let res;
+    try {
+        res = await fetch(`${HOSTED}/api/cli/draft-spec`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(180000),
+        });
+    }
+    catch (error) {
+        const timedOut = error instanceof Error && error.name === 'TimeoutError';
+        console.log(`  ${timedOut ? 'The drafter took over three minutes and was stopped. Try again.' : `Could not reach ${HOSTED}.`}`);
+        return null;
+    }
     const body = (await res.json().catch(() => null));
     if (!res.ok || !body?.section) {
         console.log(`  ${body?.error ?? `The hosted drafter failed (${res.status}).`}`);

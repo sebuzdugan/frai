@@ -81,12 +81,14 @@ function normalizeUrl(input) {
     const trimmed = input.trim();
     return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
+const SITE_CHECK_TIMEOUT_MS = 120000;
 async function checkSite(url) {
     try {
         const res = await fetch(`${HOSTED}/api/public-scan`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url }),
+            signal: AbortSignal.timeout(SITE_CHECK_TIMEOUT_MS),
         });
         const body = (await res.json());
         if (!res.ok)
@@ -100,7 +102,11 @@ async function checkSite(url) {
         };
     }
     catch (error) {
-        return { error: error instanceof Error ? error.message : 'The check could not reach frai.cc.' };
+        if (error instanceof Error && error.name === 'TimeoutError') {
+            return { error: 'The site check took over two minutes and was stopped. Try again, or check the site at frai.cc.' };
+        }
+        const reason = error instanceof Error ? error.message : String(error);
+        return { error: /fetch failed|ENOTFOUND|ECONNREFUSED|EAI_AGAIN/i.test(reason) ? `could not reach ${HOSTED}` : reason };
     }
 }
 export async function runReview(options = {}) {
@@ -120,6 +126,10 @@ export async function runReview(options = {}) {
     if (options.siteOnly && !url) {
         console.log('\n  Pass a site to check, for example: frai check yourcompany.com\n');
         return 2;
+    }
+    if (url && !options.offline && !options.json) {
+        // The hosted check reads several pages, so say what is happening instead of going quiet.
+        process.stderr.write(dim(`  checking ${url} …\n`));
     }
     const site = url && !options.offline ? await checkSite(url) : null;
     const specPath = options.siteOnly ? null : findSpec(root);
@@ -184,7 +194,7 @@ export async function runReview(options = {}) {
         }
         const next = [];
         if (!specPath && aiInCode)
-            next.push('npx frai gate init --ci    add the spec and the CI check');
+            next.push('npx frai init              add the spec and the CI check');
         if (specPath && gate && gate.verdict === 'BLOCK') {
             // The drafter reads your code, so it only helps when there is AI code to read.
             const answerByHand = gate.lines.every((l) => l.includes('needs your answer')) || !aiInCode;
@@ -199,6 +209,8 @@ export async function runReview(options = {}) {
         if (site && !('error' in site) && site.verdict === 'gap') {
             next.push('add a notice where people meet the AI, for example: "You are chatting with an AI assistant."');
         }
+        if (site && 'error' in site)
+            next.push('the site check did not run. Try again in a minute, or check it at https://frai.cc');
         if (next.length === 0)
             next.push('nothing to fix right now. Re-run this after your next AI change.');
         out.push(bold('Next'));
