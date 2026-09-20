@@ -6,7 +6,10 @@ export const DEFAULT_EXCLUDED_DIRS = [
   '.idea',
   '.vscode',
   'dist',
-  'build'
+  'build',
+  'out',
+  'coverage',
+  'vendor'
 ];
 
 export const DEFAULT_CODE_EXTENSIONS = [

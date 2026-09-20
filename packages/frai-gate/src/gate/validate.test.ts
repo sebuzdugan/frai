@@ -172,6 +172,22 @@ describe('validateSpec', () => {
     expect(result.tier).toBe('limited');
   });
 
+  it('blocks answers the drafter could not fill in', () => {
+    const result = validateSpec(
+      fullSpec({
+        oversight: `### 5.3 Human oversight
+
+- **Automation level**: assistive
+- **Override path**: NEEDS HUMAN INPUT: who can correct an answer before it is sent?
+- **Kill switch**: feature flag chat_enabled, ops on-call, off within 5 minutes`
+      })
+    );
+    expect(result.verdict).toBe('BLOCK');
+    const finding = result.findings.find((f) => f.checkId === 'oversight');
+    expect(finding?.message).toContain('needs your answer');
+    expect(finding?.message).toContain('who can correct an answer');
+  });
+
   it('warns when the evaluation plan has no numbers', () => {
     const result = validateSpec(
       fullSpec({

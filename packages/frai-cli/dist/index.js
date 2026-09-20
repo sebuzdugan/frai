@@ -5,6 +5,8 @@ import process from 'process';
 import { execSync } from 'child_process';
 import { createRequire } from 'module';
 import { Command } from 'commander';
+import { runReview } from './review.js';
+import { runDraft } from './draft.js';
 import inquirer from 'inquirer';
 import { Config, Documents, Eval, Finetune, Providers, Questionnaire, Rag, Scanners } from 'frai-core';
 const require = createRequire(import.meta.url);
@@ -492,11 +494,27 @@ async function handleCompatibilityOptions(options) {
     }
     await runGenerateFlow(options);
 }
+/** Runs the bundled frai-gate CLI in a child process and exits with its status. */
+async function runGateCli(args) {
+    const require = createRequire(import.meta.url);
+    let gateCli;
+    try {
+        const gatePkg = require.resolve('frai-gate/package.json');
+        gateCli = path.join(path.dirname(gatePkg), 'dist', 'cli.js');
+    }
+    catch {
+        log.error('frai-gate is not installed. Run: npm install -g frai-gate');
+        process.exit(2);
+    }
+    const { spawnSync } = await import('child_process');
+    const result = spawnSync(process.execPath, [gateCli, ...args], { stdio: 'inherit' });
+    process.exit(result.status ?? 0);
+}
 async function main() {
     const program = new Command();
     program
         .name('frai')
-        .description('Responsible AI toolkit for documentation, scanning, evaluation, and governance.')
+        .description('Checks whether your product tells people it uses AI, and what to fix.')
         .version(pkg.version ?? '0.0.0')
         .option('--scan', 'Run code scanning before documentation generation')
         .option('--ci', 'Run in CI mode (scan + exit if no AI indicators)')
@@ -508,7 +526,19 @@ async function main() {
         .option('--export-pdf', 'Export documentation files as PDFs')
         .option('--show-config', 'Display API key configuration status')
         .option('--update', 'Check for new CLI releases')
+        .option('--url <url>', 'Site to check instead of the one detected from this project')
+        .option('--json', 'Print the review as JSON')
+        .option('--offline', 'Skip the hosted site check')
         .action(async (options) => {
+        const usedLegacyFlag = Boolean(options.scan || options.setup || options.key || options.listDocs || options.clean ||
+            options.exportPdf || options.showConfig || options.update);
+        if (!usedLegacyFlag) {
+            // Bare `frai` (or `frai --ci`) reviews the project: scan, site check, gate, next step.
+            const code = await runReview({ url: options.url, json: options.json, ci: options.ci, offline: options.offline });
+            if (code !== 0)
+                process.exitCode = code;
+            return;
+        }
         await handleCompatibilityOptions({
             scan: options.scan,
             ci: options.ci,
@@ -521,6 +551,39 @@ async function main() {
             showConfig: options.showConfig,
             update: options.update
         });
+    });
+    program
+        .command('review')
+        .description('Look at this project and say what to fix: code scan, site check, gate, next step.')
+        .option('--url <url>', 'Site to check instead of the one detected from this project')
+        .option('--json', 'Print the review as JSON')
+        .option('--ci', 'Exit 1 when something needs fixing')
+        .option('--offline', 'Skip the hosted site check')
+        .action(async (options) => {
+        const code = await runReview(options);
+        if (code !== 0)
+            process.exitCode = code;
+    });
+    program
+        .command('check [url]')
+        .description('Check whether a website tells people it uses AI. No key, no signup.')
+        .option('--json', 'Print the result as JSON')
+        .option('--ci', 'Exit 1 when a notice is missing')
+        .action(async (url, options) => {
+        const code = await runReview({ url, json: options.json, ci: options.ci, siteOnly: true });
+        if (code !== 0)
+            process.exitCode = code;
+    });
+    program
+        .command('draft')
+        .description('Fill the gate answers from your code and write them into the spec.')
+        .option('--yes', 'Do not ask before sending file excerpts to the hosted drafter')
+        .option('--print', 'Print the draft instead of writing it')
+        .option('--out <file>', 'Where to write when there is no spec yet')
+        .action(async (options) => {
+        const code = await runDraft(options);
+        if (code !== 0)
+            process.exitCode = code;
     });
     program
         .command('generate')
@@ -617,25 +680,20 @@ async function main() {
     });
     program.enablePositionalOptions();
     program
+        .command('init')
+        .description('Add FRAI-SPEC.md and the CI check to this repo.')
+        .option('--out <file>', 'Write the spec somewhere else than FRAI-SPEC.md')
+        .action(async (options) => {
+        await runGateCli(['init', '--ci', ...(options.out ? ['--out', options.out] : [])]);
+    });
+    program
         .command('gate [args...]')
         .description('Responsible AI Gate for specs: init | check <spec> [--smart] | draft. Delegates to frai-gate.')
         .passThroughOptions()
         .allowUnknownOption(true)
         .helpOption(false)
         .action(async (args) => {
-        const require = createRequire(import.meta.url);
-        let gateCli;
-        try {
-            const gatePkg = require.resolve('frai-gate/package.json');
-            gateCli = path.join(path.dirname(gatePkg), 'dist', 'cli.js');
-        }
-        catch {
-            log.error('frai-gate is not installed. Run: npm install -g frai-gate');
-            process.exit(2);
-        }
-        const { spawnSync } = await import('child_process');
-        const result = spawnSync(process.execPath, [gateCli, ...(args ?? [])], { stdio: 'inherit' });
-        process.exit(result.status ?? 0);
+        await runGateCli(args ?? []);
     });
     program
         .command('update')
@@ -643,6 +701,14 @@ async function main() {
         .action(() => {
         checkForUpdates();
     });
+    program.addHelpText('after', `
+Start here:
+  frai                       review this project: code, live site, spec, next step
+  frai check example.com     check any site, no repo and no key needed
+  frai init                  add FRAI-SPEC.md and the CI check
+  frai draft                 fill the spec answers from your code
+  frai gate check FRAI-SPEC.md   run the gate (exits 1 on BLOCK)
+`);
     try {
         await program.parseAsync(process.argv);
     }

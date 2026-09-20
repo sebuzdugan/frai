@@ -63,6 +63,8 @@ export function scanCodebase(options = {}) {
       const fullPath = path.join(dir, entry.name);
 
       if (entry.isDirectory()) {
+        // Hidden directories hold caches, worktrees and agent state, not the code people ship.
+        if (entry.name.startsWith('.')) continue;
         scanDirectory(fullPath);
       } else if (entry.isFile()) {
         const ext = path.extname(entry.name).toLowerCase();

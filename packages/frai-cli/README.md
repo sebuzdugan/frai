@@ -21,55 +21,82 @@
 ![npm downloads](https://img.shields.io/npm/dt/frai)
 
 
-FRAI is an open-source toolkit that helps teams launch AI features responsibly. It guides you through evidence gathering, scans your code, and assembles documentation you can hand to reviewers: implementation checklists, model cards, risk files, evaluation reports, and compliance-aware RAG indexes. The toolkit ships as two packages that work together:
+**One command tells you whether your product is legal about saying it uses AI.**
 
-- `frai` – the command-line app with ready-to-run workflows.
-- `frai-core` – the reusable SDK that powers the CLI and any custom integrations.
+```bash
+npx frai
+```
 
-### Short Answer
-- `frai-core` is the library/SDK. Use it when you are embedding FRAI capabilities into your own tools, servers, automations, or extensions.
-- `frai` is the CLI. It wraps `frai-core` to deliver an end-user experience with no coding required.
+No key, no signup, no flags. In any repo, `frai` scans your code for AI, finds your public URL by
+itself, asks [frai.cc](https://frai.cc) whether that site tells people about its AI, runs the gate if you
+have a spec, and prints the one thing to do next.
 
-### Why Keep Both?
-- Independent versioning and stability  
-  - `frai-core` can evolve APIs for integrators without forcing a CLI release.  
-  - `frai` can improve UX/commands without breaking programmatic users.
-- Reuse across surfaces  
-  - `frai-core` powers the CLI today and future VS Code/Chrome extensions, GitHub Actions, internal CLIs, services, or SDKs.
-- Smaller, focused installs  
-  - Operators install the CLI.  
-  - Builders install only the core library they need.
+```
+FRAI review: support-app
 
-### When to Use Each
-- Choose **`frai` (CLI)** when you want interactive prompts, one-command scans, RAG indexing, evaluation reports, or CI-friendly automation without writing code.
-- Choose **`frai-core` (SDK)** when you want API access to FRAI capabilities from Node scripts, services, custom CLIs, extensions, or unusual I/O flows.
+Code
+  AI found  3 files using openai
+    src/support/reply.ts
 
-### Concrete Examples
-- CLI user: run `frai --scan` and `frai eval` in a repository to generate governance docs and audit reports.
-- Library user: call `Documents.generateDocuments` from an internal portal to produce standardized docs, use `Scanners.scanCodebase` inside a GitHub Action, or embed `Rag.indexDocuments` inside a VS Code extension for grounded hints.
+Site
+  https://support.example.com/  needs a notice
+    Chat tool found. No AI disclosure found.
+    found: Intercom
 
-In short: CLI = product; Core = platform. They overlap in capability on purpose but target different audiences and distribution needs.
+Spec
+  FRAI-SPEC.md  BLOCK
+    Human oversight · Escalation path needs your answer: Can a human agent take over before the AI replies?
+
+Next
+  answer the 4 open fields in FRAI-SPEC.md, then: npx frai gate check FRAI-SPEC.md
+```
+
+## The four commands
+
+| Command | What it does |
+|---------|--------------|
+| `frai` | Review this project. `--ci` exits 1 when something needs fixing, `--json` prints it as JSON, `--offline` skips the site check, `--url <url>` overrides the detected site. |
+| `frai check [url]` | Check any site, no repo and no key. Bare domains are fine: `frai check example.com`. |
+| `frai init` | Add `FRAI-SPEC.md` and the GitHub Action that runs the gate on every PR. |
+| `frai draft` | Fill the gate answers from your own code, then write them into the spec. |
+
+### What each one does behind the scenes
+
+`frai` finds your site the way a colleague would: `homepage` in `package.json`, then
+`NEXT_PUBLIC_SITE_URL` / `SITE_URL` / `APP_URL` in `.env*`, then the first real link in the README.
+Hidden directories, `node_modules`, and build output are skipped, so the file list is your code.
+
+`frai draft` prefers your local Claude agent (Claude Code login or `ANTHROPIC_API_KEY`), because that
+reads the whole repo and nothing leaves the machine. Without a key it falls back to the hosted drafter
+on frai.cc and asks first, listing the files it would send. Where your code does not show the answer it
+writes `NEEDS HUMAN INPUT: <the question>` instead of inventing one, and the gate BLOCKs until a person
+answers it.
+
+### In CI
+
+```yaml
+- run: npx frai --ci
+```
+
+Exits 1 when the live site is missing a notice, the gate BLOCKs, or AI code has no spec at all.
 
 ---
 
-## Getting Started with the CLI
+## Everything else
 
-1. Install the published CLI:
-   ```bash
-   npm install -g frai
-   ```
-2. Configure your OpenAI API key (needed for AI-generated tips and evaluations):
-   ```bash
-   frai --setup
-   ```
-   Keys can be stored per-project (`.env`) or globally (`~/.config/frai/config`). You can also provide a one-off key using `frai --key sk-...`.
-3. Run the interactive workflow:
-   ```bash
-   frai
-   ```
-   FRAI walks you through feature discovery, writes `checklist.md`, `model_card.md`, and `risk_file.md`, and optionally exports PDFs.
+FRAI also ships the original documentation toolkit and the SDK behind it:
 
-Generated artefacts live in your current working directory. Supplementary commands cover scanning, evaluation, RAG indexing, and fine-tuning governance.
+- `frai` – the command-line app.
+- `frai-core` – the reusable SDK (`Questionnaire`, `Documents`, `Scanners`, `Rag`, `Eval`, `Finetune`, `Config`, `Providers`).
+
+Install:
+
+```bash
+npm install -g frai
+```
+
+Generated artefacts land in your working directory. An OpenAI key is optional and only adds AI-written
+tips to the generated docs: `frai setup`, or set `OPENAI_API_KEY`.
 
 ---
 
@@ -77,8 +104,10 @@ Generated artefacts live in your current working directory. Supplementary comman
 
 | Command | Purpose |
 |---------|---------|
-| `frai [options]` | Interactive documentation workflow with backward-compatible shortcut flags. |
-| `frai generate [options]` | Explicit interactive workflow command. |
+| `frai [options]` | Review the project (see above). Legacy flags such as `--scan` or `--setup` still run the old workflow. |
+| `frai review` / `frai check [url]` / `frai init` / `frai draft` | The four commands above. |
+| `frai gate init \| check <spec> [--smart] \| draft` | The Responsible AI Gate, bundled from `frai-gate`. |
+| `frai generate [options]` | Interactive documentation workflow. |
 | `frai scan [--ci] [--json]` | Scan the repository for AI/ML indicators. |
 | `frai setup [--key <apiKey>] [--global]` | Store an OpenAI API key locally or globally. |
 | `frai config` | Show key configuration status. |
@@ -89,7 +118,7 @@ Generated artefacts live in your current working directory. Supplementary comman
 | `frai update` | Check npm for the latest CLI release. |
 
 ### Default Command: `frai [options]`
-Runs the interactive documentation flow. Optional flags add shortcuts:
+Runs the review. Passing any legacy flag runs the old interactive documentation flow instead:
 - `--scan` – run code scanning before questions.
 - `--ci` – exit after scanning when no AI indicators are detected.
 - `--setup` – jump directly into key configuration.

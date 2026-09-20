@@ -9,6 +9,8 @@ import {
 } from './schema.js';
 
 const PLACEHOLDER = /\b(TBD|TODO|FIXME|XXX)\b|\bfill\s+(this\s+)?in\b/i;
+// The drafter marks what it could not learn from the code. An unresolved marker is not an answer.
+const NEEDS_HUMAN = /NEEDS HUMAN INPUT/i;
 /** A template field line whose value was never filled in, e.g. `- **Retention**:` */
 const EMPTY_FIELD = /^\s*[-*]\s*\*\*[^*]+\*\*.*:\s*$/;
 
@@ -142,6 +144,18 @@ export function validateSpec(markdown: string): GateResult {
         checkId: check.id,
         severity: 'block',
         message: `"${check.title}" contains placeholder text (TBD/TODO). Answer it concretely.`,
+        source: 'validator'
+      });
+    }
+    for (const line of body.split(/\r?\n/).filter((l) => NEEDS_HUMAN.test(l))) {
+      // Lines look like: - **Retention**: ... NEEDS HUMAN INPUT: how long are prompts kept?
+      const label = line.match(/^\s*[-*]\s*\*\*(.+?)\*\*/)?.[1];
+      const question = line.split(/NEEDS HUMAN INPUT:?\s*/i)[1]?.replace(/\*+/g, '').trim() ?? '';
+      const asked = question.length > 140 ? `${question.slice(0, 137)}...` : question;
+      findings.push({
+        checkId: check.id,
+        severity: 'block',
+        message: `${check.title}${label ? ` · ${label}` : ''} needs your answer${asked ? `: ${asked}` : '.'}`,
         source: 'validator'
       });
     }

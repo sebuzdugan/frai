@@ -26,11 +26,47 @@ The sharpest example today is EU AI Act Article 50, enforceable since 2 August 2
 
 ![Screenshot of frai.cc, the FRAI web scanner.](assets/frai_cc_screenshot.png)
 
-FRAI is open source. It does three things:
+FRAI is open source. Start with one command, in any repo:
 
-1. **`frai gate`** puts a spec in your repo and fails CI until the responsible-AI questions are answered.
-2. **`frai scan`** finds AI libraries and AI function calls in your code.
-3. **`frai generate`** writes a checklist, model card, and risk file from a short questionnaire.
+```bash
+npx frai
+```
+
+No key, no signup, no flags. It scans your code for AI, finds your public URL by itself, asks
+[frai.cc](https://frai.cc) whether that site tells people about its AI, runs the gate if you have a spec,
+and prints the one thing to do next.
+
+```
+FRAI review: support-app
+
+Code
+  AI found  3 files using openai
+    src/support/reply.ts
+
+Site
+  https://support.example.com/  needs a notice
+    Chat tool found. No AI disclosure found.
+    found: Intercom
+
+Spec
+  FRAI-SPEC.md  BLOCK
+    Human oversight · Escalation path needs your answer: Can a human agent take over before the AI replies?
+
+Next
+  answer the 4 open fields in FRAI-SPEC.md, then: npx frai gate check FRAI-SPEC.md
+```
+
+Four commands cover the whole job:
+
+| Command | What it does |
+|---------|--------------|
+| `npx frai` | Review this project: code, live site, spec, next step. `--ci` exits 1 when something needs fixing. |
+| `npx frai check yourcompany.com` | Check any site, with no repo and no key. |
+| `npx frai init` | Add `FRAI-SPEC.md` and the GitHub Action that runs the gate on every PR. |
+| `npx frai draft` | Fill the gate answers from your own code. Uses your local Claude agent if you have one, otherwise frai.cc does it, after asking. |
+
+The drafter never guesses. Where your code does not show the answer it writes
+`NEEDS HUMAN INPUT: <the question>`, and the gate BLOCKs until a person answers it.
 
 ---
 
@@ -107,11 +143,15 @@ npm install -g frai
 
 | Command | What it does |
 |---------|--------------|
+| `frai` / `frai review` | Review the project: code scan, site check, gate, next step. |
+| `frai check [url]` | Check whether a site tells people it uses AI. Exits 1 with `--ci` when a notice is missing. |
+| `frai init` | Shorthand for `frai gate init --ci`. |
+| `frai draft` | Draft the gate answers from your code, locally or via frai.cc. |
 | `frai gate init [--ci]` | Write `FRAI-SPEC.md`. With `--ci`, also write the GitHub Action. |
 | `frai gate check <spec> [--smart] [--json]` | Validate the gate section. Exits 1 on BLOCK. |
 | `frai gate draft` | Draft gate answers from your code (Claude Agent SDK). |
 | `frai scan [--ci] [--json]` | Regex scan for ML library imports and common AI function names. |
-| `frai` / `frai generate` | Questionnaire that writes `checklist.md`, `model_card.md`, `risk_file.md`. |
+| `frai generate` | Questionnaire that writes `checklist.md`, `model_card.md`, `risk_file.md`. |
 | `frai docs list` / `clean` / `export` | List, delete, or export the generated docs to PDF. |
 | `frai setup [--key <key>] [--global]` | Store an OpenAI API key (optional, see below). |
 | `frai config` | Show where an API key is configured. |
@@ -123,7 +163,7 @@ Pattern matching, not semantic analysis. It uses regexes to find imports of know
 
 ### `frai generate`
 
-Run `frai` or `frai generate`. It asks about your AI feature and writes three markdown files to the current directory: `checklist.md`, `model_card.md`, and `risk_file.md`.
+Run `frai generate`. It asks about your AI feature and writes three markdown files to the current directory: `checklist.md`, `model_card.md`, and `risk_file.md`.
 
 - `--scan` runs `frai scan` first.
 - `--export-pdf` exports the docs to PDF with `markdown-pdf` (fetched through `npx`). `frai docs export` does the same later.
