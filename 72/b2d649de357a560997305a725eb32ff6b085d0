@@ -1,0 +1,28 @@
+packages/frai-core/package.json
+  s_ba30fff77c85e6::t_6fc14e7770011a 3,37
+README.md
+  ai_agent 185,187
+packages/frai-cli/dist/index.js
+  ai_agent 497,511,687-690,699
+packages/frai-cli/src/index.ts
+  ai_agent 599-600,612,808-810,820
+packages/frai-cli/package.json
+  s_ba30fff77c85e6::t_d6621edc9264d9 43
+  s_ba30fff77c85e6::t_6fc14e7770011a 3,20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "72b2d649de357a560997305a725eb32ff6b085d0",
+  "prompts": {},
+  "sessions": {
+    "s_ba30fff77c85e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa476d27-5697-42ad-89e4-0945c44ac8ff",
+        "model": "claude-opus-5"
+      },
+      "human_author": "sebastianbuzdugan <81054605+sebastianbuzdugan@users.noreply.github.com>"
+    }
+  }
+}
