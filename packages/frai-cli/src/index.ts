@@ -596,8 +596,8 @@ async function handleCompatibilityOptions(options: GenerateOptions & { listDocs?
   await runGenerateFlow(options);
 }
 
-/** Runs the bundled frai-gate CLI in a child process and exits with its status. */
-async function runGateCli(args: string[]): Promise<never> {
+/** Runs the bundled frai-gate CLI in a child process and returns its exit status. */
+async function runGateCli(args: string[]): Promise<number> {
   const require = createRequire(import.meta.url);
   let gateCli: string;
   try {
@@ -609,7 +609,7 @@ async function runGateCli(args: string[]): Promise<never> {
   }
   const { spawnSync } = await import('child_process');
   const result = spawnSync(process.execPath, [gateCli, ...args], { stdio: 'inherit' });
-  process.exit(result.status ?? 0);
+  return result.status ?? 0;
 }
 
 async function main() {
@@ -805,7 +805,9 @@ async function main() {
     .description('Add FRAI-SPEC.md and the CI check to this repo.')
     .option('--out <file>', 'Write the spec somewhere else than FRAI-SPEC.md')
     .action(async (options: { out?: string }) => {
-      await runGateCli(['init', '--ci', ...(options.out ? ['--out', options.out] : [])]);
+      const status = await runGateCli(['init', '--ci', ...(options.out ? ['--out', options.out] : [])]);
+      if (status === 0) console.log('Next: npx frai draft to fill the answers from your code, or answer them yourself and run npx frai.');
+      process.exit(status);
     });
 
   program
@@ -815,7 +817,7 @@ async function main() {
     .allowUnknownOption(true)
     .helpOption(false)
     .action(async (args: string[]) => {
-      await runGateCli(args ?? []);
+      process.exit(await runGateCli(args ?? []));
     });
 
   program

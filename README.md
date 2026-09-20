@@ -182,9 +182,9 @@ Run `frai generate`. It asks about your AI feature and writes three markdown fil
 
 | Package | Version | What it is |
 |---------|---------|------------|
-| [`frai`](https://www.npmjs.com/package/frai) | 1.1.5 | The CLI. |
+| [`frai`](https://www.npmjs.com/package/frai) | 1.2.0 | The CLI. |
 | [`frai-gate`](https://www.npmjs.com/package/frai-gate) | 0.0.1 | The gate. Runs as `npx frai-gate`, or import `validateSpec` from it. |
-| [`frai-core`](https://www.npmjs.com/package/frai-core) | 0.0.2 | The SDK behind the CLI: `Questionnaire`, `Documents`, `Scanners`, `Config`, `Providers`. |
+| [`frai-core`](https://www.npmjs.com/package/frai-core) | 0.0.3 | The SDK behind the CLI: `Questionnaire`, `Documents`, `Scanners`, `Config`, `Providers`. |
 | `frai-agent` | not published | LangChain experiment in this monorepo. Not supported. |
 
 Using the gate from code:
