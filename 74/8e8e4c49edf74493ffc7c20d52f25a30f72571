@@ -1,0 +1,11 @@
+packages/frai-cli/dist/review.js
+  ai_agent 108-109,130-133,197,212-213
+packages/frai-cli/src/review.ts
+  ai_agent 130-131,156-159,225,240
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "748e8e4c49edf74493ffc7c20d52f25a30f72571",
+  "prompts": {}
+}
