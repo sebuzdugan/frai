@@ -49,6 +49,41 @@ export function detectSiteUrl(root) {
     }
     return null;
 }
+/** AI SDKs people actually install. Matched against manifests, so a dependency counts even when
+ *  the code that calls it is in a file type the scanner does not read. */
+const AI_PACKAGES = [
+    'openai', '@anthropic-ai/sdk', '@anthropic-ai/claude-agent-sdk', 'ai', '@ai-sdk/openai', '@ai-sdk/anthropic',
+    'langchain', 'llamaindex', '@google/generative-ai', '@google/genai', 'cohere-ai', 'replicate',
+    '@huggingface/inference', 'groq-sdk', '@mistralai/mistralai', 'ollama', '@azure/openai',
+];
+const AI_PY_PACKAGES = ['openai', 'anthropic', 'langchain', 'llama-index', 'transformers', 'google-generativeai', 'cohere', 'litellm', 'ollama'];
+/** Reads the manifests, not the code: "you depend on an AI SDK" is worth saying on its own. */
+export function declaredAiDependencies(root) {
+    const found = new Set();
+    const pkg = readJson(path.join(root, 'package.json'));
+    const deps = { ...pkg?.dependencies, ...pkg?.devDependencies };
+    for (const name of Object.keys(deps ?? {})) {
+        if (AI_PACKAGES.includes(name) || name.startsWith('@ai-sdk/') || name.startsWith('@langchain/'))
+            found.add(name);
+    }
+    for (const manifest of ['requirements.txt', 'pyproject.toml', 'Pipfile']) {
+        const file = path.join(root, manifest);
+        if (!existsSync(file))
+            continue;
+        let text = '';
+        try {
+            text = readFileSync(file, 'utf8').toLowerCase();
+        }
+        catch {
+            continue;
+        }
+        for (const name of AI_PY_PACKAGES) {
+            if (new RegExp(`(^|[\\s"'\\[])${name.replace('-', '[-_]')}\\b`, 'm').test(text))
+                found.add(name);
+        }
+    }
+    return [...found];
+}
 function findSpec(root) {
     for (const candidate of SPEC_CANDIDATES) {
         const file = path.join(root, candidate);
@@ -120,7 +155,8 @@ export async function runReview(options = {}) {
             libraryCounts.set(lib, (libraryCounts.get(lib) ?? 0) + 1);
     }
     const libraries = [...libraryCounts.entries()].sort((a, b) => b[1] - a[1]);
-    const aiInCode = scan.aiFiles.length > 0;
+    const declared = options.siteOnly ? [] : declaredAiDependencies(root);
+    const aiInCode = scan.aiFiles.length > 0 || declared.length > 0;
     const rawUrl = options.url ?? (options.offline ? null : detectSiteUrl(root));
     const url = rawUrl ? normalizeUrl(rawUrl) : null;
     if (options.siteOnly && !url) {
@@ -137,7 +173,11 @@ export async function runReview(options = {}) {
     if (options.json) {
         console.log(JSON.stringify({
             project: projectName,
-            code: { aiFiles: scan.aiFiles.map((f) => path.relative(root, f)), libraries: Object.fromEntries(libraries) },
+            code: {
+                aiFiles: scan.aiFiles.map((f) => path.relative(root, f)),
+                libraries: Object.fromEntries(libraries),
+                declaredDependencies: declared,
+            },
             site,
             spec: specPath ? path.relative(root, specPath) : null,
             gate,
@@ -147,16 +187,24 @@ export async function runReview(options = {}) {
         const out = ['', bold(options.siteOnly ? 'FRAI site check' : `FRAI review: ${projectName}`), ''];
         if (!options.siteOnly) {
             out.push(bold('Code'));
-            if (aiInCode) {
+            const aiFilesFound = scan.aiFiles.length > 0;
+            if (aiFilesFound) {
                 const names = libraries.slice(0, 4).map(([name]) => name).join(', ');
                 out.push(`  ${amber('AI found')}  ${scan.aiFiles.length} file${scan.aiFiles.length === 1 ? '' : 's'}${names ? ` using ${names}` : ''}`);
                 scan.aiFiles.slice(0, 3).forEach((f) => out.push(dim(`    ${path.relative(root, f)}`)));
                 if (scan.aiFiles.length > 3)
                     out.push(dim(`    and ${scan.aiFiles.length - 3} more`));
             }
+            else if (declared.length) {
+                out.push(`  ${amber('AI found')}  ${declared.join(', ')} in your dependencies, no calls found in the files we read`);
+            }
             else {
                 out.push(`  ${dim('No AI libraries or model calls found in this repo.')}`);
             }
+            // Only worth a line when the manifest names something the code scan did not already show.
+            const extraDeclared = declared.filter((d) => !libraries.some(([name]) => d === name || d.includes(name)));
+            if (aiFilesFound && extraDeclared.length)
+                out.push(dim(`    also in your dependencies: ${extraDeclared.join(', ')}`));
             out.push('');
         }
         out.push(bold('Site'));
