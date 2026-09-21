@@ -21,6 +21,10 @@ export interface ReviewOptions {
   offline?: boolean;
   /** `frai check <url>`: report on the site only, skip the repo. */
   siteOnly?: boolean;
+  /** Email the full page-by-page report to this address. */
+  email?: string;
+  /** With email: re-check monthly and email only if the answer changes. */
+  watch?: boolean;
 }
 
 interface SiteCheck {
@@ -29,6 +33,7 @@ interface SiteCheck {
   headline: string;
   services: { name: string; how?: string }[];
   pagesChecked: string[];
+  skippedByRobots?: string[];
 }
 
 const dim = (s: string) => `[2m${s}[0m`;
@@ -155,6 +160,7 @@ async function checkSite(url: string): Promise<SiteCheck | { error: string }> {
       headline: String(body.headline ?? ''),
       services: (body.services as SiteCheck['services']) ?? [],
       pagesChecked: (body.pagesChecked as string[]) ?? [],
+      skippedByRobots: (body.skippedByRobots as string[]) ?? [],
     };
   } catch (error) {
     if (error instanceof Error && error.name === 'TimeoutError') {
@@ -162,6 +168,22 @@ async function checkSite(url: string): Promise<SiteCheck | { error: string }> {
     }
     const reason = error instanceof Error ? error.message : String(error);
     return { error: /fetch failed|ENOTFOUND|ECONNREFUSED|EAI_AGAIN/i.test(reason) ? `could not reach ${HOSTED}` : reason };
+  }
+}
+
+async function requestReport(url: string, email: string, watch: boolean): Promise<{ reportUrl: string } | { error: string }> {
+  try {
+    const res = await fetch(`${HOSTED}/api/report`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, email, watch, source: 'cli' }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    const body = (await res.json().catch(() => ({}))) as { reportUrl?: string; error?: string };
+    if (!res.ok || !body.reportUrl) return { error: body.error ?? `The report could not be started (${res.status}).` };
+    return { reportUrl: body.reportUrl };
+  } catch {
+    return { error: `could not reach ${HOSTED}` };
   }
 }
 
@@ -192,6 +214,7 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
     process.stderr.write(dim(`  checking ${url} …\n`));
   }
   const site = url && !options.offline ? await checkSite(url) : null;
+  const report = url && options.email && site && !('error' in site) ? await requestReport(url, options.email, Boolean(options.watch)) : null;
 
   const specPath = options.siteOnly ? null : findSpec(root);
   const gate = specPath ? await runGate(specPath) : null;
@@ -207,6 +230,7 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
             declaredDependencies: declared,
           },
           site,
+          report,
           spec: specPath ? path.relative(root, specPath) : null,
           gate,
         },
@@ -248,6 +272,9 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
       out.push(`  ${site.url}  ${mark}`);
       out.push(dim(`    ${site.headline}`));
       if (site.services.length) out.push(dim(`    found: ${site.services.map((s) => s.name).join(', ')}`));
+      out.push(dim(`    read ${site.pagesChecked.length} page${site.pagesChecked.length === 1 ? '' : 's'}${site.skippedByRobots?.length ? `, ${site.skippedByRobots.length} skipped because robots.txt asks` : ''}`));
+      if (report && 'reportUrl' in report) out.push(`  ${green('full report')} on its way to ${options.email}: ${report.reportUrl}`);
+      if (report && 'error' in report) out.push(dim(`    full report: ${report.error}`));
     }
     out.push('');
 
@@ -282,6 +309,9 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
       next.push('add a notice where people meet the AI, for example: "You are chatting with an AI assistant."');
     }
     if (site && 'error' in site) next.push('the site check did not run. Try again in a minute, or check it at https://frai.cc');
+    if (site && !('error' in site) && !options.email && site.verdict !== 'no-ai') {
+      next.push(`npx frai check ${new URL(site.url).hostname} --email you@company.com   page-by-page report, up to 10 pages`);
+    }
     if (next.length === 0) next.push('nothing to fix right now. Re-run this after your next AI change.');
 
     out.push(bold('Next'));

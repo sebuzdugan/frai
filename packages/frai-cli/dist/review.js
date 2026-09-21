@@ -134,6 +134,7 @@ async function checkSite(url) {
             headline: String(body.headline ?? ''),
             services: body.services ?? [],
             pagesChecked: body.pagesChecked ?? [],
+            skippedByRobots: body.skippedByRobots ?? [],
         };
     }
     catch (error) {
@@ -142,6 +143,23 @@ async function checkSite(url) {
         }
         const reason = error instanceof Error ? error.message : String(error);
         return { error: /fetch failed|ENOTFOUND|ECONNREFUSED|EAI_AGAIN/i.test(reason) ? `could not reach ${HOSTED}` : reason };
+    }
+}
+async function requestReport(url, email, watch) {
+    try {
+        const res = await fetch(`${HOSTED}/api/report`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, email, watch, source: 'cli' }),
+            signal: AbortSignal.timeout(30000),
+        });
+        const body = (await res.json().catch(() => ({})));
+        if (!res.ok || !body.reportUrl)
+            return { error: body.error ?? `The report could not be started (${res.status}).` };
+        return { reportUrl: body.reportUrl };
+    }
+    catch {
+        return { error: `could not reach ${HOSTED}` };
     }
 }
 export async function runReview(options = {}) {
@@ -168,6 +186,7 @@ export async function runReview(options = {}) {
         process.stderr.write(dim(`  checking ${url} …\n`));
     }
     const site = url && !options.offline ? await checkSite(url) : null;
+    const report = url && options.email && site && !('error' in site) ? await requestReport(url, options.email, Boolean(options.watch)) : null;
     const specPath = options.siteOnly ? null : findSpec(root);
     const gate = specPath ? await runGate(specPath) : null;
     if (options.json) {
@@ -179,6 +198,7 @@ export async function runReview(options = {}) {
                 declaredDependencies: declared,
             },
             site,
+            report,
             spec: specPath ? path.relative(root, specPath) : null,
             gate,
         }, null, 2));
@@ -223,6 +243,11 @@ export async function runReview(options = {}) {
             out.push(dim(`    ${site.headline}`));
             if (site.services.length)
                 out.push(dim(`    found: ${site.services.map((s) => s.name).join(', ')}`));
+            out.push(dim(`    read ${site.pagesChecked.length} page${site.pagesChecked.length === 1 ? '' : 's'}${site.skippedByRobots?.length ? `, ${site.skippedByRobots.length} skipped because robots.txt asks` : ''}`));
+            if (report && 'reportUrl' in report)
+                out.push(`  ${green('full report')} on its way to ${options.email}: ${report.reportUrl}`);
+            if (report && 'error' in report)
+                out.push(dim(`    full report: ${report.error}`));
         }
         out.push('');
         if (!options.siteOnly) {
@@ -259,6 +284,9 @@ export async function runReview(options = {}) {
         }
         if (site && 'error' in site)
             next.push('the site check did not run. Try again in a minute, or check it at https://frai.cc');
+        if (site && !('error' in site) && !options.email && site.verdict !== 'no-ai') {
+            next.push(`npx frai check ${new URL(site.url).hostname} --email you@company.com   page-by-page report, up to 10 pages`);
+        }
         if (next.length === 0)
             next.push('nothing to fix right now. Re-run this after your next AI change.');
         out.push(bold('Next'));

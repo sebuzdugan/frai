@@ -560,10 +560,12 @@ async function main() {
     program
         .command('check [url]')
         .description('Check whether a website tells people it uses AI. No key, no signup.')
+        .option('--email <address>', 'Also email the full page-by-page report (up to 10 pages)')
+        .option('--watch', 'With --email: re-check monthly, email only if the answer changes')
         .option('--json', 'Print the result as JSON')
         .option('--ci', 'Exit 1 when a notice is missing')
         .action(async (url, options) => {
-        const code = await runReview({ url, json: options.json, ci: options.ci, siteOnly: true });
+        const code = await runReview({ url, json: options.json, ci: options.ci, siteOnly: true, email: options.email, watch: options.watch });
         if (code !== 0)
             process.exitCode = code;
     });
@@ -701,6 +703,7 @@ async function main() {
 Start here:
   frai                       review this project: code, live site, spec, next step
   frai check example.com     check any site, no repo and no key needed
+  frai check example.com --email you@co.com   the full page-by-page report by email
   frai init                  add FRAI-SPEC.md and the CI check
   frai draft                 fill the spec answers from your code
   frai gate check FRAI-SPEC.md   run the gate (exits 1 on BLOCK)
