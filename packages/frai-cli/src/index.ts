@@ -258,16 +258,9 @@ function runScanCommand({ root = process.cwd(), ci = false, json = false, silent
 
 type FetchLike = (input: unknown, init?: unknown) => Promise<unknown>;
 
-let cachedFetch: FetchLike | null = null;
-
+// Node 18+ ships fetch, which the review and draft commands already rely on.
 async function resolveFetchImplementation(): Promise<FetchLike> {
-  if (typeof (globalThis as { fetch?: FetchLike }).fetch === 'function') {
-    return (globalThis as { fetch: FetchLike }).fetch.bind(globalThis);
-  }
-  if (cachedFetch) return cachedFetch;
-  const mod = await import('node-fetch');
-  cachedFetch = (mod.default ?? mod) as FetchLike;
-  return cachedFetch;
+  return (globalThis as unknown as { fetch: FetchLike }).fetch.bind(globalThis);
 }
 
 async function generateAITips(answers: Awaited<ReturnType<typeof Questionnaire.runQuestionnaire>>, apiKey: string | null, scan: ScanResult | null) {
