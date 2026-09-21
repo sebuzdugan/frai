@@ -1,0 +1,25 @@
+packages/frai-cli/dist/index.js
+  s_ba30fff77c85e6::t_2e7c130150ae86 187,189
+packages/frai-cli/package.json
+  s_ba30fff77c85e6::t_2e7c130150ae86 3,22,50
+packages/frai-cli/src/index.ts
+  s_ba30fff77c85e6::t_2e7c130150ae86 261,263
+pnpm-lock.yaml
+  ai_agent 73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "bd22424b1df2b0bc620ceceba55d07858bb1c2a7",
+  "prompts": {},
+  "sessions": {
+    "s_ba30fff77c85e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa476d27-5697-42ad-89e4-0945c44ac8ff",
+        "model": "claude-opus-5"
+      },
+      "human_author": "sebastianbuzdugan <81054605+sebastianbuzdugan@users.noreply.github.com>"
+    }
+  }
+}
