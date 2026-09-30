@@ -589,6 +589,32 @@ async function handleCompatibilityOptions(options: GenerateOptions & { listDocs?
   await runGenerateFlow(options);
 }
 
+/**
+ * The gate's own workflow checks only the spec. With frai installed, CI can check more: the gate,
+ * AI code without a spec, and a spec that no longer names the AI the code uses. It stays offline
+ * so a network hiccup never fails a build; the live-site check is one flag away.
+ */
+function upgradeWorkflow(specFile: string) {
+  const file = path.join(process.cwd(), '.github', 'workflows', 'rai-gate.yml');
+  if (!fs.existsSync(file)) return;
+  const text = fs.readFileSync(file, 'utf8');
+  const gateLine = `      - run: npx frai-gate check ${specFile}`;
+  if (!text.includes(gateLine)) return;
+  const upgraded = text
+    .replace('      # Blocks the build until every Responsible AI Gate check in the spec is answered.\n', '')
+    .replace(
+      gateLine,
+      [
+        '      # Fails when the spec has unanswered questions, when AI code has no spec, or when the',
+        '      # spec no longer names an AI provider the code uses. Add --url https://your.site to also',
+        '      # fail when the live site has no AI notice.',
+        '      - run: npx frai@latest --ci --offline',
+      ].join('\n')
+    );
+  fs.writeFileSync(file, upgraded);
+  console.log('CI will run: npx frai@latest --ci --offline (gate, missing spec, out-of-date spec).');
+}
+
 /** Runs the bundled frai-gate CLI in a child process and returns its exit status. */
 async function runGateCli(args: string[]): Promise<number> {
   const require = createRequire(import.meta.url);
@@ -801,7 +827,10 @@ async function main() {
     .option('--out <file>', 'Write the spec somewhere else than FRAI-SPEC.md')
     .action(async (options: { out?: string }) => {
       const status = await runGateCli(['init', '--ci', ...(options.out ? ['--out', options.out] : [])]);
-      if (status === 0) console.log('Next: npx frai draft to fill the answers from your code, or answer them yourself and run npx frai.');
+      if (status === 0) {
+        upgradeWorkflow(options.out ?? 'FRAI-SPEC.md');
+        console.log('Next: npx frai draft to fill the answers from your code, or answer them yourself and run npx frai.');
+      }
       process.exit(status);
     });
 

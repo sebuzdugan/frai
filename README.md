@@ -15,7 +15,7 @@ The rule behind it is EU AI Act Article 50, enforceable since 2 August 2026: peo
 npx frai
 ```
 
-No key, no signup, no flags. In any repo it scans your code and dependencies for AI, finds your public site on its own, checks whether that site tells people, runs the gate if you have a spec, and prints the one thing to do next.
+No key, no signup, no flags. In any repo it scans your code and dependencies for AI, looks for the notice in your own UI code, finds your public site on its own, checks whether that site tells people, runs the gate if you have a spec, and prints the one thing to do next.
 
 ```
 FRAI review: support-app
@@ -56,7 +56,7 @@ All three give the same verdict for the same site: **needs a notice**, **notice 
 npx frai init
 ```
 
-This writes `FRAI-SPEC.md` and `.github/workflows/rai-gate.yml`. The build fails until the spec answers seven questions: risk tier, data and privacy, human oversight, evaluation, bias, monitoring, and transparency (where the AI notice goes). Each answer needs a number, a name, or a mechanism.
+This writes `FRAI-SPEC.md` and `.github/workflows/rai-gate.yml`, which runs `npx frai@latest --ci --offline` on every pull request. The build fails until the spec answers seven questions: risk tier, data and privacy, human oversight, evaluation, bias, monitoring, and transparency (where the AI notice goes). Each answer needs a number, a name, or a mechanism. It also fails when your code starts using an AI provider the spec never mentions, so a spec cannot quietly go stale.
 
 `PASS` and `WARN` exit 0, `BLOCK` exits 1. The gate is deterministic: no key, no model. Add `--smart` for an AI review of vague answers (needs a Claude login or `ANTHROPIC_API_KEY`).
 

@@ -9,6 +9,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { Scanners } from 'frai-core';
+import { findNoticeInCode, unmentionedInSpec } from './code-checks.js';
 
 const HOSTED = process.env.FRAI_API_URL || 'https://www.frai.cc';
 const SPEC_CANDIDATES = ['FRAI-SPEC.md', 'frai-spec.md', 'docs/FRAI-SPEC.md', '.github/FRAI-SPEC.md'];
@@ -219,6 +220,12 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
   const specPath = options.siteOnly ? null : findSpec(root);
   const gate = specPath ? await runGate(specPath) : null;
 
+  // Only the repository can answer these: is the notice in the UI code, and does the spec still
+  // name every AI provider the code now uses?
+  const noticeInCode = aiInCode && !options.siteOnly ? findNoticeInCode(root) : [];
+  const libraryNames = [...libraries.map(([name]) => name), ...declared];
+  const staleFor = specPath ? unmentionedInSpec(libraryNames, readFileSync(specPath, 'utf8')) : [];
+
   if (options.json) {
     console.log(
       JSON.stringify(
@@ -228,10 +235,12 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
             aiFiles: scan.aiFiles.map((f: string) => path.relative(root, f)),
             libraries: Object.fromEntries(libraries),
             declaredDependencies: declared,
+            noticeInCode,
           },
           site,
           report,
           spec: specPath ? path.relative(root, specPath) : null,
+          specMissingProviders: staleFor,
           gate,
         },
         null,
@@ -257,6 +266,15 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
     // Only worth a line when the manifest names something the code scan did not already show.
     const extraDeclared = declared.filter((d) => !libraries.some(([name]) => d === name || d.includes(name)));
     if (aiFilesFound && extraDeclared.length) out.push(dim(`    also in your dependencies: ${extraDeclared.join(', ')}`));
+    if (aiInCode) {
+      if (noticeInCode.length) {
+        const n = noticeInCode[0];
+        out.push(`  ${green('notice in code')}  ${n.file}:${n.line}`);
+        out.push(dim(`    ${n.text}`));
+      } else {
+        out.push(`  ${amber('no notice in code')}  no file tells people they are talking to AI`);
+      }
+    }
     out.push('');
     }
 
@@ -289,6 +307,9 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
       out.push(`  ${path.relative(root, specPath)}  ${mark}`);
       gate.lines.forEach((l) => out.push(dim(`    ${l}`)));
     }
+    if (specPath && staleFor.length) {
+      out.push(`  ${amber('out of date')}  your code uses ${staleFor.join(', ')}; ${path.relative(root, specPath)} never mentions ${staleFor.length === 1 ? 'it' : 'them'}`);
+    }
     out.push('');
     }
 
@@ -304,8 +325,16 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
       );
     }
     if (specPath && !gate) next.push('npx frai gate check FRAI-SPEC.md   run the gate on your spec');
+    if (specPath && staleFor.length) {
+      next.push(`update ${path.relative(root, specPath)} for ${staleFor.join(', ')} (data, oversight, notice), then: npx frai gate check ${path.relative(root, specPath)}`);
+    }
+    const siteHasNotice = site && !('error' in site) && site.verdict === 'review';
+    if (aiInCode && !noticeInCode.length && !siteHasNotice) {
+      const where = scan.aiFiles[0] ? ` next to the UI that shows what ${path.relative(root, scan.aiFiles[0])} returns` : '';
+      next.push(`show a notice${where}: "You're chatting with an AI assistant."`);
+    }
     if (!url && !options.offline && !options.siteOnly) next.push('npx frai check yourcompany.com     check the live site too');
-    if (site && !('error' in site) && site.verdict === 'gap') {
+    if (site && !('error' in site) && site.verdict === 'gap' && !next.some((n) => n.startsWith('show a notice'))) {
       next.push('add a notice where people meet the AI, for example: "You are chatting with an AI assistant."');
     }
     if (site && 'error' in site) next.push('the site check did not run. Try again in a minute, or check it at https://frai.cc');
@@ -324,7 +353,9 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
     const siteGap = site && !('error' in site) && site.verdict === 'gap';
     const gateBlocked = gate?.verdict === 'BLOCK';
     const missingSpec = aiInCode && !specPath;
-    if (siteGap || gateBlocked || missingSpec) return 1;
+    // A spec that passes but no longer names the AI in the code is the failure the gate alone misses.
+    const staleSpec = staleFor.length > 0;
+    if (siteGap || gateBlocked || missingSpec || staleSpec) return 1;
   }
   return 0;
 }

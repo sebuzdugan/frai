@@ -37,16 +37,18 @@ Flags on `frai`: `--ci` (exit 1 when something needs fixing), `--json`, `--offli
 
 - **Finds your site.** From `homepage` in `package.json`, then `NEXT_PUBLIC_SITE_URL`, `SITE_URL` or `APP_URL` in `.env*`, then the first real link in your README.
 - **Finds your AI.** Model calls in your code, and AI SDKs in `package.json`, `requirements.txt`, `pyproject.toml` or `Pipfile`. It skips hidden folders, `node_modules` and build output.
+- **Finds your notice in code.** It looks through components, pages, templates and locale files for wording that tells people they are talking to AI, and names the file and line. Tests, docs and the spec do not count.
+- **Notices when the spec is out of date.** If your code starts using a provider the spec never mentions — Anthropic next to OpenAI, say — `frai --ci` fails, even though the gate on its own would still pass.
 - **Checks the live site** through [frai.cc](https://frai.cc): your homepage and policy pages, with the homepage loaded in a real browser so JavaScript chat widgets are found. It respects robots.txt ([how it reads sites](https://frai.cc/bot)).
 - **Drafts honestly.** `frai draft` uses your local Claude (Claude Code login or `ANTHROPIC_API_KEY`), so nothing leaves your machine. Without one, frai.cc drafts it after listing the files it would send and asking. Anything your code doesn't show becomes `NEEDS HUMAN INPUT: <question>`, and the gate blocks until a person answers.
 
 ## In CI
 
 ```yaml
-- run: npx frai --ci
+- run: npx frai@latest --ci --offline
 ```
 
-Fails when the live site is missing a notice, the gate blocks, or AI code has no spec. If frai.cc can't be reached, the site check is skipped rather than failing your build.
+Fails when the gate blocks, when AI code has no spec, or when the spec no longer names an AI provider the code uses. `frai init` writes a workflow that runs `npx frai@latest --ci --offline`; drop `--offline` (and add `--url`) to also fail when the live site has no notice. If frai.cc can't be reached, the site check is skipped rather than failing your build.
 
 ## Older tools
 
