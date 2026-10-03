@@ -1,86 +1,88 @@
+<div align="center">
+
 # FRAI
 
-![npm version](https://img.shields.io/npm/v/frai)
-![npm downloads](https://img.shields.io/npm/dt/frai)
+**Does your product tell people it uses AI?**<br>
+One command checks your code, your live site and your spec, and fails the pull request until the answer is yes.
 
-**Does your product tell people it uses AI?** FRAI checks your code, your live site and your spec, and blocks the release until the answer is yes.
+[![npm](https://img.shields.io/npm/v/frai?color=34D3E3&label=npm)](https://www.npmjs.com/package/frai)
+[![downloads](https://img.shields.io/npm/dm/frai?color=34D3E3)](https://www.npmjs.com/package/frai)
+[![MIT](https://img.shields.io/badge/license-MIT-34D3E3)](LICENSE)
+[![Node 18+](https://img.shields.io/badge/node-18%2B-34D3E3)](https://nodejs.org)
 
-The rule behind it is EU AI Act Article 50, enforceable since 2 August 2026: people must be told when they talk to an AI system or see AI-generated content. Fines reach €15M or 3% of global turnover.
+<img src="assets/demo.gif" width="820" alt="npx frai on frai.cc's own code: finds OpenAI in 15 files and the notice in chat-client.tsx, confirms the live site, adds the gate, drafts the spec, blocks on 15 questions only a person can answer, then passes CI">
 
-![frai.cc, the free site check](assets/frai_cc_screenshot.png)
+<sub>A real run on frai.cc's own code. Only step 4 is scripted: a stand-in answers the 15 open questions.</sub>
 
-## Start here
+</div>
+
+## Try it
 
 ```bash
-npx frai
+npx frai                      # review this repo: code, live site, spec
+npx frai check yoursite.com   # check any site, no repo needed
+npx frai init                 # add the gate to every pull request
 ```
 
-No key, no signup, no flags. In any repo it scans your code and dependencies for AI, looks for the notice in your own UI code, finds your public site on its own, checks whether that site tells people, runs the gate if you have a spec, and prints the one thing to do next.
+No key, no signup. Node 18 or newer.
 
+## How it works
+
+![One command, three questions: which AI your code calls and where the notice is, whether the live site says it, and whether a person has answered the spec. You get a verdict, the wording to add, and a CI gate.](assets/how-it-works.png)
+
+- **Code.** Finds AI SDKs and model calls (OpenAI, Anthropic, Gemini, LangChain and 8 more), then the sentence in your UI that tells people, down to the file and line.
+- **Site.** Finds your URL in `package.json`, `.env` or the README, reads the homepage and policy pages like a visitor, and opens your chat widget to read what it says first.
+- **Spec.** `FRAI-SPEC.md` asks seven questions: risk tier, data, oversight, evaluation, bias, monitoring, transparency. `frai draft` fills them from your code and writes `NEEDS HUMAN INPUT: <question>` wherever the code can't know. The gate blocks until a person answers.
+
+## What it finds in the wild
+
+![We opened the chat on 9 chat vendors' own homepages: 3 say it's AI, 1 doesn't, 2 opened but run in a frame we can't read, 3 didn't open for a bot.](assets/chat-study.png)
+
+Most AI notices live inside the chat, not on the page, so a page scan misses them. FRAI declines cookies, opens the chat through the vendor's own API, reads the first screen and keeps a screenshot. Where it can't read the chat, it says so instead of guessing.
+
+## The report
+
+<img src="assets/report.png" width="720" alt="FRAI full report for intercom.com: notice found, with the chat's greeting quoted and a screenshot of the open chat">
+
+`npx frai check yoursite.com --email you@company.com` (or [frai.cc](https://frai.cc)) sends the full report: up to 10 pages, the chat opened and quoted, a screenshot, the wording to add, and a PDF. Add `--watch` and it re-checks every month. All free.
+
+## Why now
+
+Since 2 August 2026, EU AI Act Article 50 says people must be told when they're talking to an AI or seeing AI-generated content. Fines reach €15M or 3% of global turnover. Model makers watermark their output for machines. Telling the person is your job, and it is the half that breaks quietly when someone swaps a chat widget or adds a second model.
+
+## In CI
+
+```yaml
+- run: npx frai@latest --ci --offline
 ```
-FRAI review: support-app
 
-Code   AI found  3 files using openai
-Site   https://support.example.com/  needs a notice
-       Chat tool found. No AI disclosure found. · found: Intercom
-Spec   FRAI-SPEC.md  BLOCK
-       Human oversight · Escalation path needs your answer: …
-Next   answer the 4 open fields in FRAI-SPEC.md, then: npx frai gate check FRAI-SPEC.md
-```
+`frai init` writes this workflow for you. It fails when:
 
-## Four commands
+- the spec still has open questions,
+- AI code lands with no spec,
+- the code starts calling an AI provider the spec never names.
 
-| Command | What it does |
+Drop `--offline` to also fail when the live site has no notice. The gate is deterministic: no model, no key. Add `--smart` for an AI review of vague answers.
+
+## What leaves your machine
+
+| | Runs where |
 |---|---|
-| `npx frai` | Review this project. `--ci` exits 1 when something needs fixing. `--json` for machines. |
-| `npx frai check example.com` | Check any site. No repo, no key. Add `--email you@company.com` for the full report. |
-| `npx frai init` | Add `FRAI-SPEC.md` and a GitHub Action that runs the gate on every pull request. |
-| `npx frai draft` | Fill the spec from your own code. Uses your local Claude if you have one; otherwise frai.cc drafts it, after listing the files it would send. |
-
-Where your code doesn't show an answer, the drafter writes `NEEDS HUMAN INPUT: <the question>` instead of guessing, and the gate blocks until a person answers it.
-
-## Three depths of site check
-
-| | Free check | Full report | Signed in |
-|---|---|---|---|
-| **Pages read** | Homepage + up to 3 policy pages | Up to 10, adding help, support, contact, FAQ | Same as the full report |
-| **You get** | Verdict, what we found, the wording we found | Page by page, plus what to write and where | Every site you own, with history and one-click re-check |
-| **How** | [frai.cc](https://frai.cc) or `npx frai check` | Your email on frai.cc, or `--email` | A free account on frai.cc |
-| **Keeps running** | No | Optional monthly re-check | Re-check any time |
-
-All three give the same verdict for the same site: **needs a notice**, **notice found**, or **no AI found**. The deeper checks read more of the places where chat assistants and their notices actually sit.
-
-## Put it in CI
-
-```bash
-npx frai init
-```
-
-This writes `FRAI-SPEC.md` and `.github/workflows/rai-gate.yml`, which runs `npx frai@latest --ci --offline` on every pull request. The build fails until the spec answers seven questions: risk tier, data and privacy, human oversight, evaluation, bias, monitoring, and transparency (where the AI notice goes). Each answer needs a number, a name, or a mechanism. It also fails when your code starts using an AI provider the spec never mentions, so a spec cannot quietly go stale.
-
-`PASS` and `WARN` exit 0, `BLOCK` exits 1. The gate is deterministic: no key, no model. Add `--smart` for an AI review of vague answers (needs a Claude login or `ANTHROPIC_API_KEY`).
-
-<img src="assets/frai-gate-demo.gif" width="360" alt="The gate blocks empty answers, the agent drafts them from the code, then it passes" />
-
-Building with AI coding agents? `npx skills add sebuzdugan/frai-skills` teaches them to write specs that include the gate.
-
-## How FRAI reads your site
-
-FRAIBot reads robots.txt first and stays off anything it disallows. It fetches one page at a time, at least a second apart, identifies itself as `FRAIBot/1.0 (+https://frai.cc/bot)`, and never signs in or submits forms. Your homepage is also loaded once in a real browser, so chat widgets added by JavaScript are seen the way a visitor sees them. Details and how to block it: [frai.cc/bot](https://frai.cc/bot).
-
-FRAI is a technical check, not legal advice.
+| Code scan, notice-in-code, gate | On your machine. Nothing is sent. |
+| Site check | Through frai.cc, which visits your public site as [FRAIBot](https://frai.cc/bot) and respects robots.txt. Skip it with `--offline`. |
+| `frai draft` | Your own Claude (Claude Code login or `ANTHROPIC_API_KEY`). Without one, frai.cc drafts it after listing the files it would send and asking you first. |
 
 ## Packages
 
-| Package | What it is |
+| Package | |
 |---|---|
-| [`frai`](https://www.npmjs.com/package/frai) | The CLI. Node 18+. |
-| [`frai-gate`](https://www.npmjs.com/package/frai-gate) | The gate on its own: `npx frai-gate check FRAI-SPEC.md`, or `import { validateSpec } from 'frai-gate'`. |
-| [`frai-core`](https://www.npmjs.com/package/frai-core) | The SDK under the CLI: `Scanners`, `Documents`, `Questionnaire`, `Config`, `Providers`. |
+| [`frai`](https://www.npmjs.com/package/frai) | The CLI. |
+| [`frai-gate`](https://www.npmjs.com/package/frai-gate) | The gate alone: `npx frai-gate check FRAI-SPEC.md`, or `import { validateSpec } from 'frai-gate'`. |
+| [`frai-core`](https://www.npmjs.com/package/frai-core) | Scanners and document helpers under the CLI. |
 
-The CLI also keeps its original tools: `frai scan` (AI libraries and calls in your code) and `frai generate` (a questionnaire that writes a checklist, model card and risk file). `frai rag`, `frai eval` and `frai finetune` are experiments and not ready for real use.
+Building with coding agents? `npx skills add sebuzdugan/frai-skills` teaches them to write specs that include the gate.
 
-## Develop
+## Contribute
 
 ```bash
 pnpm install
@@ -88,6 +90,8 @@ pnpm --filter frai-gate build && pnpm --filter frai build
 node packages/frai-cli/dist/index.js --help
 ```
 
-To release, bump the three packages, point `frai`'s dependency ranges at the versions you're publishing (never `workspace:*`), build, then publish `frai-gate`, `frai-core` and `frai` in that order.
+The most useful contributions right now: AI SDKs we don't detect yet ([`code-checks.ts`](packages/frai-cli/src/code-checks.ts)), notice wording in other languages, and chat widgets that don't open for us. Issues and PRs welcome.
 
-MIT licensed · [frai.cc](https://frai.cc)
+To release: bump the packages, point `frai`'s dependency ranges at the versions you're publishing (never `workspace:*`), build, then publish `frai-gate`, `frai-core` and `frai` in that order.
+
+<sub>FRAI is a technical check, not legal advice. MIT licensed. Images are rendered from [`assets/source`](assets/source).</sub>

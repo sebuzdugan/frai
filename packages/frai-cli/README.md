@@ -10,6 +10,8 @@ npx frai
 
 No key, no signup, no flags. Node 18 or newer.
 
+![A real run of npx frai on frai.cc's own code](https://raw.githubusercontent.com/sebuzdugan/frai/main/assets/demo.gif)
+
 ```
 FRAI review: support-app
 

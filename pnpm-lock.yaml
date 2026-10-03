@@ -73,7 +73,7 @@ importers:
         specifier: ^0.0.3
         version: link:../frai-core
       frai-gate:
-        specifier: ^0.0.1
+        specifier: ^0.0.2
         version: link:../frai-gate
       inquirer:
         specifier: ^8.2.6

@@ -1,0 +1,40 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+html,body,.frame{width:1600px;height:690px}
+.frame{padding:56px 72px}
+.top{display:flex;justify-content:space-between;align-items:center}
+h1{font-size:44px;font-weight:800;letter-spacing:-.03em;margin-top:28px;line-height:1.08}
+h1 span{color:var(--muted)}
+.bar{margin-top:40px;display:flex;height:64px;border-radius:16px;overflow:hidden;gap:4px}
+.bar div{display:flex;align-items:center;padding:0 20px;font-weight:700;font-size:20px}
+.b1{flex:3;background:rgba(52,211,227,.22);color:var(--teal)}
+.b2{flex:1;background:rgba(248,113,113,.22);color:var(--red)}
+.b3{flex:2;background:rgba(255,255,255,.08);color:var(--muted)}
+.b4{flex:3;background:rgba(255,255,255,.04);color:var(--dim)}
+.keys{display:flex;margin-top:12px;gap:4px;font-size:16px;color:var(--muted)}
+.keys div{padding:0 4px}
+.cards{margin-top:40px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.c{background:#0C181B;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:22px 22px}
+.c .q{font-size:20px;line-height:1.42;color:#E9F2F3}
+.c .q b{color:var(--teal);font-weight:700}
+.c .who{font-size:15px;color:var(--muted);margin-top:14px;font-family:'JetBrains Mono',monospace}
+.c.no .q b{color:var(--red)}
+.foot{bottom:36px;left:72px;right:72px;font-size:15px}
+</style></head><body><div class="frame">
+<div class="top">
+ <div class="brand"><svg viewBox="0 0 24 24" fill="none" stroke="#34D3E3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5L12 2 4 5v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>FRAI</div>
+ <div class="eyebrow">Real run · 30 Sep 2026</div>
+</div>
+<h1>We opened the chat on 9 chat vendors' own homepages.<br><span>Here is what a visitor reads first.</span></h1>
+
+<div class="bar"><div class="b1">3 say it's AI</div><div class="b2">1 doesn't</div><div class="b3">2 opened, sealed</div><div class="b4">3 didn't open for a bot</div></div>
+<div class="keys"><div style="flex:3">Greeting names AI</div><div style="flex:1">AI chat, no notice</div><div style="flex:2">Cross-origin frame, unreadable</div><div style="flex:3">Reported as "chat found, did not open"</div></div>
+
+<div class="cards">
+ <div class="c"><div class="q">You are now speaking with Fin. How can I help?<br><b>Fin • AI Agent</b></div><div class="who">intercom.com</div></div>
+ <div class="c"><div class="q">Hi there! <b>AI chat</b> powered by our team. How can we help you?</div><div class="who">tidio.com</div></div>
+ <div class="c"><div class="q">Hi! I'm Apollo, <b>an AI Assistant</b>. Ask me anything about tawk.to!</div><div class="who">tawk.to</div></div>
+ <div class="c no"><div class="q">Questions? Chat with us. Suggested questions, an AI agent, <b>no notice</b>.</div><div class="who">one vendor, unnamed</div></div>
+</div>
+
+<div class="foot"><span>Each chat was opened by FRAI's widget peek: decline cookies, open the chat through the vendor's own API, read what's on screen, keep a screenshot.</span><span class="mono" style="color:var(--teal)">frai.cc</span></div>
+</div></body></html>

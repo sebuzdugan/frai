@@ -89,10 +89,31 @@ function extractTier(body: string): RiskTier | null {
   return null;
 }
 
+/**
+ * Field lines with nothing after the colon and nothing under them. A field answered by an
+ * indented list on the following lines counts as answered:
+ *   - **Data processed**:
+ *     1. Chat questions
+ */
+function emptyFieldLines(body: string): string[] {
+  const lines = body.split(/\r?\n/);
+  return lines.filter((line, i) => {
+    if (!EMPTY_FIELD.test(line)) return false;
+    const indent = line.match(/^\s*/)?.[0].length ?? 0;
+    for (const next of lines.slice(i + 1)) {
+      if (!next.trim()) continue;
+      const nextIndent = next.match(/^\s*/)?.[0].length ?? 0;
+      return !(nextIndent > indent && !EMPTY_FIELD.test(next));
+    }
+    return true;
+  });
+}
+
 function answeredText(body: string): string {
+  const empty = new Set(emptyFieldLines(body));
   return body
     .split(/\r?\n/)
-    .filter((l) => !EMPTY_FIELD.test(l))
+    .filter((l) => !empty.has(l))
     .join('\n')
     .trim();
 }
@@ -149,7 +170,9 @@ export function validateSpec(markdown: string): GateResult {
     }
     for (const line of body.split(/\r?\n/).filter((l) => NEEDS_HUMAN.test(l))) {
       // Lines look like: - **Retention**: ... NEEDS HUMAN INPUT: how long are prompts kept?
-      const label = line.match(/^\s*[-*]\s*\*\*(.+?)\*\*/)?.[1];
+      // A label that is itself the question (`- **NEEDS HUMAN INPUT: …?**`) is not a label.
+      const bold = line.match(/^\s*[-*]\s*\*\*(.+?)\*\*/)?.[1];
+      const label = bold && !NEEDS_HUMAN.test(bold) ? bold : undefined;
       const question = line.split(/NEEDS HUMAN INPUT:?\s*/i)[1]?.replace(/\*+/g, '').trim() ?? '';
       const asked = question.length > 140 ? `${question.slice(0, 137)}...` : question;
       findings.push({
@@ -159,7 +182,7 @@ export function validateSpec(markdown: string): GateResult {
         source: 'validator'
       });
     }
-    const emptyFields = body.split(/\r?\n/).filter((l) => EMPTY_FIELD.test(l));
+    const emptyFields = emptyFieldLines(body);
     for (const line of emptyFields) {
       findings.push({
         checkId: check.id,

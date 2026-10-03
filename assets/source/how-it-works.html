@@ -1,0 +1,70 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+html,body{width:1600px;height:1000px}
+.frame{height:1000px}
+.frame{padding:56px 72px}
+.top{display:flex;justify-content:space-between;align-items:center}
+h1{font-size:46px;font-weight:800;letter-spacing:-.03em;margin-top:28px;line-height:1.05}
+h1 span{color:var(--muted)}
+.cmd{font-family:'JetBrains Mono',monospace;font-size:22px;background:#071013;border:1px solid rgba(52,211,227,.35);color:var(--teal);border-radius:14px;padding:14px 20px;display:inline-flex;gap:12px;align-items:center}
+.cmd .p{color:var(--dim)}
+.grid{position:absolute;left:72px;right:72px;top:290px;bottom:104px;display:grid;grid-template-columns:250px 1fr 360px;gap:0 40px;align-items:stretch}
+.lanes{display:grid;grid-template-rows:repeat(3,1fr);gap:18px}
+.lane{display:grid;grid-template-columns:1fr;background:linear-gradient(180deg,var(--surface),rgba(15,29,33,.6));border:1px solid var(--line);border-radius:20px;padding:22px 26px;position:relative}
+.lane .lab{font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.16em;color:var(--teal)}
+.lane h3{font-size:25px;font-weight:700;margin-top:6px;letter-spacing:-.01em}
+.lane p{font-size:18px;color:var(--muted);margin-top:6px;line-height:1.45}
+.lane .out{position:absolute;right:22px;top:22px}
+.src{display:grid;grid-template-rows:repeat(3,1fr);gap:18px}
+.s{border:1px dashed rgba(255,255,255,.18);border-radius:20px;display:flex;flex-direction:column;justify-content:center;padding:0 24px;position:relative}
+.s .k{font-size:15px;color:var(--dim);font-family:'JetBrains Mono',monospace;letter-spacing:.12em}
+.s .v{font-size:24px;font-weight:700;margin-top:4px}
+.s .m{font-size:16px;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace}
+.s:after{content:'';position:absolute;right:-41px;top:50%;width:40px;height:2px;background:#1FA7B8}
+.out{display:flex;flex-direction:column;gap:18px}
+.card{border-radius:20px;padding:24px 26px;position:relative}
+.card.v{background:linear-gradient(180deg,rgba(52,211,227,.12),rgba(52,211,227,.03));border:1px solid rgba(52,211,227,.4);flex:1.2}
+.card.ci{background:linear-gradient(180deg,rgba(251,191,36,.10),rgba(251,191,36,.03));border:1px solid rgba(251,191,36,.4);flex:1}
+.card .lab{font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.16em}
+.card.v .lab{color:var(--teal)} .card.ci .lab{color:var(--amber)}
+.card h3{font-size:26px;font-weight:800;margin-top:8px;letter-spacing:-.01em}
+.card ul{list-style:none;margin-top:10px}
+.card li{font-size:17px;color:var(--muted);line-height:1.5;padding-left:20px;position:relative}
+.card li:before{content:'›';position:absolute;left:2px;color:var(--dim)}
+.card li b{color:var(--text);font-weight:600}
+.v3{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.v3 .pill{font-size:14px;padding:6px 11px}
+.lanecol{position:relative}
+.lanecol:after{content:'';position:absolute;right:-41px;top:50%;width:40px;height:2px;background:#1FA7B8}
+.foot{bottom:36px;left:72px;right:72px;font-size:16px}
+</style></head><body><div class="frame">
+
+<div class="top">
+ <div class="brand"><svg viewBox="0 0 24 24" fill="none" stroke="#34D3E3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5L12 2 4 5v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>FRAI</div>
+ <div class="cmd"><span class="p">$</span>npx frai</div>
+</div>
+
+<h1>One command, three questions.<br><span>Does your product tell people it uses AI?</span></h1>
+
+<div class="grid">
+ <div class="src">
+  <div class="s"><div class="k">READS</div><div class="v">Your repo</div><div class="m">imports, manifests,<br>UI copy</div></div>
+  <div class="s"><div class="k">VISITS</div><div class="v">Your live site</div><div class="m">from package.json,<br>.env or README</div></div>
+  <div class="s"><div class="k">CHECKS</div><div class="v">FRAI-SPEC.md</div><div class="m">seven answers,<br>one per risk area</div></div>
+ </div>
+
+ <div class="lanes lanecol">
+  <div class="lane"><div class="lab">CODE</div><h3>Which AI do you call, and where is the notice?</h3><p>OpenAI, Anthropic, Gemini, LangChain and 8 more. Then it finds the sentence that tells users, down to the file and line.</p><span class="out pill teal">15 files · chat-client.tsx:193</span></div>
+  <div class="lane"><div class="lab">SITE</div><h3>Does the deployed site say it?</h3><p>Reads your homepage and policy pages like a visitor, respects robots.txt, and opens your chat widget to read its greeting.</p><span class="out pill teal">notice found</span></div>
+  <div class="lane"><div class="lab">SPEC</div><h3>Has a person answered the hard questions?</h3><p>Risk tier, data, oversight, evaluation, bias, monitoring, transparency. Each answer needs a number, a name or a mechanism.</p><span class="out pill amber">BLOCK until answered</span></div>
+ </div>
+
+ <div class="out">
+  <div class="card v"><div class="lab">YOU GET</div><h3>A verdict and the one next step</h3>
+   <ul><li><b>needs a notice</b> · <b>notice found</b> · <b>no AI found</b></li><li>the exact wording to add, and where</li><li><b>frai draft</b> fills the spec from your code and marks what only you can answer</li></ul></div>
+  <div class="card ci"><div class="lab">IN CI · frai init</div><h3>Fails the pull request when</h3>
+   <ul><li>the spec still has open questions</li><li>AI code lands with no spec</li><li>a new AI provider appears that the spec never names</li></ul></div>
+ </div>
+</div>
+
+<div class="foot"><span><b>Open source, MIT.</b> The code check and the gate run on your machine. No key, no signup.</span><span class="mono" style="color:var(--teal)">github.com/sebuzdugan/frai</span></div>
+</div></body></html>
