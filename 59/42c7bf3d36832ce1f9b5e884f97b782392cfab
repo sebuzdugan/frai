@@ -1,0 +1,38 @@
+packages/frai-cli/README.md
+  ai_agent 13-14
+assets/source/base.css
+  ai_agent 1-17
+packages/frai-gate/src/gate/validate.ts
+  s_ba30fff77c85e6::t_8f62d96bc5a14d 92-111,113,116,173-175,185
+assets/source/chat-study.html
+  s_ba30fff77c85e6::t_862678b3452aa7 1,3-40
+assets/source/render.sh
+  ai_agent 1-5
+pnpm-lock.yaml
+  ai_agent 76
+packages/frai-gate/src/gate/validate.test.ts
+  s_ba30fff77c85e6::t_e9b3e98e2d4384 103-132
+assets/source/how-it-works.html
+  s_ba30fff77c85e6::t_1d423a19418d26 1,4-5,7-9,11-30,32-49,52-70
+  s_ba30fff77c85e6::t_c034e45289ba1c 2-3,6,10,31,50-51
+packages/frai-gate/dist/gate/validate.js
+  s_ba30fff77c85e6::t_e9b3e98e2d4384 79-99,101,104,155-157,167
+README.md
+  s_ba30fff77c85e6::t_d9fd8a240e9dc3 1-2,5-11,13,15,17,19,22-24,27,29,31,33-35,37,39,41,43,45,47-51,53,55-57,59,61-63,65,67,69-73,77,79-81,83,85,93-95,97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "5942c7bf3d36832ce1f9b5e884f97b782392cfab",
+  "prompts": {},
+  "sessions": {
+    "s_ba30fff77c85e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa476d27-5697-42ad-89e4-0945c44ac8ff",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "sebastianbuzdugan <81054605+sebastianbuzdugan@users.noreply.github.com>"
+    }
+  }
+}
