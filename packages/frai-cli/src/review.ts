@@ -35,6 +35,8 @@ interface SiteCheck {
   services: { name: string; how?: string }[];
   pagesChecked: string[];
   skippedByRobots?: string[];
+  /** The check saw notice wording. A "review" without it means AI features described, notice not seen. */
+  noticeSeen: boolean;
 }
 
 const dim = (s: string) => `[2m${s}[0m`;
@@ -162,6 +164,7 @@ async function checkSite(url: string): Promise<SiteCheck | { error: string }> {
       services: (body.services as SiteCheck['services']) ?? [],
       pagesChecked: (body.pagesChecked as string[]) ?? [],
       skippedByRobots: (body.skippedByRobots as string[]) ?? [],
+      noticeSeen: Array.isArray(body.disclosureEvidence) && body.disclosureEvidence.length > 0,
     };
   } catch (error) {
     if (error instanceof Error && error.name === 'TimeoutError') {
@@ -286,7 +289,14 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
     } else if (site && 'error' in site) {
       out.push(`  ${dim(`${url}: ${site.error}`)}`);
     } else if (site && !('error' in site)) {
-      const mark = site.verdict === 'gap' ? amber('needs a notice') : site.verdict === 'review' ? green('notice found') : dim('no AI found');
+      const mark =
+        site.verdict === 'gap'
+          ? amber('needs a notice')
+          : site.verdict === 'review'
+            ? site.noticeSeen
+              ? green('notice found')
+              : amber('AI features, no notice seen')
+            : dim('no AI found');
       out.push(`  ${site.url}  ${mark}`);
       out.push(dim(`    ${site.headline}`));
       if (site.services.length) out.push(dim(`    found: ${site.services.map((s) => s.name).join(', ')}`));
@@ -328,7 +338,7 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
     if (specPath && staleFor.length) {
       next.push(`update ${path.relative(root, specPath)} for ${staleFor.join(', ')} (data, oversight, notice), then: npx frai gate check ${path.relative(root, specPath)}`);
     }
-    const siteHasNotice = site && !('error' in site) && site.verdict === 'review';
+    const siteHasNotice = site && !('error' in site) && site.verdict === 'review' && site.noticeSeen;
     if (aiInCode && !noticeInCode.length && !siteHasNotice) {
       const where = scan.aiFiles[0] ? ` next to the UI that shows what ${path.relative(root, scan.aiFiles[0])} returns` : '';
       next.push(`show a notice${where}: "You're chatting with an AI assistant."`);
