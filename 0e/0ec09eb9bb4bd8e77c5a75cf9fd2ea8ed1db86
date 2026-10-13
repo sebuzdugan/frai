@@ -1,0 +1,68 @@
+pnpm-lock.yaml
+  ai_agent 73,76,99,120,128,136,144,152,160,168,176,199,213,234,759,1213,1401,1493,1532,1550,1709,1728,1758,1863,1868,1873,1878,1883,1891,1900,1954,2004,2040,2049,2217,2420,2434,2441,2473,2509,2513,2525,2529,2557,2617,2626,2771,2782,2807,2869,2874,3008,3092,3096,3124,3132,3136,3503,3508,3522,3536,3623,3658,3663,3716,3722,3861,3871,3884,3905,3955,3968,3973,3983,4027,4104,4180,4192,4227,4234,4239,4255,4265,4276,4298,4327,4332,4453,4461,4571,4648,4673,4879,4906,4946,4954
+packages/frai-cli/dist/code-checks.js
+  s_ba30fff77c85e6::t_0605b1bdb25a7b 13,70-72
+packages/frai-cli/dist/index.js
+  s_ba30fff77c85e6::t_a54235c6ef8d0c 514-544,746-753,756
+  s_ba30fff77c85e6::t_0605b1bdb25a7b 507-508,568,580-588,593,618,630
+packages/frai-cli/src/readme-site.test.ts
+  s_ba30fff77c85e6::t_560b7ff50fe48d 1-23
+packages/frai-gate/dist/pipeline/agent.js
+  s_ba30fff77c85e6::t_0605b1bdb25a7b 1-12,22
+packages/frai-core/src/scanners/llm-imports.test.js
+  s_ba30fff77c85e6::t_0a459b612aaa58 3,37-62
+packages/frai-core/src/scanners/constants.js
+  s_ba30fff77c85e6::t_207c7a16158bec 25-29,57-58,119-137
+packages/frai-gate/dist/cli.js
+  s_ba30fff77c85e6::t_a54235c6ef8d0c 77,102-109
+packages/frai-cli/package.json
+  s_ba30fff77c85e6::t_ec1618b92968ac 3,20-21
+packages/frai-gate/src/pipeline/agent.ts
+  s_ba30fff77c85e6::t_3c47338d9f9902 3-16,29
+packages/frai-gate/src/gate/validate.test.ts
+  s_ba30fff77c85e6::t_0605b1bdb25a7b 133-160
+packages/frai-gate/package.json
+  s_ba30fff77c85e6::t_ec1618b92968ac 3
+  s_ba30fff77c85e6::t_3c47338d9f9902 29-30,49-56
+packages/frai-cli/dist/review.js
+  s_ba30fff77c85e6::t_0605b1bdb25a7b 8,38-39,46-48,52-80,90-123,126-132,203,256,262-264,326-332,377,392-395,412-414
+  s_ba30fff77c85e6::t_a54235c6ef8d0c 403-405
+packages/frai-gate/dist/gate/validate.js
+  s_ba30fff77c85e6::t_0605b1bdb25a7b 2-4,147-148,152
+packages/frai-cli/src/code-checks.ts
+  s_ba30fff77c85e6::t_2091e1523473dc 15,72-73
+packages/frai-gate/src/cli.ts
+  s_ba30fff77c85e6::t_4c2c4942ee6082 85,111-117
+packages/frai-core/package.json
+  s_ba30fff77c85e6::t_ec1618b92968ac 3
+packages/frai-cli/src/index.ts
+  s_ba30fff77c85e6::t_046f45fc0ff3a8 609-610,675,687-695,702,727-728,739
+  s_ba30fff77c85e6::t_203d4c170e4e88 618-650,871-878,881
+packages/frai-cli/src/code-checks.test.ts
+  s_ba30fff77c85e6::t_2091e1523473dc 58-68
+packages/frai-gate/src/gate/validate.ts
+  s_ba30fff77c85e6::t_3c47338d9f9902 11-13,165-166,170
+packages/frai-core/src/scanners/detectors.js
+  s_ba30fff77c85e6::t_2df82769c2399c 25-27
+  s_ba30fff77c85e6::t_207c7a16158bec 3-4,14-15,20-24,28,36-53,57,67,70
+packages/frai-cli/src/review.ts
+  s_ba30fff77c85e6::t_7465da11dc3a57 290-292,416-417,434-436
+  s_ba30fff77c85e6::t_a54235c6ef8d0c 426-427
+  s_ba30fff77c85e6::t_c94f2f1fb36bd4 9,23-24,68-69,75-76,81-109,120-147,150-155
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "0e0ec09eb9bb4bd8e77c5a75cf9fd2ea8ed1db86",
+  "prompts": {},
+  "sessions": {
+    "s_ba30fff77c85e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa476d27-5697-42ad-89e4-0945c44ac8ff",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "sebastianbuzdugan <81054605+sebastianbuzdugan@users.noreply.github.com>"
+    }
+  }
+}
