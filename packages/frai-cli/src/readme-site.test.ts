@@ -20,4 +20,18 @@ describe('the site a README points to', () => {
   it('ignores links in comments and images', () => {
     expect(siteFromReadme('<!-- https://old.example.com -->\n![logo](https://cdn.example.com/logo.png)')).toBeNull();
   });
+
+  it('takes the app from a "Streamlit App" badge, not an API key page', () => {
+    const readme = [
+      '[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/a/b)',
+      '[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://llm-examples.streamlit.app/)',
+      '1. Go to https://platform.openai.com/account/api-keys.',
+    ].join('\n');
+    expect(siteFromReadme(readme)).toBe('https://llm-examples.streamlit.app/');
+  });
+
+  it('never picks a provider dashboard or key page', () => {
+    expect(siteFromReadme('Get a key at https://console.anthropic.com/settings/keys')).toBeNull();
+    expect(siteFromReadme('Create one at https://example.com/account/api-keys')).toBeNull();
+  });
 });

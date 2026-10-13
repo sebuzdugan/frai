@@ -80,7 +80,18 @@ export function detectSiteUrl(root: string): string | null {
 
 // Links in a README that are never the project's own site: code hosts, package registries,
 // badges, deploy buttons, dev environments and social posts.
-const NOT_THE_SITE = /^(?:[\w-]+\.)*(?:github\.com|githubusercontent\.com|github\.io\/[^/]+\/?$|gitlab\.com|bitbucket\.org|npmjs\.com|npmjs\.org|pypi\.org|shields\.io|badgen\.net|badge\.fury\.io|codecov\.io|codespaces\.new|gitpod\.io|stackblitz\.com|codesandbox\.io|replit\.com|x\.com|twitter\.com|linkedin\.com|youtube\.com|youtu\.be|discord\.gg|discord\.com|t\.me|reddit\.com|medium\.com|producthunt\.com|vercel\.com|netlify\.com|railway\.app|render\.com|heroku\.com|deploy\.cloud\.run|img\.|opensource\.org|creativecommons\.org|star-history\.com|contrib\.rocks)/i;
+const NOT_THE_SITE = /^(?:[\w-]+\.)*(?:github\.com|githubusercontent\.com|github\.io\/[^/]+\/?$|gitlab\.com|bitbucket\.org|npmjs\.com|npmjs\.org|pypi\.org|shields\.io|badgen\.net|badge\.fury\.io|codecov\.io|codespaces\.new|gitpod\.io|stackblitz\.com|codesandbox\.io|replit\.com|x\.com|twitter\.com|linkedin\.com|youtube\.com|youtu\.be|discord\.gg|discord\.com|t\.me|reddit\.com|medium\.com|producthunt\.com|vercel\.com|netlify\.com|railway\.app|render\.com|heroku\.com|deploy\.cloud\.run|img\.|opensource\.org|creativecommons\.org|star-history\.com|contrib\.rocks|platform\.openai\.com|console\.anthropic\.com|aistudio\.google\.com|makersuite\.google\.com|console\.groq\.com|console\.mistral\.ai|dashboard\.cohere\.com|huggingface\.co\/settings|portal\.azure\.com)/i;
+
+/** Hosts where a badge usually links to the running app itself: a "Streamlit App" or "Open in Spaces" badge. */
+const APP_HOSTS = /\.(?:streamlit\.app|vercel\.app|netlify\.app|pages\.dev|hf\.space|fly\.dev|onrender\.com|up\.railway\.app|herokuapp\.com)$/i;
+
+const pathOf = (url: string) => {
+  try {
+    return new URL(url).pathname;
+  } catch {
+    return '';
+  }
+};
 
 /** The project's own site from its README, or null. Badges, images and deploy buttons do not count. */
 export function siteFromReadme(markdown: string): string | null {
@@ -90,6 +101,14 @@ export function siteFromReadme(markdown: string): string | null {
     .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ') // ![image](src)
     .replace(/<img[^>]*>/gi, ' ');
   const candidates: { url: string; preferred: boolean }[] = [];
+  // Badges are dropped, except one that links to the app itself.
+  for (const m of markdown.matchAll(/\[!\[[^\]]*\]\([^)]*\)\]\((https?:\/\/[^)\s]+)\)/g)) {
+    try {
+      if (APP_HOSTS.test(new URL(m[1]).hostname)) candidates.push({ url: m[1], preferred: true });
+    } catch {
+      // not a URL
+    }
+  }
   for (const line of text.split('\n')) {
     for (const m of line.matchAll(/https?:\/\/[^\s)"'<>\]]+/gi)) {
       const url = m[0].replace(/[.,;:!?]+$/, '');
@@ -101,6 +120,7 @@ export function siteFromReadme(markdown: string): string | null {
         continue;
       }
       if (NOT_THE_SITE.test(host) || /\.(?:png|jpe?g|gif|svg|webp)(?:\?|$)/i.test(url) || /localhost|127\.0\.0\.1/.test(url)) continue;
+      if (/api[-_]?keys?\b|\/settings\/tokens/i.test(pathOf(url))) continue;
       candidates.push({ url, preferred: /\b(?:demo|live|website|homepage|try it|visit|app)\b/i.test(line) });
     }
   }
