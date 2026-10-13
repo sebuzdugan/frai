@@ -22,7 +22,11 @@ export const DEFAULT_CODE_EXTENSIONS = [
   '.r',
   '.rmd',
   '.java',
-  '.scala'
+  '.scala',
+  '.mjs',
+  '.cjs',
+  '.mts',
+  '.cts'
 ];
 
 export const DEFAULT_AI_LIBRARIES = [
@@ -50,6 +54,8 @@ export const DEFAULT_AI_LIBRARIES = [
   'ollama',
   'litellm',
   '@ai-sdk',
+  // The Vercel AI SDK core package: import { streamText } from "ai"
+  'ai',
   '@azure/openai',
   'azure.ai.inference',
   // Python ML/AI libraries
@@ -109,4 +115,24 @@ export const DEFAULT_AI_FUNCTIONS = [
   'generate',
   'fine_tune',
   'finetune'
+];
+
+/**
+ * Calls that only an AI SDK makes. A file with one of these is an AI file even when the client
+ * comes from elsewhere (a wrapper module, a dependency-injected client).
+ */
+export const DEFAULT_MODEL_CALLS = [
+  'chat.completions.create',
+  'responses.create',
+  'completions.create',
+  'embeddings.create',
+  'messages.create',
+  'messages.stream',
+  'generateText',
+  'streamText',
+  'generateObject',
+  'streamObject',
+  'generate_content',
+  'generateContent',
+  'ChatCompletion.create'
 ];

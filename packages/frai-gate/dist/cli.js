@@ -74,6 +74,7 @@ async function cmdInit(args) {
         // does not exist - good
     }
     const template = await fs.readFile(TEMPLATE_PATH, 'utf8');
+    await fs.mkdir(path.dirname(target), { recursive: true });
     await fs.writeFile(target, template);
     console.log(`Created ${out}. Fill in every FRAI Gate field, then run: frai-gate check ${out}`);
     if (args.flags.has('ci')) {
@@ -98,7 +99,14 @@ async function cmdCheck(args) {
         console.error('Usage: frai-gate check <spec.md> [--smart] [--json]');
         return 2;
     }
-    const markdown = await fs.readFile(path.resolve(process.cwd(), specPath), 'utf8');
+    let markdown;
+    try {
+        markdown = await fs.readFile(path.resolve(process.cwd(), specPath), 'utf8');
+    }
+    catch {
+        console.error(`No spec at ${specPath}. Create one with: frai-gate init --out ${specPath}`);
+        return 2;
+    }
     const result = validateSpec(markdown);
     if (args.flags.has('smart') && result.gateSection) {
         const agentFindings = await smartReview(markdown, process.cwd());

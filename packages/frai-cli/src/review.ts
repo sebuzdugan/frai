@@ -6,7 +6,7 @@
  * that site tells people about its AI, runs the gate if a spec exists, and prints the next command.
  */
 
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { Scanners } from 'frai-core';
 import { findNoticeInCode, unmentionedInSpec } from './code-checks.js';
@@ -20,6 +20,8 @@ export interface ReviewOptions {
   json?: boolean;
   ci?: boolean;
   offline?: boolean;
+  /** Spec file, when it is not in one of the usual places. */
+  spec?: string;
   /** `frai check <url>`: report on the site only, skip the repo. */
   siteOnly?: boolean;
   /** Email the full page-by-page report to this address. */
@@ -63,18 +65,46 @@ export function detectSiteUrl(root: string): string | null {
     const file = path.join(root, envFile);
     if (!existsSync(file)) continue;
     const text = readFileSync(file, 'utf8');
-    const match = text.match(/^(?:NEXT_PUBLIC_(?:APP|SITE)_URL|SITE_URL|PUBLIC_URL|APP_URL)\s*=\s*"?(https?:\/\/[^\s"']+)"?/m);
-    if (match && !match[1].includes('localhost')) return match[1];
+    const match = text.match(/^(?:NEXT_PUBLIC_(?:APP|SITE)_URL|SITE_URL|PUBLIC_URL|APP_URL)\s*=\s*["']?(https?:\/\/[^\s"']+)["']?/m);
+    if (match && !/localhost|127\.0\.0\.1/.test(match[1])) return match[1];
   }
 
   for (const readme of ['README.md', 'readme.md']) {
     const file = path.join(root, readme);
     if (!existsSync(file)) continue;
-    const text = readFileSync(file, 'utf8');
-    const match = text.match(/https?:\/\/(?!github\.com|www\.npmjs\.com|img\.shields\.io|badge)[a-z0-9.-]+\.[a-z]{2,}[^\s)"']*/i);
-    if (match) return match[0];
+    const url = siteFromReadme(readFileSync(file, 'utf8'));
+    if (url) return url;
   }
   return null;
+}
+
+// Links in a README that are never the project's own site: code hosts, package registries,
+// badges, deploy buttons, dev environments and social posts.
+const NOT_THE_SITE = /^(?:[\w-]+\.)*(?:github\.com|githubusercontent\.com|github\.io\/[^/]+\/?$|gitlab\.com|bitbucket\.org|npmjs\.com|npmjs\.org|pypi\.org|shields\.io|badgen\.net|badge\.fury\.io|codecov\.io|codespaces\.new|gitpod\.io|stackblitz\.com|codesandbox\.io|replit\.com|x\.com|twitter\.com|linkedin\.com|youtube\.com|youtu\.be|discord\.gg|discord\.com|t\.me|reddit\.com|medium\.com|producthunt\.com|vercel\.com|netlify\.com|railway\.app|render\.com|heroku\.com|deploy\.cloud\.run|img\.|opensource\.org|creativecommons\.org|star-history\.com|contrib\.rocks)/i;
+
+/** The project's own site from its README, or null. Badges, images and deploy buttons do not count. */
+export function siteFromReadme(markdown: string): string | null {
+  const text = markdown
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)/g, ' ') // [![badge](img)](link)
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ') // ![image](src)
+    .replace(/<img[^>]*>/gi, ' ');
+  const candidates: { url: string; preferred: boolean }[] = [];
+  for (const line of text.split('\n')) {
+    for (const m of line.matchAll(/https?:\/\/[^\s)"'<>\]]+/gi)) {
+      const url = m[0].replace(/[.,;:!?]+$/, '');
+      let host = '';
+      try {
+        const u = new URL(url);
+        host = u.hostname + u.pathname;
+      } catch {
+        continue;
+      }
+      if (NOT_THE_SITE.test(host) || /\.(?:png|jpe?g|gif|svg|webp)(?:\?|$)/i.test(url) || /localhost|127\.0\.0\.1/.test(url)) continue;
+      candidates.push({ url, preferred: /\b(?:demo|live|website|homepage|try it|visit|app)\b/i.test(line) });
+    }
+  }
+  return (candidates.find((c) => c.preferred) ?? candidates[0])?.url ?? null;
 }
 
 /** AI SDKs people actually install. Matched against manifests, so a dependency counts even when
@@ -87,12 +117,42 @@ const AI_PACKAGES = [
 const AI_PY_PACKAGES = ['openai', 'anthropic', 'langchain', 'llama-index', 'transformers', 'google-generativeai', 'cohere', 'litellm', 'ollama'];
 
 /** Reads the manifests, not the code: "you depend on an AI SDK" is worth saying on its own. */
+/** package.json files of the workspace packages in a monorepo (npm/yarn workspaces, pnpm-workspace.yaml). */
+function workspaceManifests(root: string): string[] {
+  const pkg = readJson(path.join(root, 'package.json'));
+  const globs: string[] = [];
+  const ws = pkg?.workspaces as unknown;
+  if (Array.isArray(ws)) globs.push(...ws.filter((g): g is string => typeof g === 'string'));
+  else if (ws && typeof ws === 'object' && Array.isArray((ws as { packages?: unknown }).packages)) globs.push(...((ws as { packages: string[] }).packages));
+  const pnpm = path.join(root, 'pnpm-workspace.yaml');
+  if (existsSync(pnpm)) {
+    for (const m of readFileSync(pnpm, 'utf8').matchAll(/^\s*-\s*['"]?([^'"\n#]+?)['"]?\s*$/gm)) globs.push(m[1]);
+  }
+  const files: string[] = [];
+  for (const glob of globs) {
+    if (glob.startsWith('!')) continue;
+    const base = glob.replace(/\/\*\*?$/, '');
+    if (glob.endsWith('*')) {
+      try {
+        for (const dir of readdirSync(path.join(root, base))) files.push(path.join(root, base, dir, 'package.json'));
+      } catch {
+        // not a directory
+      }
+    } else {
+      files.push(path.join(root, base, 'package.json'));
+    }
+  }
+  return files.filter((f) => existsSync(f)).slice(0, 100);
+}
+
 export function declaredAiDependencies(root: string): string[] {
   const found = new Set<string>();
-  const pkg = readJson(path.join(root, 'package.json'));
-  const deps = { ...(pkg?.dependencies as object), ...(pkg?.devDependencies as object) } as Record<string, string>;
-  for (const name of Object.keys(deps ?? {})) {
-    if (AI_PACKAGES.includes(name) || name.startsWith('@ai-sdk/') || name.startsWith('@langchain/')) found.add(name);
+  for (const manifest of [path.join(root, 'package.json'), ...workspaceManifests(root)]) {
+    const pkg = readJson(manifest);
+    const deps = { ...(pkg?.dependencies as object), ...(pkg?.devDependencies as object) } as Record<string, string>;
+    for (const name of Object.keys(deps ?? {})) {
+      if (AI_PACKAGES.includes(name) || name.startsWith('@ai-sdk/') || name.startsWith('@langchain/')) found.add(name);
+    }
   }
   for (const manifest of ['requirements.txt', 'pyproject.toml', 'Pipfile']) {
     const file = path.join(root, manifest);
@@ -220,14 +280,16 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
   const site = url && !options.offline ? await checkSite(url) : null;
   const report = url && options.email && site && !('error' in site) ? await requestReport(url, options.email, Boolean(options.watch)) : null;
 
-  const specPath = options.siteOnly ? null : findSpec(root);
+  const specPath = options.siteOnly ? null : options.spec ? (existsSync(path.resolve(root, options.spec)) ? path.resolve(root, options.spec) : null) : findSpec(root);
   const gate = specPath ? await runGate(specPath) : null;
 
   // Only the repository can answer these: is the notice in the UI code, and does the spec still
   // name every AI provider the code now uses?
   const noticeInCode = aiInCode && !options.siteOnly ? findNoticeInCode(root) : [];
   const libraryNames = [...libraries.map(([name]) => name), ...declared];
-  const staleFor = specPath ? unmentionedInSpec(libraryNames, readFileSync(specPath, 'utf8')) : [];
+  // The template's HTML comments carry example answers ("OpenAI retention 30 days"); only the
+  // spec's own words count when asking whether it names the AI the code uses.
+  const staleFor = specPath ? unmentionedInSpec(libraryNames, readFileSync(specPath, 'utf8').replace(/<!--[\s\S]*?-->/g, ' ')) : [];
 
   if (options.json) {
     console.log(
@@ -351,6 +413,8 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
     if (site && !('error' in site) && !options.email && site.verdict !== 'no-ai') {
       next.push(`npx frai check ${new URL(site.url).hostname} --email you@company.com   page-by-page report, up to 10 pages`);
     }
+    if (specPath && gate?.verdict === 'WARN') next.push(`read the gate's warnings: npx frai gate check ${path.relative(root, specPath)}`);
+    if (specPath && !gate) next.push('the gate could not run. Install frai-gate (npm i -D frai-gate) or run: npx frai-gate check FRAI-SPEC.md');
     if (next.length === 0) next.push('nothing to fix right now. Re-run this after your next AI change.');
 
     out.push(bold('Next'));
@@ -359,13 +423,17 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
     console.log(out.join('\n'));
   }
 
+  // `frai check` is only the site check: when it could not run, the command failed.
+  if (options.siteOnly && site && 'error' in site) return 1;
   if (options.ci) {
     const siteGap = site && !('error' in site) && site.verdict === 'gap';
     const gateBlocked = gate?.verdict === 'BLOCK';
     const missingSpec = aiInCode && !specPath;
     // A spec that passes but no longer names the AI in the code is the failure the gate alone misses.
     const staleSpec = staleFor.length > 0;
-    if (siteGap || gateBlocked || missingSpec || staleSpec) return 1;
+    // A spec the gate could not read is not a pass.
+    const gateBroken = Boolean(specPath) && !gate;
+    if (siteGap || gateBlocked || missingSpec || staleSpec || gateBroken) return 1;
   }
   return 0;
 }

@@ -1,5 +1,7 @@
 import { GATE_CHECKS, GATE_HEADING, RISK_TIERS, verdictFrom } from './schema.js';
-const PLACEHOLDER = /\b(TBD|TODO|FIXME|XXX)\b|\bfill\s+(this\s+)?in\b/i;
+// Placeholders are written in capitals (TBD, TODO) or are the whole answer ("fill in", "<fill this in>").
+// "their open todo items" or "customers fill in a form" are real answers.
+const PLACEHOLDER = /\b(?:TBD|TODO|FIXME|XXX)\b|:\s*[<\[(]?\s*fill\s+(?:this\s+)?in\s*[>\])]?\s*\.?\s*$/m;
 // The drafter marks what it could not learn from the code. An unresolved marker is not an answer.
 const NEEDS_HUMAN = /NEEDS HUMAN INPUT/i;
 /** A template field line whose value was never filled in, e.g. `- **Retention**:` */
@@ -142,11 +144,12 @@ export function validateSpec(markdown) {
             });
             continue;
         }
-        if (PLACEHOLDER.test(body)) {
+        const placeholderLine = body.split(/\r?\n/).find((l) => PLACEHOLDER.test(l));
+        if (placeholderLine) {
             findings.push({
                 checkId: check.id,
                 severity: 'block',
-                message: `"${check.title}" contains placeholder text (TBD/TODO). Answer it concretely.`,
+                message: `"${check.title}" contains placeholder text. Answer it concretely: ${placeholderLine.trim().slice(0, 120)}`,
                 source: 'validator'
             });
         }

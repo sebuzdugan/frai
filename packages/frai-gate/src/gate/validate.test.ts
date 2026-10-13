@@ -130,6 +130,34 @@ describe('validateSpec', () => {
     expect(result.findings.some((f) => f.message.includes('Data sources'))).toBe(true);
   });
 
+  it('does not mistake ordinary words for placeholders', () => {
+    const result = validateSpec(
+      fullSpec({
+        data: `### 5.2 Data provenance & privacy
+
+- **Data sources**: users' open todo items and notes; customers fill in a correction form
+- **PII involved?**: no
+- **Retention**: prompts kept 30 days, then hard-deleted
+- **Used for training?**: no; provider training disabled`
+      })
+    );
+    expect(result.findings.filter((f) => f.checkId === 'data-privacy')).toEqual([]);
+  });
+
+  it('blocks an answer that is only "fill in", and quotes it', () => {
+    const result = validateSpec(
+      fullSpec({
+        data: `### 5.2 Data provenance & privacy
+
+- **Data sources**: <fill in>
+- **PII involved?**: no
+- **Retention**: prompts kept 30 days, then hard-deleted
+- **Used for training?**: no; provider training disabled`
+      })
+    );
+    expect(result.findings.some((f) => f.message.includes('Data sources'))).toBe(true);
+  });
+
   it('blocks a missing subsection', () => {
     const spec = fullSpec();
     const withoutBias = spec.replace(/### 5\.5 Bias & fairness[\s\S]*?(?=### 5\.6)/, '');

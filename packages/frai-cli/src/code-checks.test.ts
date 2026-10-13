@@ -55,3 +55,14 @@ describe('unmentionedInSpec', () => {
     expect(unmentionedInSpec(['numpy'], 'Nothing here.')).toEqual([]);
   });
 });
+
+describe('comments are not notices', () => {
+  it('skips TODO and comment lines', () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'frai-cmt-'));
+    mkdirSync(path.join(dir, 'components'));
+    writeFileSync(path.join(dir, 'components', 'Chat.tsx'), "// TODO(legal): add \"You're chatting with an AI assistant\"\nexport const Chat = () => null\n");
+    expect(findNoticeInCode(dir)).toEqual([]);
+    writeFileSync(path.join(dir, 'components', 'Chat.tsx'), "export const Chat = () => <p>You're chatting with an AI assistant.</p>\n");
+    expect(findNoticeInCode(dir)[0]?.line).toBe(1);
+  });
+});

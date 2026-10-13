@@ -606,13 +606,46 @@ function upgradeWorkflow(specFile: string) {
       gateLine,
       [
         '      # Fails when the spec has unanswered questions, when AI code has no spec, or when the',
-        '      # spec no longer names an AI provider the code uses. Add --url https://your.site to also',
-        '      # fail when the live site has no AI notice.',
-        '      - run: npx frai@latest --ci --offline',
+        '      # spec no longer names an AI provider the code uses. To also fail when the live site',
+        '      # has no AI notice, replace --offline with --url https://your.site',
+        `      - run: npx frai@latest --ci --offline${specFile === 'FRAI-SPEC.md' ? '' : ` --spec ${specFile}`}`,
       ].join('\n')
     );
   fs.writeFileSync(file, upgraded);
   console.log('CI will run: npx frai@latest --ci --offline (gate, missing spec, out-of-date spec).');
+}
+
+/** Writes the frai CI workflow when the repo has none, or upgrades the gate-only one. */
+function ensureWorkflow(specFile: string) {
+  const file = path.join(process.cwd(), '.github', 'workflows', 'rai-gate.yml');
+  if (fs.existsSync(file)) {
+    if (fs.readFileSync(file, 'utf8').includes('npx frai@latest')) console.log('CI workflow already runs frai.');
+    else upgradeWorkflow(specFile);
+    return;
+  }
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(
+    file,
+    [
+      'name: Responsible AI Gate',
+      'on:',
+      '  pull_request:',
+      '  push:',
+      '    branches: [main]',
+      'jobs:',
+      '  rai-gate:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - uses: actions/setup-node@v4',
+      '        with:',
+      "          node-version: '20'",
+      `      - run: npx frai-gate check ${specFile}`,
+      '',
+    ].join('\n')
+  );
+  console.log('Created .github/workflows/rai-gate.yml.');
+  upgradeWorkflow(specFile);
 }
 
 /** Runs the bundled frai-gate CLI in a child process and returns its exit status. */
@@ -639,7 +672,7 @@ async function main() {
     .description('Checks whether your product tells people it uses AI, and what to fix.')
     .version(pkg.version ?? '0.0.0')
     .option('--scan', 'Run code scanning before documentation generation')
-    .option('--ci', 'Run in CI mode (scan + exit if no AI indicators)')
+    .option('--ci', 'Exit 1 when something needs fixing (CI)')
     .option('--setup', 'Shortcut to open API key setup flow')
     .option('--key <apiKey>', 'Provide an OpenAI API key for this invocation', undefined)
     .option('--global', 'Persist provided API key in the global config store', false)
@@ -651,14 +684,22 @@ async function main() {
     .option('--url <url>', 'Site to check instead of the one detected from this project')
     .option('--json', 'Print the review as JSON')
     .option('--offline', 'Skip the hosted site check')
-    .action(async (options) => {
+    .option('--spec <file>', 'Spec file, when it is not FRAI-SPEC.md')
+    .argument('[command]')
+    .action(async (unknown: string | undefined, options) => {
+      // "frai chek example.com" or "frai ci" must not quietly run a review and pass.
+      if (unknown) {
+        console.error(`Unknown command: ${unknown}. Run "frai --help" for the list. Did you mean "frai check ${unknown}" or "frai --ci"?`);
+        process.exitCode = 1;
+        return;
+      }
       const usedLegacyFlag = Boolean(
         options.scan || options.setup || options.key || options.listDocs || options.clean ||
         options.exportPdf || options.showConfig || options.update
       );
       if (!usedLegacyFlag) {
         // Bare `frai` (or `frai --ci`) reviews the project: scan, site check, gate, next step.
-        const code = await runReview({ url: options.url, json: options.json, ci: options.ci, offline: options.offline });
+        const code = await runReview({ url: options.url, json: options.json, ci: options.ci, offline: options.offline, spec: options.spec });
         if (code !== 0) process.exitCode = code;
         return;
       }
@@ -683,7 +724,8 @@ async function main() {
     .option('--json', 'Print the review as JSON')
     .option('--ci', 'Exit 1 when something needs fixing')
     .option('--offline', 'Skip the hosted site check')
-    .action(async (options: { url?: string; json?: boolean; ci?: boolean; offline?: boolean }) => {
+    .option('--spec <file>', 'Spec file, when it is not FRAI-SPEC.md')
+    .action(async (options: { url?: string; json?: boolean; ci?: boolean; offline?: boolean; spec?: string }) => {
       const code = await runReview(options);
       if (code !== 0) process.exitCode = code;
     });
@@ -694,7 +736,7 @@ async function main() {
     .option('--email <address>', 'Also email the full page-by-page report (up to 10 pages)')
     .option('--watch', 'With --email: re-check monthly, email only if the answer changes')
     .option('--json', 'Print the result as JSON')
-    .option('--ci', 'Exit 1 when a notice is missing')
+    .option('--ci', 'Exit 1 when the site needs a notice')
     .action(async (url: string | undefined, options: { json?: boolean; ci?: boolean; email?: string; watch?: boolean }) => {
       const code = await runReview({ url, json: options.json, ci: options.ci, siteOnly: true, email: options.email, watch: options.watch });
       if (code !== 0) process.exitCode = code;
@@ -826,9 +868,17 @@ async function main() {
     .description('Add FRAI-SPEC.md and the CI check to this repo.')
     .option('--out <file>', 'Write the spec somewhere else than FRAI-SPEC.md')
     .action(async (options: { out?: string }) => {
+      const spec = options.out ?? 'FRAI-SPEC.md';
+      // An existing spec is kept as it is, but CI is still set up: re-running init is how a repo
+      // that already has a spec gets the workflow.
+      if (fs.existsSync(path.resolve(spec))) {
+        console.log(`${spec} already exists, keeping it.`);
+        ensureWorkflow(spec);
+        process.exit(0);
+      }
       const status = await runGateCli(['init', '--ci', ...(options.out ? ['--out', options.out] : [])]);
       if (status === 0) {
-        upgradeWorkflow(options.out ?? 'FRAI-SPEC.md');
+        upgradeWorkflow(spec);
         console.log('Next: npx frai draft to fill the answers from your code, or answer them yourself and run npx frai.');
       }
       process.exit(status);

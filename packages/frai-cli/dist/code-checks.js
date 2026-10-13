@@ -10,7 +10,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 const UI_EXTENSIONS = new Set(['.tsx', '.jsx', '.vue', '.svelte', '.astro', '.html', '.ts', '.js', '.mdx', '.json', '.yml', '.yaml', '.liquid', '.erb', '.twig', '.php', '.py']);
 const SKIP_DIRS = new Set(['node_modules', 'dist', 'build', 'out', 'coverage', 'vendor', '.next', '.git', '.venv', '__pycache__']);
-const MAX_FILES = 4000;
+const MAX_FILES = 20000;
 const NOT_PRODUCT = /(^|\/)(__tests__|__mocks__|tests?|spec|specs|e2e|fixtures|stories|docs?|examples?|scripts)\/|\.(test|spec|stories)\.[a-z]+$|frai-spec\.md$/i;
 const MAX_BYTES = 400000;
 // The same notice phrases the site check looks for, so a notice in code counts the same as one on the page.
@@ -67,6 +67,9 @@ export function findNoticeInCode(root) {
         }
         const lines = text.split('\n');
         for (let i = 0; i < lines.length; i++) {
+            // A comment is a plan, not a notice: "// TODO: add 'You're chatting with an AI assistant'".
+            if (/^\s*(?:\/\/|#|\*|\/\*|<!--|\{\/\*)/.test(lines[i]) || /\b(?:TODO|FIXME)\b/.test(lines[i]))
+                continue;
             if (NOTICE.some((re) => re.test(lines[i]))) {
                 hits.push({ file: path.relative(root, file), line: i + 1, text: lines[i].trim().slice(0, 140) });
                 break;

@@ -1,5 +1,18 @@
-import { query } from '@anthropic-ai/claude-agent-sdk';
 import { Finding } from '../gate/schema.js';
+
+/**
+ * The Claude Agent SDK is an optional add-on (about 230MB). The gate itself never needs it, so it
+ * is loaded only when an AI review or a local draft actually runs.
+ */
+async function loadQuery() {
+  try {
+    return (await import('@anthropic-ai/claude-agent-sdk')).query;
+  } catch {
+    throw new Error(
+      'The AI review needs the Claude Agent SDK. Install it with: npm i -g @anthropic-ai/claude-agent-sdk (frai draft can also draft on frai.cc without it).'
+    );
+  }
+}
 
 const DEFAULT_MODEL = process.env.FRAI_GATE_MODEL ?? 'claude-opus-5';
 
@@ -13,6 +26,7 @@ const READ_ONLY_OPTIONS = {
 };
 
 async function runQuery(prompt: string, cwd: string, maxTurns: number): Promise<string> {
+  const query = await loadQuery();
   const stream = query({
     prompt,
     options: { ...READ_ONLY_OPTIONS, cwd, maxTurns }
