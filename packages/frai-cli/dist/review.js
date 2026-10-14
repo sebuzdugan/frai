@@ -100,6 +100,7 @@ export function siteFromReadme(markdown) {
     }
     return (candidates.find((c) => c.preferred) ?? candidates[0])?.url ?? null;
 }
+const PREDICTIVE_ML = /^(?:sklearn|scikit-learn|xgboost|lightgbm|catboost|statsmodels|prophet|pmdarima)$/i;
 /** AI SDKs people actually install. Matched against manifests, so a dependency counts even when
  *  the code that calls it is in a file type the scanner does not read. */
 const AI_PACKAGES = [
@@ -281,6 +282,9 @@ export async function runReview(options = {}) {
     // name every AI provider the code now uses?
     const noticeInCode = aiInCode && !options.siteOnly ? findNoticeInCode(root) : [];
     const libraryNames = [...libraries.map(([name]) => name), ...declared];
+    // Classic machine learning (a scikit-learn model scoring rows) talks to no one and generates no
+    // content, so "You're chatting with an AI assistant" is the wrong advice for it.
+    const predictiveOnly = libraryNames.length > 0 && libraryNames.every((n) => PREDICTIVE_ML.test(n));
     // The template's HTML comments carry example answers ("OpenAI retention 30 days"); only the
     // spec's own words count when asking whether it names the AI the code uses.
     const staleFor = specPath ? unmentionedInSpec(libraryNames, readFileSync(specPath, 'utf8').replace(/<!--[\s\S]*?-->/g, ' ')) : [];
@@ -327,6 +331,9 @@ export async function runReview(options = {}) {
                     const n = noticeInCode[0];
                     out.push(`  ${green('notice in code')}  ${n.file}:${n.line}`);
                     out.push(dim(`    ${n.text}`));
+                }
+                else if (predictiveOnly) {
+                    out.push(`  ${dim('no notice in code')}  this AI predicts rather than chats or generates, so a chat notice may not apply`);
                 }
                 else {
                     out.push(`  ${amber('no notice in code')}  no file tells people they are talking to AI`);
@@ -397,7 +404,10 @@ export async function runReview(options = {}) {
             next.push(`update ${path.relative(root, specPath)} for ${staleFor.join(', ')} (data, oversight, notice), then: npx frai gate check ${path.relative(root, specPath)}`);
         }
         const siteHasNotice = site && !('error' in site) && site.verdict === 'review' && site.noticeSeen;
-        if (aiInCode && !noticeInCode.length && !siteHasNotice) {
+        if (aiInCode && predictiveOnly && !noticeInCode.length) {
+            next.push(`your AI (${libraryNames.join(', ')}) makes predictions. Article 50 notices are for chatbots and generated content; if the predictions decide things about people (credit, hiring, insurance), check the high-risk rules instead`);
+        }
+        else if (aiInCode && !noticeInCode.length && !siteHasNotice) {
             const where = scan.aiFiles[0] ? ` next to the UI that shows what ${path.relative(root, scan.aiFiles[0])} returns` : '';
             next.push(`show a notice${where}: "You're chatting with an AI assistant."`);
         }

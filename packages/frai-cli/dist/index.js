@@ -4,7 +4,7 @@ import path from 'path';
 import process from 'process';
 import { execSync } from 'child_process';
 import { createRequire } from 'module';
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { runReview } from './review.js';
 import { runDraft } from './draft.js';
 import inquirer from 'inquirer';
@@ -564,16 +564,18 @@ async function main() {
         .name('frai')
         .description('Checks whether your product tells people it uses AI, and what to fix.')
         .version(pkg.version ?? '0.0.0')
-        .option('--scan', 'Run code scanning before documentation generation')
+        .usage('[options] [command]')
         .option('--ci', 'Exit 1 when something needs fixing (CI)')
-        .option('--setup', 'Shortcut to open API key setup flow')
-        .option('--key <apiKey>', 'Provide an OpenAI API key for this invocation', undefined)
-        .option('--global', 'Persist provided API key in the global config store', false)
-        .option('--list-docs', 'List generated documentation files')
-        .option('--clean', 'Remove generated documentation files')
-        .option('--export-pdf', 'Export documentation files as PDFs')
-        .option('--show-config', 'Display API key configuration status')
-        .option('--update', 'Check for new CLI releases')
+        // The documentation generator's options still work, but are no longer what frai is for.
+        .addOption(new Option('--scan', 'Run code scanning before documentation generation').hideHelp())
+        .addOption(new Option('--setup', 'Shortcut to open API key setup flow').hideHelp())
+        .addOption(new Option('--key <apiKey>', 'Provide an OpenAI API key for this invocation').hideHelp())
+        .addOption(new Option('--global', 'Persist provided API key in the global config store').default(false).hideHelp())
+        .addOption(new Option('--list-docs', 'List generated documentation files').hideHelp())
+        .addOption(new Option('--clean', 'Remove generated documentation files').hideHelp())
+        .addOption(new Option('--export-pdf', 'Export documentation files as PDFs').hideHelp())
+        .addOption(new Option('--show-config', 'Display API key configuration status').hideHelp())
+        .addOption(new Option('--update', 'Check for new CLI releases').hideHelp())
         .option('--url <url>', 'Site to check instead of the one detected from this project')
         .option('--json', 'Print the review as JSON')
         .option('--offline', 'Skip the hosted site check')
@@ -645,7 +647,7 @@ async function main() {
             process.exitCode = code;
     });
     program
-        .command('generate')
+        .command('generate', { hidden: true })
         .description('Run the interactive documentation workflow.')
         .option('--scan', 'Run code scanning before documentation generation')
         .option('--ci', 'Run in CI mode')
@@ -657,7 +659,7 @@ async function main() {
         await runGenerateFlow(options);
     });
     program
-        .command('scan')
+        .command('scan', { hidden: true })
         .description('Scan the current codebase for AI/ML artefacts.')
         .option('--ci', 'Run in CI mode')
         .option('--json', 'Print raw JSON results')
@@ -669,7 +671,7 @@ async function main() {
         });
     });
     program
-        .command('setup')
+        .command('setup', { hidden: true })
         .description('Configure the OpenAI API key store.')
         .option('--key <apiKey>', 'Provide an API key to store')
         .option('--global', 'Store the API key globally (instead of local project)')
@@ -677,12 +679,12 @@ async function main() {
         await runSetupFlow(options.key, Boolean(options.global));
     });
     program
-        .command('config')
+        .command('config', { hidden: true })
         .description('Display API key configuration status.')
         .action(() => {
         showConfigStatus();
     });
-    const docsCommand = program.command('docs').description('Manage generated documentation artefacts.');
+    const docsCommand = program.command('docs', { hidden: true }).description('Manage generated documentation artefacts.');
     docsCommand
         .command('list')
         .description('List generated documentation files.')
@@ -696,7 +698,7 @@ async function main() {
         .description('Export documentation to PDF using markdown-pdf.')
         .action(() => exportDocsAsPdf());
     program
-        .command('rag')
+        .command('rag', { hidden: true })
         .description('Compliance-aware retrieval-augmented generation tooling.')
         .command('index')
         .description('Create a vector index for documents.')
@@ -713,7 +715,7 @@ async function main() {
         });
     });
     program
-        .command('eval')
+        .command('eval', { hidden: true })
         .description('Run evaluation metrics on model outputs.')
         .requiredOption('--outputs <file>', 'Path to JSON file containing model outputs')
         .option('--references <file>', 'Path to JSON file containing reference outputs')
@@ -722,7 +724,7 @@ async function main() {
         .action((options) => {
         runEvalCommand(options);
     });
-    const finetuneCommand = program.command('finetune').description('Fine-tuning governance utilities.');
+    const finetuneCommand = program.command('finetune', { hidden: true }).description('Fine-tuning governance utilities.');
     finetuneCommand
         .command('template')
         .description('Generate a governance template JSON file.')

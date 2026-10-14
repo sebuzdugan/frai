@@ -35,10 +35,11 @@ jobs:
       - name: Scan repository for AI indicators
         run: node packages/frai-cli/dist/index.js scan --ci
 
-      - name: Unit tests (frai-core + frai-gate)
+      - name: Tests (frai-core, frai-gate, frai CLI end to end)
         run: |
           pnpm --filter frai-core exec vitest run
           pnpm --filter frai-gate exec vitest run
+          pnpm --filter frai exec vitest run
 
       - name: Responsible AI Gate on example spec
         run: |

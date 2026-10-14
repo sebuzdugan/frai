@@ -54,6 +54,9 @@ function walk(root: string, dir: string, files: string[]) {
 }
 
 /** Finds notice wording anywhere a user-facing string can live: components, templates, locale files. */
+/** A line that holds a system prompt or model instructions rather than text shown to people. */
+const PROMPT_LINE = /\b(?:system_?prompt|system_?message|SYSTEM_PROMPT|instructions)\b\s*[:=]|role\s*:\s*['"]system['"]|\bsystem\s*=\s*['"`]/i;
+
 export function findNoticeInCode(root: string): NoticeInCode[] {
   const files: string[] = [];
   walk(root, root, files);
@@ -67,8 +70,20 @@ export function findNoticeInCode(root: string): NoticeInCode[] {
     } catch {
       continue;
     }
+    // Instructions to the model ("You are an AI assistant...") are read by the model, not by people.
+    if (/(^|\/)[^/]*prompt[^/]*$/i.test(file)) continue;
     const lines = text.split('\n');
+    let inPrompt = false;
     for (let i = 0; i < lines.length; i++) {
+      if (inPrompt) {
+        if (lines[i].includes('`')) inPrompt = false;
+        continue;
+      }
+      if (PROMPT_LINE.test(lines[i])) {
+        // A multi-line template literal: skip until it closes.
+        inPrompt = (lines[i].match(/`/g) || []).length % 2 === 1;
+        continue;
+      }
       // A comment is a plan, not a notice: "// TODO: add 'You're chatting with an AI assistant'".
       if (/^\s*(?:\/\/|#|\*|\/\*|<!--|\{\/\*)/.test(lines[i]) || /\b(?:TODO|FIXME)\b/.test(lines[i])) continue;
       if (NOTICE.some((re) => re.test(lines[i]))) {
