@@ -1,0 +1,44 @@
+packages/frai-cli/dist/review.js
+  s_ba30fff77c85e6::t_e8a4c71a93a27c 11,254-280,315-319,331,365,373-378,380-381
+packages/frai-cli/src/index.ts
+  s_ba30fff77c85e6::t_fd539a122a8f67 732
+  s_ba30fff77c85e6::t_7f0b552162ad76 731
+  s_ba30fff77c85e6::t_c34da8beb4554e 690,705
+packages/frai-cli/src/review.ts
+  s_ba30fff77c85e6::t_7f0b552162ad76 12,31-32,278-304,339,344-347,362,396,402,404,406
+  s_ba30fff77c85e6::t_327dc72e8c2229 403
+packages/frai-cli/src/code-checks.test.ts
+  s_ba30fff77c85e6::t_9d8a337a09df18 5,69-146
+packages/frai-cli/src/code-checks.ts
+  s_ba30fff77c85e6::t_3cd8a7288c32ac 25-45
+  s_ba30fff77c85e6::t_e8dd5fb51483ca 84,112,130-138,140,142-143,147-192
+  s_ba30fff77c85e6::t_7f0b552162ad76 52-53
+  s_ba30fff77c85e6::t_0f6309f81343db 83,113-124
+  s_ba30fff77c85e6::t_c188a9c66cdea1 139,141,144-146
+packages/frai-cli/dist/index.js
+  s_ba30fff77c85e6::t_e8a4c71a93a27c 583,596,622
+packages/frai-cli/src/cli.e2e.test.ts
+  s_ba30fff77c85e6::t_e8a4c71a93a27c 179-190,309-339
+packages/frai-cli/package.json
+  s_ba30fff77c85e6::t_fd8102198f5fd5 3
+packages/frai-cli/dist/code-checks.js
+  s_ba30fff77c85e6::t_e8a4c71a93a27c 22-42,76-77,110-122,127-183
+packages/frai-cli/README.md
+  s_ba30fff77c85e6::t_fd8102198f5fd5 38-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "ef6e6a38eac5ac23bc956d7387576a03c2bfa249",
+  "prompts": {},
+  "sessions": {
+    "s_ba30fff77c85e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa476d27-5697-42ad-89e4-0945c44ac8ff",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "sebastianbuzdugan <81054605+sebastianbuzdugan@users.noreply.github.com>"
+    }
+  }
+}
