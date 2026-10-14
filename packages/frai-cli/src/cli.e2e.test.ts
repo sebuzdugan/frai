@@ -176,6 +176,18 @@ describe.skipIf(!existsSync(CLI))('frai CLI end to end', () => {
       expect(run(dir, '--offline').out).toContain('notice in code  src/components/ChatHeader.tsx');
     });
 
+    it('a German notice counts, like on the site check', () => {
+      const dir = project('de-notice', { ...OPENAI, 'src/components/Chat.tsx': 'export const Hi = () => <p>Sie chatten mit einem KI-Assistenten.</p>;\n' });
+      expect(run(dir, '--offline').out).toContain('notice in code  src/components/Chat.tsx:1');
+    });
+
+    it('a notice in a language the rules do not read points to --any-language', () => {
+      const dir = project('ro-offline', { ...OPENAI, 'src/components/Chat.tsx': 'export const Hi = () => <p>Salut! Eu sunt Ana, asistentul virtual bazat pe inteligență artificială.</p>;\n' });
+      const r = run(dir);
+      expect(r.out).toContain('no notice in code');
+      expect(r.out).toContain('npx frai --any-language');
+    });
+
     it('CLI-08f: in a 6,000-file repo a notice in the last folder is found', () => {
       const files: Record<string, string> = { ...OPENAI, 'src/zz/Notice.tsx': 'export const Notice = () => "You are chatting with an AI assistant.";\n' };
       for (let i = 0; i < 6000; i++) files[`src/f${i}.js`] = `export const v${i} = ${i};\n`;
@@ -293,6 +305,38 @@ describe.skipIf(!existsSync(CLI) || process.env.FRAI_LIVE !== '1')('frai CLI liv
     expect(r.out).toMatch(/Tier/);
     expect(r.out).toMatch(/OpenAI|GPT/i);
   }, 120_000);
+
+  it('--any-language: a Romanian notice in a component is read by the hosted model and shown at its line', (ctx) => {
+    const dir = project('ro-live', {
+      ...OPENAI,
+      'src/components/Chat.tsx': [
+        'export const Chat = () => (',
+        '  <aside className="rounded-xl border p-4">',
+        '    <h2>Magazinul Verde</h2>',
+        '    <p>Salut! Eu sunt Ana, asistentul virtual bazat pe inteligență artificială.</p>',
+        '  </aside>',
+        ');',
+      ].join('\n'),
+    });
+    const r = run(dir, '--any-language');
+    if (/too many reads/i.test(r.out)) ctx.skip();
+    expect(r.out, r.out).toContain('notice in code  src/components/Chat.tsx:4');
+    expect(r.out).toContain('(ro, read by AI)');
+    expect(r.out).toMatch(/sent \d+ UI strings \(\d+ characters, no code\)/);
+    expect(r.out).not.toContain('show a notice');
+  }, 60_000);
+
+  it('--any-language: a person introducing themselves in Romanian is not a notice', (ctx) => {
+    const dir = project('ro-human-live', {
+      ...OPENAI,
+      'src/components/Chat.tsx': 'export const Chat = () => <p>Bună! Sunt Andreea de la echipa de suport. Îți răspund personal.</p>;\n',
+    });
+    const r = run(dir, '--any-language');
+    if (/too many reads/i.test(r.out)) ctx.skip();
+    expect(r.out, r.out).toContain('no notice in code');
+    expect(r.out).toMatch(/read \d+ UI strings? in any language: none says it is AI/);
+    expect(r.out).toContain('show a notice');
+  }, 60_000);
 
   it('CLI-15e: frai check on an address that does not exist fails', () => {
     expect(run(work, 'check', 'not-a-real-site-frai-test.com').code).toBe(1);

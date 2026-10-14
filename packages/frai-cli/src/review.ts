@@ -9,7 +9,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { Scanners } from 'frai-core';
-import { findNoticeInCode, unmentionedInSpec } from './code-checks.js';
+import { collectUiText, findNoticeInCode, locateQuote, unmentionedInSpec, type NoticeInCode, type UiText } from './code-checks.js';
 
 const HOSTED = process.env.FRAI_API_URL || 'https://www.frai.cc';
 const SPEC_CANDIDATES = ['FRAI-SPEC.md', 'frai-spec.md', 'docs/FRAI-SPEC.md', '.github/FRAI-SPEC.md'];
@@ -28,6 +28,8 @@ export interface ReviewOptions {
   email?: string;
   /** With email: re-check monthly and email only if the answer changes. */
   watch?: boolean;
+  /** Send the UI's user-facing strings (never code) to frai.cc to read a notice in any language. */
+  anyLanguage?: boolean;
 }
 
 interface SiteCheck {
@@ -273,6 +275,33 @@ async function requestReport(url: string, email: string, watch: boolean): Promis
   }
 }
 
+type AnyLanguageRead = { sent: number; chars: number; model?: string; found: NoticeInCode | null } | { error: string };
+
+/** Asks frai.cc's reader whether any UI string is an AI notice, in any language. Only strings, never code. */
+async function readNoticeAnyLanguage(texts: UiText[]): Promise<AnyLanguageRead> {
+  if (!texts.length) return { sent: 0, chars: 0, found: null };
+  const chars = texts.reduce((n, t) => n + t.text.length + 1, 0);
+  try {
+    const res = await fetch(`${HOSTED}/api/cli/notice-read`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(process.env.FRAI_LIVE_TEST_KEY ? { 'x-frai-live-test': process.env.FRAI_LIVE_TEST_KEY } : {}) },
+      body: JSON.stringify({ texts: texts.map((t) => t.text) }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    const body = (await res.json()) as { notice?: boolean; quote?: string; language?: string | null; model?: string; error?: string };
+    if (!res.ok) return { error: body.error ?? `the reader failed (${res.status})` };
+    const at = body.notice && body.quote ? locateQuote(texts, body.quote) : null;
+    return {
+      sent: texts.length,
+      chars,
+      model: body.model,
+      found: at ? { file: at.file, line: at.line, text: body.quote!.slice(0, 140), language: body.language ?? null } : null,
+    };
+  } catch {
+    return { error: `could not reach ${HOSTED}` };
+  }
+}
+
 export async function runReview(options: ReviewOptions = {}): Promise<number> {
   const root = options.root ?? process.cwd();
   const pkg = readJson(path.join(root, 'package.json'));
@@ -307,11 +336,15 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
 
   // Only the repository can answer these: is the notice in the UI code, and does the spec still
   // name every AI provider the code now uses?
-  const noticeInCode = aiInCode && !options.siteOnly ? findNoticeInCode(root) : [];
+  const noticeInCode: NoticeInCode[] = aiInCode && !options.siteOnly ? findNoticeInCode(root) : [];
   const libraryNames = [...libraries.map(([name]) => name), ...declared];
   // Classic machine learning (a scikit-learn model scoring rows) talks to no one and generates no
   // content, so "You're chatting with an AI assistant" is the wrong advice for it.
   const predictiveOnly = libraryNames.length > 0 && libraryNames.every((n) => PREDICTIVE_ML.test(n));
+  // The rules read 8 languages. With --any-language, the UI strings go to the hosted reader.
+  const wantsReader = aiInCode && !options.siteOnly && !predictiveOnly && !noticeInCode.length;
+  const anyLanguage = wantsReader && options.anyLanguage && !options.offline ? await readNoticeAnyLanguage(collectUiText(root)) : null;
+  if (anyLanguage && 'found' in anyLanguage && anyLanguage.found) noticeInCode.push(anyLanguage.found);
   // The template's HTML comments carry example answers ("OpenAI retention 30 days"); only the
   // spec's own words count when asking whether it names the AI the code uses.
   const staleFor = specPath ? unmentionedInSpec(libraryNames, readFileSync(specPath, 'utf8').replace(/<!--[\s\S]*?-->/g, ' ')) : [];
@@ -326,6 +359,7 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
             libraries: Object.fromEntries(libraries),
             declaredDependencies: declared,
             noticeInCode,
+            anyLanguage: anyLanguage ? ('error' in anyLanguage ? { error: anyLanguage.error } : { stringsSent: anyLanguage.sent, chars: anyLanguage.chars, model: anyLanguage.model }) : null,
           },
           site,
           report,
@@ -359,13 +393,17 @@ export async function runReview(options: ReviewOptions = {}): Promise<number> {
     if (aiInCode) {
       if (noticeInCode.length) {
         const n = noticeInCode[0];
-        out.push(`  ${green('notice in code')}  ${n.file}:${n.line}`);
+        out.push(`  ${green('notice in code')}  ${n.file}:${n.line}${n.language ? dim(`  (${n.language}, read by AI)`) : ''}`);
         out.push(dim(`    ${n.text}`));
       } else if (predictiveOnly) {
         out.push(`  ${dim('no notice in code')}  this AI predicts rather than chats or generates, so a chat notice may not apply`);
       } else {
         out.push(`  ${amber('no notice in code')}  no file tells people they are talking to AI`);
+        if (anyLanguage && 'error' in anyLanguage) out.push(dim(`    any language: ${anyLanguage.error}`));
+        else if (anyLanguage && 'sent' in anyLanguage) out.push(dim(`    read ${anyLanguage.sent} UI string${anyLanguage.sent === 1 ? '' : 's'} in any language: none says it is AI`));
+        else if (!options.offline) out.push(dim('    the rules read English, German, French, Spanish, Italian, Dutch, Polish and Portuguese. Other languages: npx frai --any-language'));
       }
+      if (noticeInCode.length && anyLanguage && 'sent' in anyLanguage) out.push(dim(`    sent ${anyLanguage.sent} UI strings (${anyLanguage.chars} characters, no code) to ${HOSTED}; nothing is stored`));
     }
     out.push('');
     }

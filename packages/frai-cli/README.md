@@ -35,6 +35,8 @@ Next   answer the 4 open fields in FRAI-SPEC.md, then: npx frai gate check FRAI-
 
 Flags on `frai`: `--ci` (exit 1 when something needs fixing), `--json`, `--offline` (skip the site check), `--url <site>` (override the detected site).
 
+The notice search reads English, German, French, Spanish, Italian, Dutch, Polish and Portuguese on your machine. For any other language, `--any-language` sends the user-facing strings from your UI files (never code, at most 6,000 characters) to frai.cc, where an EU-hosted model must quote the notice word for word; nothing is stored.
+
 ## What it does for you
 
 - **Finds your site.** From `homepage` in `package.json`, then `NEXT_PUBLIC_SITE_URL`, `SITE_URL` or `APP_URL` in `.env*`, then the first real link in your README.

@@ -8,7 +8,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { Scanners } from 'frai-core';
-import { findNoticeInCode, unmentionedInSpec } from './code-checks.js';
+import { collectUiText, findNoticeInCode, locateQuote, unmentionedInSpec } from './code-checks.js';
 const HOSTED = process.env.FRAI_API_URL || 'https://www.frai.cc';
 const SPEC_CANDIDATES = ['FRAI-SPEC.md', 'frai-spec.md', 'docs/FRAI-SPEC.md', '.github/FRAI-SPEC.md'];
 const dim = (s) => `[2m${s}[0m`;
@@ -251,6 +251,33 @@ async function requestReport(url, email, watch) {
         return { error: `could not reach ${HOSTED}` };
     }
 }
+/** Asks frai.cc's reader whether any UI string is an AI notice, in any language. Only strings, never code. */
+async function readNoticeAnyLanguage(texts) {
+    if (!texts.length)
+        return { sent: 0, chars: 0, found: null };
+    const chars = texts.reduce((n, t) => n + t.text.length + 1, 0);
+    try {
+        const res = await fetch(`${HOSTED}/api/cli/notice-read`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...(process.env.FRAI_LIVE_TEST_KEY ? { 'x-frai-live-test': process.env.FRAI_LIVE_TEST_KEY } : {}) },
+            body: JSON.stringify({ texts: texts.map((t) => t.text) }),
+            signal: AbortSignal.timeout(30000),
+        });
+        const body = (await res.json());
+        if (!res.ok)
+            return { error: body.error ?? `the reader failed (${res.status})` };
+        const at = body.notice && body.quote ? locateQuote(texts, body.quote) : null;
+        return {
+            sent: texts.length,
+            chars,
+            model: body.model,
+            found: at ? { file: at.file, line: at.line, text: body.quote.slice(0, 140), language: body.language ?? null } : null,
+        };
+    }
+    catch {
+        return { error: `could not reach ${HOSTED}` };
+    }
+}
 export async function runReview(options = {}) {
     const root = options.root ?? process.cwd();
     const pkg = readJson(path.join(root, 'package.json'));
@@ -285,6 +312,11 @@ export async function runReview(options = {}) {
     // Classic machine learning (a scikit-learn model scoring rows) talks to no one and generates no
     // content, so "You're chatting with an AI assistant" is the wrong advice for it.
     const predictiveOnly = libraryNames.length > 0 && libraryNames.every((n) => PREDICTIVE_ML.test(n));
+    // The rules read 8 languages. With --any-language, the UI strings go to the hosted reader.
+    const wantsReader = aiInCode && !options.siteOnly && !predictiveOnly && !noticeInCode.length;
+    const anyLanguage = wantsReader && options.anyLanguage && !options.offline ? await readNoticeAnyLanguage(collectUiText(root)) : null;
+    if (anyLanguage && 'found' in anyLanguage && anyLanguage.found)
+        noticeInCode.push(anyLanguage.found);
     // The template's HTML comments carry example answers ("OpenAI retention 30 days"); only the
     // spec's own words count when asking whether it names the AI the code uses.
     const staleFor = specPath ? unmentionedInSpec(libraryNames, readFileSync(specPath, 'utf8').replace(/<!--[\s\S]*?-->/g, ' ')) : [];
@@ -296,6 +328,7 @@ export async function runReview(options = {}) {
                 libraries: Object.fromEntries(libraries),
                 declaredDependencies: declared,
                 noticeInCode,
+                anyLanguage: anyLanguage ? ('error' in anyLanguage ? { error: anyLanguage.error } : { stringsSent: anyLanguage.sent, chars: anyLanguage.chars, model: anyLanguage.model }) : null,
             },
             site,
             report,
@@ -329,7 +362,7 @@ export async function runReview(options = {}) {
             if (aiInCode) {
                 if (noticeInCode.length) {
                     const n = noticeInCode[0];
-                    out.push(`  ${green('notice in code')}  ${n.file}:${n.line}`);
+                    out.push(`  ${green('notice in code')}  ${n.file}:${n.line}${n.language ? dim(`  (${n.language}, read by AI)`) : ''}`);
                     out.push(dim(`    ${n.text}`));
                 }
                 else if (predictiveOnly) {
@@ -337,7 +370,15 @@ export async function runReview(options = {}) {
                 }
                 else {
                     out.push(`  ${amber('no notice in code')}  no file tells people they are talking to AI`);
+                    if (anyLanguage && 'error' in anyLanguage)
+                        out.push(dim(`    any language: ${anyLanguage.error}`));
+                    else if (anyLanguage && 'sent' in anyLanguage)
+                        out.push(dim(`    read ${anyLanguage.sent} UI string${anyLanguage.sent === 1 ? '' : 's'} in any language: none says it is AI`));
+                    else if (!options.offline)
+                        out.push(dim('    the rules read English, German, French, Spanish, Italian, Dutch, Polish and Portuguese. Other languages: npx frai --any-language'));
                 }
+                if (noticeInCode.length && anyLanguage && 'sent' in anyLanguage)
+                    out.push(dim(`    sent ${anyLanguage.sent} UI strings (${anyLanguage.chars} characters, no code) to ${HOSTED}; nothing is stored`));
             }
             out.push('');
         }

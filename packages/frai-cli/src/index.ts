@@ -687,6 +687,7 @@ async function main() {
     .option('--json', 'Print the review as JSON')
     .option('--offline', 'Skip the hosted site check')
     .option('--spec <file>', 'Spec file, when it is not FRAI-SPEC.md')
+    .option('--any-language', 'Also read notices in languages the rules do not: sends UI strings (no code) to frai.cc')
     .argument('[command]')
     .action(async (unknown: string | undefined, options) => {
       // "frai chek example.com" or "frai ci" must not quietly run a review and pass.
@@ -701,7 +702,7 @@ async function main() {
       );
       if (!usedLegacyFlag) {
         // Bare `frai` (or `frai --ci`) reviews the project: scan, site check, gate, next step.
-        const code = await runReview({ url: options.url, json: options.json, ci: options.ci, offline: options.offline, spec: options.spec });
+        const code = await runReview({ url: options.url, json: options.json, ci: options.ci, offline: options.offline, spec: options.spec, anyLanguage: options.anyLanguage });
         if (code !== 0) process.exitCode = code;
         return;
       }
@@ -727,7 +728,8 @@ async function main() {
     .option('--ci', 'Exit 1 when something needs fixing')
     .option('--offline', 'Skip the hosted site check')
     .option('--spec <file>', 'Spec file, when it is not FRAI-SPEC.md')
-    .action(async (options: { url?: string; json?: boolean; ci?: boolean; offline?: boolean; spec?: string }) => {
+    .option('--any-language', 'Also read notices in languages the rules do not: sends UI strings (no code) to frai.cc')
+    .action(async (options: { url?: string; json?: boolean; ci?: boolean; offline?: boolean; spec?: string; anyLanguage?: boolean }) => {
       const code = await runReview(options);
       if (code !== 0) process.exitCode = code;
     });
