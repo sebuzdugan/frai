@@ -35,6 +35,30 @@ function run(cwd: string, ...args: string[]): { out: string; code: number } {
   return { out: `${r.stdout}${r.stderr}`.replace(/\x1b\[[0-9;]*m/g, ''), code: r.status ?? -1 };
 }
 
+const MEASURED = [
+  '- **Pre-ship metrics & thresholds**: groundedness >= 0.85; refusal rate <= 2%',
+  '- **Eval dataset**: eval/policy-qa.jsonl, 300 real questions',
+].join('\n')
+/** An evaluation plan with no number anywhere: the gate warns that it cannot fail. */
+const UNMEASURED = [
+  '- **Pre-ship metrics & thresholds**: we read a sample of answers by hand',
+  '- **Eval dataset**: real questions from support tickets',
+].join('\n')
+
+/** A fully answered spec; an `evaluation` with no numbers makes the gate warn instead of pass. */
+function answeredSpec(evaluation = MEASURED): string {
+  return [
+    '# Spec: Support chatbot', '', '## 5. Responsible AI Gate', '',
+    '### 5.1 Risk tier', '', '- **Tier**: limited', '- **Justification**: Chatbot answering policy questions; no decisions about people.', '- **Sign-off**: not required (tier below high)', '',
+    '### 5.2 Data provenance & privacy', '', '- **Data sources**: policy docs; questions sent to OpenAI GPT at runtime', '- **PII involved?**: no', '- **Retention**: prompts kept 30 days, then deleted', '- **Used for training?**: no; OpenAI training disabled', '',
+    '### 5.3 Human oversight', '', '- **Automation level**: assistive', '- **Override path**: support can correct answers in the admin panel', '- **Kill switch**: feature flag chat_enabled, off within 5 minutes', '',
+    '### 5.4 Evaluation plan', '', evaluation, '- **Who runs it and when**: CI on every prompt change', '',
+    '### 5.5 Bias & fairness', '', '- **Groups at risk of disparate impact**: non-native English speakers', '- **Mitigations**: multilingual eval slice', '- **How tested**: groundedness by question language', '',
+    '### 5.6 Monitoring & rollback', '', '- **Production monitoring**: thumbs-down rate, latency', '- **Degradation definition**: thumbs-down > 10% over 24h', '- **Rollback trigger & procedure**: on-call flips chat_enabled off', '',
+    '### 5.7 Transparency & incident response', '', '- **User disclosure**: "AI assistant" label in the chat header', '- **Incident owner**: Dana Rivers', '- **Incident path**: in-chat report, triage, fix within 24h', '',
+  ].join('\n');
+}
+
 const OPENAI = { 'package.json': '{"dependencies":{"openai":"4"}}', 'src/ai.js': 'import OpenAI from "openai";\nexport const c = new OpenAI();\n' };
 
 describe.skipIf(!existsSync(CLI))('frai CLI end to end', () => {
@@ -208,6 +232,21 @@ describe.skipIf(!existsSync(CLI))('frai CLI end to end', () => {
       expect(run(dir, '--offline', '--spec', 'specs/AI-SPEC.md').out).toContain('specs/AI-SPEC.md');
     });
 
+    it('a fully answered spec passes the gate, and CI passes', () => {
+      const dir = project('answered', { ...OPENAI, 'FRAI-SPEC.md': answeredSpec(), 'src/components/Chat.tsx': 'export const H = () => <p>You are chatting with an AI assistant.</p>;\n' });
+      const r = run(dir, '--ci', '--offline');
+      expect(r.out).toContain('PASS');
+      expect(r.code).toBe(0);
+    });
+
+    it('CLI-11h: a spec with only warnings points to them instead of "nothing to fix"', () => {
+      const dir = project('warn', { ...OPENAI, 'FRAI-SPEC.md': answeredSpec(UNMEASURED) });
+      const r = run(dir, '--offline');
+      expect(r.out).toContain('WARN');
+      expect(r.out).toContain("read the gate's warnings");
+      expect(r.out).not.toContain('nothing to fix');
+    });
+
     it('CLI-13o: checking a spec that does not exist says so plainly', () => {
       const r = spawnSync(process.execPath, [GATE, 'check', 'nope.md'], { cwd: work, encoding: 'utf8' });
       expect(r.stderr).toContain('No spec at nope.md');
@@ -232,6 +271,16 @@ describe.skipIf(!existsSync(CLI) || process.env.FRAI_LIVE !== '1')('frai CLI liv
     if (/free checks for this hour/.test(r.out)) ctx.skip();
     expect(r.out).toContain('needs a notice');
     expect(r.code).toBe(1);
+  }, 120_000);
+
+  it('frai draft fills the gate answers from the code (hosted drafter)', (ctx) => {
+    const dir = project('draft', { ...OPENAI, 'src/chat.ts': 'import OpenAI from "openai";\nconst ai = new OpenAI();\nexport const ask = (q: string) => ai.responses.create({ model: "gpt-5", input: q });\n' });
+    spawnSync(process.execPath, [GATE, 'init'], { cwd: dir });
+    const r = run(dir, 'draft', '--yes', '--print');
+    if (/limit|too many|try again later/i.test(r.out) && r.code !== 0) ctx.skip();
+    expect(r.code, r.out).toBe(0);
+    expect(r.out).toMatch(/Tier/);
+    expect(r.out).toMatch(/OpenAI|GPT/i);
   }, 120_000);
 
   it('CLI-15e: frai check on an address that does not exist fails', () => {
