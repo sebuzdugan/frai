@@ -1,0 +1,11 @@
+.github/workflows/rai-check.yml
+  ai_agent 15-19,31
+packages/frai-cli/src/cli.e2e.test.ts
+  ai_agent 196-199,220-224
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "ac5b9851a3c802a747a1e18e457ab8d9badf0dcd",
+  "prompts": {}
+}
