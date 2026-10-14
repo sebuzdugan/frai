@@ -1,0 +1,38 @@
+packages/frai-cli/src/code-checks.ts
+  s_ba30fff77c85e6::t_12f7cbf2162dd9 57-59,73-74,76,78-86
+packages/frai-cli/src/cli.e2e.test.ts
+  s_ba30fff77c85e6::t_90c8907af6ccdd 1-13,15-171,173-227
+  s_ba30fff77c85e6::t_45c9c6998725ce 14,172
+packages/frai-cli/src/review.ts
+  s_ba30fff77c85e6::t_494f18762e97cd 130-131,312-314,364-365,431-435
+packages/frai-cli/dist/review.js
+  s_ba30fff77c85e6::t_494f18762e97cd 103,285-287,335-337,407-410
+packages/frai-cli/dist/index.js
+  s_ba30fff77c85e6::t_494f18762e97cd 7,569-578
+  s_ba30fff77c85e6::t_de3656e22be31a 567,650,662,674,682,687,701,718,727
+packages/frai-cli/package.json
+  ai_agent 3
+.github/workflows/rai-check.yml
+  s_ba30fff77c85e6::t_8f48d3fc6a5fdf 38,42
+packages/frai-cli/src/index.ts
+  s_ba30fff77c85e6::t_6a79a3c04fbf95 9,676-685
+  s_ba30fff77c85e6::t_a7a49eeedc4665 674,759,772,785,794,800,818,838,848
+packages/frai-cli/dist/code-checks.js
+  s_ba30fff77c85e6::t_494f18762e97cd 53-54,70-72,74,76-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "d44b25ccc26900e3b3bdb12c267943b3885ecea9",
+  "prompts": {},
+  "sessions": {
+    "s_ba30fff77c85e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa476d27-5697-42ad-89e4-0945c44ac8ff",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "sebastianbuzdugan <81054605+sebastianbuzdugan@users.noreply.github.com>"
+    }
+  }
+}
