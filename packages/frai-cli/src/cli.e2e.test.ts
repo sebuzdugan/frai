@@ -6,7 +6,7 @@
  * Build first: pnpm build, then pnpm --filter frai exec vitest run.
  */
 import { spawnSync } from 'child_process';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, readFileSync, appendFileSync } from 'fs';
 import { tmpdir } from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -32,7 +32,18 @@ function project(name: string, files: Record<string, string>): string {
 
 function run(cwd: string, ...args: string[]): { out: string; code: number } {
   const r = spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env: { ...process.env, NO_COLOR: '1', FORCE_COLOR: '0' } });
-  return { out: `${r.stdout}${r.stderr}`.replace(/\x1b\[[0-9;]*m/g, ''), code: r.status ?? -1 };
+  const result = { out: `${r.stdout}${r.stderr}`.replace(/\x1b\[[0-9;]*m/g, ''), code: r.status ?? -1 };
+  logRun(args, result);
+  return result;
+}
+
+/** With FRAI_E2E_LOG=<dir>, every command a test runs is written to <dir>/<test name>.log, for the test report. */
+function logRun(args: string[], { out, code }: { out: string; code: number }) {
+  const dir = process.env.FRAI_E2E_LOG;
+  if (!dir) return;
+  const name = (expect.getState().currentTestName ?? 'unnamed').replace(/[^\w.-]+/g, '_').slice(0, 120);
+  mkdirSync(dir, { recursive: true });
+  appendFileSync(path.join(dir, `${name}.log`), `$ frai ${args.join(' ')}\n${out.trimEnd()}\n[exit ${code}]\n\n`);
 }
 
 const MEASURED = [
