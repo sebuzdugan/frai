@@ -12,6 +12,8 @@ import { Scanners } from 'frai-core';
 import { collectUiText, findNoticeInCode, locateQuote, unmentionedInSpec, type NoticeInCode, type UiText } from './code-checks.js';
 
 const HOSTED = process.env.FRAI_API_URL || 'https://www.frai.cc';
+/** FRAI's own test suite sets this so its runs skip the per-visitor limits on frai.cc. Unset for everyone else. */
+const testModeHeader = (): Record<string, string> => (process.env.FRAI_LIVE_TEST_KEY ? { 'x-frai-live-test': process.env.FRAI_LIVE_TEST_KEY } : {});
 const SPEC_CANDIDATES = ['FRAI-SPEC.md', 'frai-spec.md', 'docs/FRAI-SPEC.md', '.github/FRAI-SPEC.md'];
 
 export interface ReviewOptions {
@@ -235,7 +237,7 @@ async function checkSite(url: string): Promise<SiteCheck | { error: string }> {
   try {
     const res = await fetch(`${HOSTED}/api/public-scan`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...testModeHeader() },
       body: JSON.stringify({ url }),
       signal: AbortSignal.timeout(SITE_CHECK_TIMEOUT_MS),
     });
@@ -284,7 +286,7 @@ async function readNoticeAnyLanguage(texts: UiText[]): Promise<AnyLanguageRead> 
   try {
     const res = await fetch(`${HOSTED}/api/cli/notice-read`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(process.env.FRAI_LIVE_TEST_KEY ? { 'x-frai-live-test': process.env.FRAI_LIVE_TEST_KEY } : {}) },
+      headers: { 'Content-Type': 'application/json', ...testModeHeader() },
       body: JSON.stringify({ texts: texts.map((t) => t.text) }),
       signal: AbortSignal.timeout(30_000),
     });
