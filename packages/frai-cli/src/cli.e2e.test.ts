@@ -193,7 +193,10 @@ describe.skipIf(!existsSync(CLI))('frai CLI end to end', () => {
       const dir = project('init-existing', { 'FRAI-SPEC.md': '# mine\n' });
       expect(run(dir, 'init').code).toBe(0);
       expect(readFileSync(path.join(dir, 'FRAI-SPEC.md'), 'utf8')).toBe('# mine\n');
-      expect(readFileSync(path.join(dir, '.github/workflows/rai-gate.yml'), 'utf8')).toContain('npx frai@latest --ci --offline');
+      const workflow = readFileSync(path.join(dir, '.github/workflows/rai-gate.yml'), 'utf8');
+      expect(workflow).toContain('npx frai@latest --ci --offline');
+      // CLI-11g: the comment says how to add the live-site check, and following it must work.
+      expect(workflow).toContain('replace --offline with --url https://your.site');
     });
 
     it('CLI-12d/12e: init --out makes the folder, and CI finds the spec there', () => {
@@ -211,6 +214,14 @@ describe.skipIf(!existsSync(CLI))('frai CLI end to end', () => {
       expect(r.stderr).not.toContain('ENOENT');
       expect(r.status).toBe(2);
     });
+  });
+});
+
+describe('install size', () => {
+  it('CLI-17b: the 231 MB Agent SDK is an optional peer of frai-gate, never a dependency', () => {
+    const gate = JSON.parse(readFileSync(path.resolve(here, '../../frai-gate/package.json'), 'utf8'));
+    expect(Object.keys(gate.dependencies ?? {})).not.toContain('@anthropic-ai/claude-agent-sdk');
+    expect(gate.peerDependenciesMeta?.['@anthropic-ai/claude-agent-sdk']?.optional).toBe(true);
   });
 });
 

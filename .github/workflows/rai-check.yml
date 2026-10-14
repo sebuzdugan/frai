@@ -12,6 +12,11 @@ permissions:
 jobs:
   rai-check:
     runs-on: ubuntu-latest
+    # frai says it runs on Node 18 and up (CLI-18b: it once crashed on 18), so test each.
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['18', '20', '22']
 
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +28,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ matrix.node }}
           cache: pnpm
 
       - name: Install dependencies
