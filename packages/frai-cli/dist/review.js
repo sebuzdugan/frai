@@ -416,8 +416,11 @@ export async function runReview(options = {}) {
         if (site && !('error' in site) && site.verdict === 'gap' && !next.some((n) => n.startsWith('show a notice'))) {
             next.push('add a notice where people meet the AI, for example: "You are chatting with an AI assistant."');
         }
-        if (site && 'error' in site)
-            next.push('the site check did not run. Try again in a minute, or check it at https://frai.cc');
+        if (site && 'error' in site) {
+            next.push(/this hour/i.test(site.error)
+                ? 'the site check did not run: 5 free checks an hour. Try again later, or check it at https://frai.cc'
+                : 'the site check did not run. Try again in a minute, or check it at https://frai.cc');
+        }
         if (site && !('error' in site) && !options.email && site.verdict !== 'no-ai') {
             next.push(`npx frai check ${new URL(site.url).hostname} --email you@company.com   page-by-page report, up to 10 pages`);
         }

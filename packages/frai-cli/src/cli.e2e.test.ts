@@ -215,8 +215,10 @@ describe.skipIf(!existsSync(CLI))('frai CLI end to end', () => {
 });
 
 describe.skipIf(!existsSync(CLI) || process.env.FRAI_LIVE !== '1')('frai CLI live (FRAI_LIVE=1)', () => {
-  it('CLI-15d: frai check --ci fails for a site whose chat has no notice', () => {
+  it('CLI-15d: frai check --ci fails for a site whose chat has no notice', (ctx) => {
     const r = run(work, 'check', 'crisp.chat', '--ci');
+    // 5 free checks an hour per address: hitting that is not a failure of this case.
+    if (/free checks for this hour/.test(r.out)) ctx.skip();
     expect(r.out).toContain('needs a notice');
     expect(r.code).toBe(1);
   }, 120_000);
